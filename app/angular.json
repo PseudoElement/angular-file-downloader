@@ -28,7 +28,7 @@
                         "scripts": []
                     },
                     "configurations": {
-                        "prod": {
+                        "production": {
                             "budgets": [
                                 {
                                     "type": "initial",
@@ -49,7 +49,7 @@
                                 }
                             ]
                         },
-                        "dev": {
+                        "development": {
                             "buildOptimizer": false,
                             "optimization": false,
                             "vendorChunk": true,
@@ -64,7 +64,7 @@
                             ]
                         }
                     },
-                    "defaultConfiguration": "dev"
+                    "defaultConfiguration": "development"
                 },
                 "serve": {
                     "builder": "@angular-devkit/build-angular:dev-server",
