@@ -1,0 +1,19 @@
+<div class="option-in-selector" [class.option-in-selector-opened]="info.isOpen" [style.background-color]="info.bgColorRGB || 'gray'">
+    <div class="option-in-selector__content" [class.option-in-selector__content-opened]="info.isOpen" (click)="toggleOption(info)">
+        <p class="option-in-selector__text">{{ info.value }}</p>
+        <span
+            *ngIf="hasChildren"
+            class="material-symbols-outlined option-in-selector__arrow"
+            [class.option-in-selector__arrow-opened]="info.isOpen"
+        >
+            keyboard_arrow_down
+        </span>
+    </div>
+    <div *ngIf="hasChildren && info.isOpen" [@showHideAnimation]>
+        <app-option-in-selector
+            *ngFor="let option of info.children; trackBy: trackByFn"
+            [info]="getOptionWithDimmedBG(option, info.bgColorRGB!)"
+        >
+        </app-option-in-selector>
+    </div>
+</div>

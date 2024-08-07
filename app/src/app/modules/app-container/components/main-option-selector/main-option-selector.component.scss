@@ -1,0 +1,16 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .option-selector {
+        @include flex-column(flex-start, center);
+
+        position: fixed;
+        top: 52px;
+        left: 0;
+        width: 300px;
+        border: 1px solid gray;
+
+        .option {
+        }
+    }
+}
