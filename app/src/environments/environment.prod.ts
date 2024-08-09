@@ -1,3 +1,4 @@
 export const ENVIRONMENT = {
-    baseUrl: 'https://bubamainer.fvds.ru/api/v1'
+    apiBaseUrl: 'https://bubamainer.fvds.ru/api/v1',
+    appDomain: 'bubamainer.fvds.ru'
 };

@@ -1,10 +1,12 @@
 import { MainSelectorOption } from '../models/components-types';
 
+const START_RGB = 'rgb(240, 240, 240)';
+
 export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
     {
         isOpen: false,
         value: 'Tools',
-        bgColorRGB: 'rgb(250, 250, 250)',
+        bgColorRGB: START_RGB,
         children: [
             {
                 isOpen: false,
@@ -15,7 +17,23 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
             {
                 isOpen: false,
                 value: 'Download games',
-                children: [],
+                children: [
+                    {
+                        isOpen: false,
+                        value: 'Vampire Survivors',
+                        children: []
+                    },
+                    {
+                        isOpen: false,
+                        value: 'Rust',
+                        children: []
+                    },
+                    {
+                        isOpen: false,
+                        value: 'CS 2.0',
+                        children: []
+                    }
+                ],
                 navigationUrl: '/download-games'
             }
         ]
@@ -23,13 +41,26 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
     {
         isOpen: false,
         value: 'Tutorial',
-        bgColorRGB: 'rgb(250, 250, 250)',
+        bgColorRGB: START_RGB,
         children: []
     },
     {
         isOpen: false,
         value: 'License',
-        bgColorRGB: 'rgb(250, 250, 250)',
+        bgColorRGB: START_RGB,
+        children: []
+    },
+    {
+        isOpen: false,
+        value: 'About',
+        bgColorRGB: START_RGB,
+        children: []
+    },
+    {
+        isOpen: false,
+        value: 'Angular documentation',
+        bgColorRGB: START_RGB,
+        navigationUrl: 'https://angular.dev/overview',
         children: []
     }
 ];
