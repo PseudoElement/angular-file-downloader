@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MainSelectorOption } from '../../models/components-types';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ENVIRONMENT } from 'src/environments/environment';
@@ -12,12 +12,12 @@ import { Router } from '@angular/router';
     animations: [
         trigger('showHideAnimation', [
             transition(':enter', [
-                style({ transform: 'translateX(100%)', opacity: 0 }),
+                style({ transform: 'translateX(-100%)', opacity: 0 }),
                 animate('200ms', style({ transform: 'translateX(0)', opacity: 1 }))
             ]),
             transition(':leave', [
                 style({ transform: 'translateX(0)', opacity: 1 }),
-                animate('200ms', style({ transform: 'translateX(100%)', opacity: 0 }))
+                animate('200ms', style({ transform: 'translateX(-100%)', opacity: 0 }))
             ])
         ])
     ]
@@ -29,7 +29,7 @@ export class OptionInSelectorComponent {
         return this.info.children.length > 0;
     }
 
-    constructor(private readonly router: Router, private readonly cdr: ChangeDetectorRef) {}
+    constructor(private readonly router: Router) {}
 
     public trackByFn(_: number, option: MainSelectorOption): string {
         return option.value;

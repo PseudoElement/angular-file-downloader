@@ -1,6 +1,24 @@
+@use '@angular/material' as mat;
 @import 'src/scss/mixins.scss';
 @import url('https://fonts.googleapis.com/css2?family=Carattere&family=Dancing+Script:wght@400;600&family=Lemon&family=Lustria&display=swap');
 
+@include mat.core();
+
+html {
+    .mat-body-large p,
+    .mat-typography .mat-body-large p,
+    .mat-typography p {
+        margin: unset;
+    }
+}
+
 body {
+    .mat-typography p {
+        @include regular-font();
+        margin: 0;
+    }
+    :host {
+        --mat-form-field-error-text-color: red;
+    }
     @include regular-font();
 }

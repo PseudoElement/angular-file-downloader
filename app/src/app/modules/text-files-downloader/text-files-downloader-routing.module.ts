@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { TextFilesDownloaderComponent } from './components/text-files-downloader.component';
+import { TextFilesDownloaderPageComponent } from './components/text-file-downloader-page/text-files-downloader.component';
 
-const routes: Routes = [{ path: '', component: TextFilesDownloaderComponent }];
+const routes: Routes = [{ path: '', component: TextFilesDownloaderPageComponent }];
 
 @NgModule({
     imports: [RouterModule.forChild(routes)],

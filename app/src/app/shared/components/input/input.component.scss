@@ -1,0 +1,9 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .app-input {
+        @include flex-column(center, flex-start);
+        gap: 2px;
+        max-width: 350px;
+    }
+}
