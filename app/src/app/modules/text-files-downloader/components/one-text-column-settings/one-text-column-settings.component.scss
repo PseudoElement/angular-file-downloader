@@ -1,0 +1,9 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .one-text-column-settings {
+        @include flex-row(space-between, center);
+        width: 100%;
+        gap: 10px;
+    }
+}

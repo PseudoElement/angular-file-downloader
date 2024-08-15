@@ -1,20 +1,18 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { SelectOption } from '../../models/select-types';
 import { FormControl } from '@angular/forms';
-import { InputType } from '../../models/inputs';
 import { InputBase } from '../../abstract/input-base';
 
 @Component({
-    selector: 'app-input',
-    templateUrl: './input.component.html',
-    styleUrl: './input.component.scss',
+    selector: 'app-select',
+    templateUrl: './select.component.html',
+    styleUrl: './select.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InputComponent extends InputBase {
+export class SelectComponent extends InputBase {
     @Input({ required: true }) label: string = '';
 
     @Input({ required: true }) control!: FormControl;
 
-    @Input() type: InputType = 'text';
-
-    @Input() placeholder: string = '';
+    @Input({ required: true }) options: SelectOption[] = [];
 }

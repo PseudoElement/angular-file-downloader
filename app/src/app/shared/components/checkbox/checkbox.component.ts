@@ -1,8 +1,15 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { InputBase } from '../../abstract/input-base';
+import { FormControl } from '@angular/forms';
 
 @Component({
     selector: 'app-checkbox',
     templateUrl: './checkbox.component.html',
-    styleUrl: './checkbox.component.scss'
+    styleUrl: './checkbox.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CheckboxComponent {}
+export class CheckboxComponent extends InputBase {
+    @Input({ required: true }) label: string = '';
+
+    @Input({ required: true }) control!: FormControl;
+}
