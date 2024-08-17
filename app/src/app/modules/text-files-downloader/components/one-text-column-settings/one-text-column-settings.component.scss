@@ -5,5 +5,11 @@
         @include flex-row(space-between, center);
         width: 100%;
         gap: 10px;
+
+        app-input,
+        app-select,
+        app-checkbox {
+            max-width: 140px;
+        }
     }
 }

@@ -1,1 +1,17 @@
-<app-input [label]="'Test'" [placeholder]="'Test'" [type]="'text'" [control]="testControl"></app-input>
+<div *ngLet="isSqlDocType$ | async as isSql" class="wrapper">
+    <h2>Create txt/sql/doc/pdf/csv file</h2>
+    <div class="form-controls">
+        <div class="form-controls__columns">
+            <app-one-column-settings
+                *ngFor="let columnFormGroup of columnsControls"
+                [columnFormGroup]="columnFormGroup"
+                [isSqlDocType]="isSql"
+            ></app-one-column-settings>
+        </div>
+        <div class="form-controls__others">
+            <app-select [control]="docTypeControl" [label]="'Select document type'" [options]="docTypeOptions"></app-select>
+            <app-input [control]="docNameControl" [label]="'Document name'" [placeholder]="'Enter file name'"></app-input>
+            <app-checkbox *ngIf="isSql" [control]="needCreateSqlTableControl!" [label]="'Add table creation query'"></app-checkbox>
+        </div>
+    </div>
+</div>

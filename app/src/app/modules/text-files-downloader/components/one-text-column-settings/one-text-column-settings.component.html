@@ -1,1 +1,34 @@
-<div class="one-text-column-settings"></div>
+<div class="one-text-column-settings" [@opacityAnimation]>
+    <app-input [control]="getControlFromColumnGroup('name')" [label]="'Column name'" [placeholder]="'Enter column name'"></app-input>
+    <app-input
+        [control]="getControlFromColumnGroup('max')"
+        [label]="'Max'"
+        [type]="'number'"
+        [placeholder]="'Enter column max'"
+    ></app-input>
+    <app-input
+        [control]="getControlFromColumnGroup('min')"
+        [label]="'Min'"
+        [type]="'number'"
+        [placeholder]="'Enter column min'"
+    ></app-input>
+    <app-input
+        [control]="getControlFromColumnGroup('nullValuesPercent')"
+        [label]="'Percent of rows with nullable value'"
+        [type]="'number'"
+    ></app-input>
+    <app-select [control]="getControlFromColumnGroup('type')" [label]="'Column type'" [options]="columnTypeOptions"></app-select>
+    <div *ngIf="isSqlDocType" [@opacityAnimation]>
+        <app-checkbox [control]="getControlFromColumnGroup('isPrimaryKey')" [label]="'Set as primary key'"></app-checkbox>
+        <app-input
+            [control]="getControlFromColumnGroup('refTableName')"
+            [label]="'Foreign key table'"
+            [placeholder]="'Enter table name to set column as foreign key'"
+        ></app-input>
+        <app-input
+            [control]="getControlFromColumnGroup('refColumnName')"
+            [label]="'Foreign key column'"
+            [placeholder]="'Enter column name of foreign table to set column as foreign key'"
+        ></app-input>
+    </div>
+</div>
