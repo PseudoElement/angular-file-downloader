@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FileBuilderService } from '../../services/file-builder.service';
-import { DocumentType, SqlColumnControl, SqlColumnInfo, TextColumnControl, TextColumnInfo } from '../../models/file-builder-types';
+import { DocumentType, FileBuilderForm, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT_TYPE_OPTIONS } from '../../constants/document-type-options';
 
@@ -15,6 +15,15 @@ export class TextFilesDownloaderPageComponent {
     public readonly isSqlDocType$ = this.fileBuilderSrv.isSqlDocType$;
 
     constructor(private readonly fileBuilderSrv: FileBuilderService) {}
+
+    public get form(): FormGroup<FileBuilderForm> {
+        return this.fileBuilderSrv.fileBuilderForm;
+    }
+
+    ngOnInit(): void {
+        this.fileBuilderSrv.addNewColumn();
+        this.fileBuilderSrv.addNewColumn();
+    }
 
     public get columnsControls(): FormGroup<TextColumnControl | SqlColumnControl>[] {
         return this.fileBuilderSrv.columnsFormArrayControls;

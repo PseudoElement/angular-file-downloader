@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { InputBase } from '../../abstract/input-base';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
     selector: 'app-checkbox',
@@ -9,6 +9,8 @@ import { FormControl } from '@angular/forms';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CheckboxComponent extends InputBase {
+    @Input() fg!: FormGroup;
+
     @Input({ required: true }) label: string = '';
 
     @Input({ required: true }) control!: FormControl;

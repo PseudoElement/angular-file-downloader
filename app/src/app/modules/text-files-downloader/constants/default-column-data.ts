@@ -4,7 +4,7 @@ export const DEFAULT_COLUMN_DATA: SqlColumnInfo = {
     min: 0,
     max: 10,
     name: 'Default',
-    nullValuesPercent: 50,
+    nullValuesPercent: 0,
     type: COLUMN_TYPES.NUMBER,
     isPrimaryKey: false,
     foreignKeyData: {

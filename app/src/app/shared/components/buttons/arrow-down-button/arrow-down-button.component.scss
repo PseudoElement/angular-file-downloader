@@ -1,0 +1,9 @@
+:host {
+    .arrow-down {
+        font-size: 24px;
+        transition: all 0.2s;
+        &__opened {
+            transform: rotate(-180deg);
+        }
+    }
+}

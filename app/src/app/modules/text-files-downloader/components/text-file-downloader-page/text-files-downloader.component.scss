@@ -1,0 +1,16 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .form-controls {
+        &__columns {
+            @include flex-column(space-between, baseline);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        &__others {
+            @include flex-row(flex-start, center);
+            gap: 20px;
+            width: 100%;
+        }
+    }
+}

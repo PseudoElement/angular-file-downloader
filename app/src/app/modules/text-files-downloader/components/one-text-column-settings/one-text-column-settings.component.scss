@@ -2,14 +2,22 @@
 
 :host {
     .one-text-column-settings {
-        @include flex-row(space-between, center);
-        width: 100%;
-        gap: 10px;
+        @include flex-row(flex-start, flex-start);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px 10px 0 10px;
+        border-radius: 10px;
 
-        app-input,
-        app-select,
-        app-checkbox {
-            max-width: 140px;
+        &__params {
+            @include flex-row(flex-start, center);
+            // gap: 10px;
+            flex-wrap: wrap;
+            margin-right: 20px;
+
+            app-input,
+            app-select,
+            app-checkbox {
+                margin-right: 10px;
+            }
         }
     }
 }

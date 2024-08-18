@@ -44,13 +44,12 @@ export class FileBuilderService {
     public readonly isSqlDocType$ = this.fileBuilderForm.valueChanges.pipe(map((val) => val.docType === 'sql'));
 
     constructor() {
-        this.handleValueChanges();
+        // this.handleValueChanges();
     }
 
     public addNewColumn(): void {
-        const uniqueName = `${DEFAULT_COLUMN_DATA.name}_${Date.now()}`;
         const newColumn = new FormGroup<TextColumnControl | SqlColumnControl>({
-            name: new FormControl(uniqueName, [Validators.required]) as FormControl,
+            name: new FormControl(DEFAULT_COLUMN_DATA.name, [Validators.required]) as FormControl,
             type: new FormControl(DEFAULT_COLUMN_DATA.type, [Validators.required]) as FormControl,
             max: new FormControl(DEFAULT_COLUMN_DATA.max, [Validators.required]) as FormControl,
             min: new FormControl(DEFAULT_COLUMN_DATA.min, [Validators.required]) as FormControl,

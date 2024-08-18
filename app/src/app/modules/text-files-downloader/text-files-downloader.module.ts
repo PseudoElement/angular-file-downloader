@@ -6,12 +6,11 @@ import { TextFilesDownloaderPageComponent } from './components/text-file-downloa
 import { OneTextColumnSettingsComponent } from './components/one-text-column-settings/one-text-column-settings.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { FileBuilderService } from './services/file-builder.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AppRoutingModule } from 'src/app/app-routing.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [TextFilesDownloaderPageComponent, OneTextColumnSettingsComponent],
-    imports: [CommonModule, TextFilesDownloaderRoutingModule, SharedModule, AppRoutingModule, BrowserAnimationsModule],
+    imports: [CommonModule, TextFilesDownloaderRoutingModule, SharedModule, ReactiveFormsModule, FormsModule],
     providers: [FileBuilderService]
 })
 export class TextFilesDownloaderModule {}
