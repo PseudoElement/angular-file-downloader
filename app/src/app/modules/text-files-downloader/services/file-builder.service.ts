@@ -112,11 +112,11 @@ export class FileBuilderService {
             column.addControl('isPrimaryKey', primaryKeyCtrl, { emitEvent: false });
         }
         if (!column.contains('refColumnName')) {
-            const refColumnNameCtrl = new FormControl(DEFAULT_COLUMN_DATA.foreignKeyData.refColumnName) as FormControl;
+            const refColumnNameCtrl = new FormControl('') as FormControl;
             column.addControl('refColumnName', refColumnNameCtrl, { emitEvent: false });
         }
         if (!column.contains('refTableName')) {
-            const refTableNameCtrl = new FormControl(DEFAULT_COLUMN_DATA.foreignKeyData.refTableName) as FormControl;
+            const refTableNameCtrl = new FormControl('') as FormControl;
             column.addControl('refTableName', refTableNameCtrl, { emitEvent: false });
         }
     }
