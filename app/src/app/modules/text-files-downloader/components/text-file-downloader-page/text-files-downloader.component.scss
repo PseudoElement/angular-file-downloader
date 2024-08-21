@@ -8,7 +8,7 @@
             margin-bottom: 30px;
         }
         &__others {
-            @include flex-row(flex-start, center);
+            @include flex-row(flex-start, flex-start);
             gap: 20px;
             width: 100%;
         }

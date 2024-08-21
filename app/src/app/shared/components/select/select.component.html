@@ -1,6 +1,6 @@
-<mat-form-field [formGroup]="fg" class="app-select">
+<mat-form-field class="app-select">
     <mat-label>{{ label }}</mat-label>
-    <mat-select matInput [formControl]="control">
+    <mat-select [formControl]="control">
         <mat-option *ngFor="let option of options" [value]="option.value" [disabled]="option.isDisabled">{{ option.text }}</mat-option>
     </mat-select>
     <mat-error *ngIf="error">{{ error | errorMapping }}</mat-error>

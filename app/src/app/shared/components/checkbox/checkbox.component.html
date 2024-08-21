@@ -1,4 +1,4 @@
-<mat-form-field [formGroup]="fg" class="app-checkbox">
-    <mat-checkbox matInput [formControl]="control">{{ label }}</mat-checkbox>
-    <mat-error *ngIf="error">{{ error | errorMapping }}</mat-error>
-</mat-form-field>
+<div class="app-checkbox">
+    <mat-checkbox [formControl]="control" [required]="isRequired">{{ label }}</mat-checkbox>
+    <mat-error *ngIf="error" class="app-checkbox__error">{{ error | errorMapping }}</mat-error>
+</div>

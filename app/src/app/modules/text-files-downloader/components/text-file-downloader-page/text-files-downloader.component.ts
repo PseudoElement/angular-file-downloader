@@ -40,4 +40,8 @@ export class TextFilesDownloaderPageComponent {
     public get needCreateSqlTableControl(): FormControl<boolean> | undefined {
         return this.fileBuilderSrv.needCreateSqlTableControl;
     }
+
+    public deleteColumn(index: number): void {
+        this.fileBuilderSrv.deleteColumn(index);
+    }
 }

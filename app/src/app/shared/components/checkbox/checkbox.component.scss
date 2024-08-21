@@ -1,9 +1,14 @@
 @use 'src/styles.scss' as *;
 
 :host {
-    .app-input {
+    .app-checkbox {
         @include flex-column(center, flex-start);
         gap: 2px;
         max-width: 350px;
+
+        &__error {
+            font-size: 12px;
+            margin-left: 10px;
+        }
     }
 }

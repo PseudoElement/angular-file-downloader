@@ -10,8 +10,6 @@ import { InputBase } from '../../abstract/input-base';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InputComponent extends InputBase {
-    @Input() fg!: FormGroup;
-
     @Input({ required: true }) label: string = '';
 
     @Input({ required: true }) control!: FormControl;

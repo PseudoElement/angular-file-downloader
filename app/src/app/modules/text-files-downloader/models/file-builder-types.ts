@@ -17,9 +17,9 @@ export type DocumentType = 'pdf' | 'txt' | 'sql' | 'csv' | 'doc';
 export interface TextColumnInfo {
     name: string;
     type: ColumnType;
-    nullValuesPercent: number;
-    min: number;
-    max: number;
+    nullValuesPercent: string;
+    min: string;
+    max: string;
 }
 
 export interface SqlColumnInfo extends TextColumnInfo {
