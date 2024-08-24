@@ -1,18 +1,29 @@
 <div *ngLet="isSqlDocType$ | async as isSql" class="wrapper">
     <h2>Create txt/sql/doc/pdf/csv file</h2>
-    <div class="form-controls" [formGroup]="form">
+    <div class="form-controls">
         <div class="form-controls__columns">
             <app-one-column-settings
                 *ngFor="let columnFormGroup of columnsControls; let i = index"
+                [@fadeIn]
                 [columnFormGroup]="columnFormGroup"
                 [isSqlDocType]="isSql"
                 (handleRemove)="deleteColumn(i)"
             ></app-one-column-settings>
         </div>
+
+        <div class="form-controls__add-column">
+            <app-button (click)="addColumn()" [text]="'+ Add column'"></app-button>
+        </div>
+
         <div class="form-controls__others">
             <app-select [control]="docTypeControl" [label]="'Select document type'" [options]="docTypeOptions"></app-select>
             <app-input [control]="docNameControl" [label]="'Document name'" [placeholder]="'Enter file name'"></app-input>
-            <app-checkbox [control]="needCreateSqlTableControl!" [label]="'Add table creation query'"></app-checkbox>
+            <app-checkbox
+                *ngIf="isSql"
+                [@opacityAnimation]
+                [control]="needCreateSqlTableControl!"
+                [label]="'Add table creation query'"
+            ></app-checkbox>
         </div>
     </div>
 </div>

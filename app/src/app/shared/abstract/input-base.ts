@@ -12,6 +12,10 @@ export abstract class InputBase {
         return this.control.value;
     }
 
+    public get showError(): boolean {
+        return !!this.error && this.control.touched && this.control.dirty;
+    }
+
     public get error(): { [k: string]: { [key: string]: string | number } } | null {
         for (const key in this.control.errors) {
             if (key) {

@@ -8,6 +8,7 @@ export const COLUMN_TYPES = {
     FIRST_NAME: 'FIRST_NAME',
     LAST_NAME: 'LAST_NAME',
     COUNTRY: 'COUNTRY',
+    DATE: 'DATE',
     CAR: 'CAR'
 } as const;
 

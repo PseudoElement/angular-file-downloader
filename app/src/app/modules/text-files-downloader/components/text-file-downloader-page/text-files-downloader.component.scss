@@ -2,11 +2,18 @@
 
 :host {
     .form-controls {
+        @include flex-column(flex-start, flex-start);
+        gap: 20px;
+
         &__columns {
             @include flex-column(space-between, baseline);
             gap: 10px;
-            margin-bottom: 30px;
         }
+
+        &__add-columns {
+            gap: 10px;
+        }
+
         &__others {
             @include flex-row(flex-start, flex-start);
             gap: 20px;

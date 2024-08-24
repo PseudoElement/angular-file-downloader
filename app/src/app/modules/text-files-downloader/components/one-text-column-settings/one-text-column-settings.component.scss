@@ -9,7 +9,6 @@
 
         &__params {
             @include flex-row(flex-start, flex-start);
-            gap: 10px;
             flex-wrap: wrap;
             margin-right: 20px;
 
@@ -17,6 +16,8 @@
             app-select,
             app-checkbox {
                 margin-right: 10px;
+                margin-bottom: 15px;
+                width: 250px;
             }
         }
     }

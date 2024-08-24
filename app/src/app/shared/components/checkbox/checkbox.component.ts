@@ -14,6 +14,6 @@ export class CheckboxComponent extends InputBase {
     @Input({ required: true }) control!: FormControl;
 
     public get isRequired(): boolean {
-        return this.control.hasValidator(Validators.required);
+        return (this.control?.hasValidator(Validators.required) && this.showError) || false;
     }
 }

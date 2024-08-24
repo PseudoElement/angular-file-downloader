@@ -19,7 +19,7 @@ export class FileBuilderService {
         columns: new FormArray<FormGroup<TextColumnControl | SqlColumnControl>>([], [Validators.required]),
         docType: new FormControl<DocumentType>(DOCUMENT_TYPE_OPTIONS[0].value, [Validators.required]) as FormControl,
         docName: new FormControl<string>('default', [Validators.required]) as FormControl,
-        needCreateSqlTable: new FormControl<boolean>(false) as FormControl
+        needCreateSqlTable: new FormControl<boolean>(false, [Validators.required]) as FormControl
     });
 
     public get docTypeControl(): FormControl<DocumentType> {
@@ -47,9 +47,18 @@ export class FileBuilderService {
         startWith('sql')
     );
 
+    private _needAddDefaultColumns: boolean = true;
+
+    public get needAddDefaultColumns(): boolean {
+        return this._needAddDefaultColumns;
+    }
+
     constructor() {
         this.handleValueChanges();
-        this.fileBuilderForm.valueChanges.subscribe(console.log);
+    }
+
+    public disableAddingDefaultColumns(): void {
+        this._needAddDefaultColumns = false;
     }
 
     public addNewColumn(): void {

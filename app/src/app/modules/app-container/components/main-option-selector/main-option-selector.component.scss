@@ -5,12 +5,11 @@
         @include flex-column(flex-start, center);
 
         position: fixed;
-        top: 52px;
+        background: rgb(240, 240, 240);
+        top: 50px;
         left: 0;
         width: 300px;
+        height: calc(100vh - 50px);
         border: 1px solid gray;
-
-        .option {
-        }
     }
 }

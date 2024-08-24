@@ -12,9 +12,20 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NgLetDirective } from './directives/ng-let.directive';
 import { ArrowDownButtonComponent } from './components/buttons/arrow-down-button/arrow-down-button.component';
 import { DeleteButtonComponent } from './components/buttons/delete-button/delete-button.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { ButtonComponent } from './components/buttons/button/button.component';
 
 @NgModule({
-    exports: [InputComponent, CheckboxComponent, SelectComponent, NgLetDirective, ArrowDownButtonComponent, DeleteButtonComponent],
+    exports: [
+        InputComponent,
+        CheckboxComponent,
+        SelectComponent,
+        NgLetDirective,
+        ArrowDownButtonComponent,
+        DeleteButtonComponent,
+        ButtonComponent
+    ],
     declarations: [
         InputComponent,
         CheckboxComponent,
@@ -22,8 +33,19 @@ import { DeleteButtonComponent } from './components/buttons/delete-button/delete
         ErrorMappingPipe,
         NgLetDirective,
         ArrowDownButtonComponent,
-        DeleteButtonComponent
+        DeleteButtonComponent,
+        ButtonComponent
     ],
-    imports: [CommonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatCheckboxModule, ReactiveFormsModule, FormsModule]
+    imports: [
+        CommonModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatButtonModule,
+        MatInputModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        ReactiveFormsModule,
+        FormsModule
+    ]
 })
 export class SharedModule {}

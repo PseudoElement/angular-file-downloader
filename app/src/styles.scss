@@ -1,5 +1,6 @@
 @use '@angular/material' as mat;
 @import 'src/scss/mixins.scss';
+@import 'src/scss/vars.scss';
 @import url('https://fonts.googleapis.com/css2?family=Carattere&family=Dancing+Script:wght@400;600&family=Lemon&family=Lustria&display=swap');
 
 @include mat.core();
@@ -21,4 +22,5 @@ body {
         --mat-form-field-error-text-color: red;
     }
     @include regular-font();
+    background-color: rgba(0, 0, 0, 0.2);
 }

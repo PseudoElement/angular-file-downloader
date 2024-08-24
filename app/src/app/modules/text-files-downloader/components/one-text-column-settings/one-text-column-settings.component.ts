@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { FormControl, FormGroup } from '@angular/forms';
 import { SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
 import { COLUMN_TYPE_OPTIONS } from '../../constants/column-type-options';
-import { animate, style, transition, trigger } from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
     selector: 'app-one-column-settings',
@@ -11,8 +11,14 @@ import { animate, style, transition, trigger } from '@angular/animations';
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [
         trigger('opacityAnimation', [
-            transition(':enter', [style({ opacity: 0 }), animate('200ms', style({ opacity: 1 }))]),
-            transition(':leave', [style({ opacity: 1 }), animate('200ms', style({ opacity: 0 }))])
+            transition(':enter', [
+                style({ opacity: 0, transform: 'scale(0.0)' }),
+                animate('100ms', style({ opacity: 1, transform: 'scale(1.0)' }))
+            ]),
+            transition(':leave', [
+                style({ opacity: 1, transform: 'scale(1.0)' }),
+                animate('100ms', style({ opacity: 0, transform: 'scale(0.0)' }))
+            ])
         ])
     ]
 })

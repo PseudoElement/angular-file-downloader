@@ -3,11 +3,28 @@ import { FileBuilderService } from '../../services/file-builder.service';
 import { DocumentType, FileBuilderForm, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT_TYPE_OPTIONS } from '../../constants/document-type-options';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
     selector: 'app-text-files-downloader-page',
     templateUrl: './text-files-downloader.component.html',
-    styleUrl: './text-files-downloader.component.scss'
+    styleUrl: './text-files-downloader.component.scss',
+    animations: [
+        trigger('opacityAnimation', [
+            transition(':enter', [
+                style({ opacity: 0, transform: 'scale(0.0)' }),
+                animate('100ms', style({ opacity: 1, transform: 'scale(1.0)' }))
+            ]),
+            transition(':leave', [
+                style({ opacity: 1, transform: 'scale(1.0)' }),
+                animate('100ms', style({ opacity: 0, transform: 'scale(0.0)' }))
+            ])
+        ]),
+        trigger('fadeIn', [
+            transition(':enter', [style({ opacity: 0 }), animate('400ms ease-in', style({ opacity: 1 }))]),
+            transition(':leave', [style({ opacity: 1 }), animate('200ms ease-out', style({ opacity: 0 }))])
+        ])
+    ]
 })
 export class TextFilesDownloaderPageComponent {
     public readonly docTypeOptions = DOCUMENT_TYPE_OPTIONS;
@@ -21,8 +38,11 @@ export class TextFilesDownloaderPageComponent {
     }
 
     ngOnInit(): void {
-        this.fileBuilderSrv.addNewColumn();
-        this.fileBuilderSrv.addNewColumn();
+        if (this.fileBuilderSrv.needAddDefaultColumns) {
+            this.fileBuilderSrv.addNewColumn();
+            this.fileBuilderSrv.addNewColumn();
+            this.fileBuilderSrv.disableAddingDefaultColumns();
+        }
     }
 
     public get columnsControls(): FormGroup<TextColumnControl | SqlColumnControl>[] {
@@ -39,6 +59,10 @@ export class TextFilesDownloaderPageComponent {
 
     public get needCreateSqlTableControl(): FormControl<boolean> | undefined {
         return this.fileBuilderSrv.needCreateSqlTableControl;
+    }
+
+    public addColumn(): void {
+        this.fileBuilderSrv.addNewColumn();
     }
 
     public deleteColumn(index: number): void {
