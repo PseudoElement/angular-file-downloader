@@ -41,12 +41,14 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
     {
         isOpen: false,
         value: 'Tutorial',
+        navigationUrl: '/tutorial',
         bgColorRGB: START_RGB,
         children: []
     },
     {
         isOpen: false,
         value: 'License',
+        navigationUrl: '/license',
         bgColorRGB: START_RGB,
         children: []
     },
@@ -58,9 +60,30 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
     },
     {
         isOpen: false,
-        value: 'Angular documentation',
+        value: 'Angular docs',
         bgColorRGB: START_RGB,
         navigationUrl: 'https://angular.dev/overview',
+        children: []
+    },
+    {
+        isOpen: false,
+        value: 'TypeScript docs',
+        bgColorRGB: START_RGB,
+        navigationUrl: 'https://www.typescriptlang.org/docs',
+        children: []
+    },
+    {
+        isOpen: false,
+        value: 'Golang docs',
+        bgColorRGB: START_RGB,
+        navigationUrl: 'https://go.dev/doc',
+        children: []
+    },
+    {
+        isOpen: false,
+        value: 'ECMAScript specs',
+        bgColorRGB: START_RGB,
+        navigationUrl: 'https://tc39.es/ecma262/2024',
         children: []
     }
 ];

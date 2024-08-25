@@ -10,6 +10,14 @@ const routes: Routes = [
         path: 'download-files',
         loadChildren: () => import('./modules/text-files-downloader/text-files-downloader.module').then((m) => m.TextFilesDownloaderModule)
     },
+    {
+        path: 'tutorial',
+        loadChildren: () => import('./modules/tutorial/tutorial.module').then((m) => m.TutorialModule)
+    },
+    {
+        path: 'license',
+        loadChildren: () => import('./modules/license/license.module').then((m) => m.LicenseModule)
+    },
     { path: '**', redirectTo: '' }
 ];
 

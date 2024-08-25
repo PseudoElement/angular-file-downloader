@@ -15,6 +15,7 @@ import { DeleteButtonComponent } from './components/buttons/delete-button/delete
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ButtonComponent } from './components/buttons/button/button.component';
+import { PerspectOnHoverDirective } from './directives/perspect-on-hover.directive';
 
 @NgModule({
     exports: [
@@ -24,7 +25,8 @@ import { ButtonComponent } from './components/buttons/button/button.component';
         NgLetDirective,
         ArrowDownButtonComponent,
         DeleteButtonComponent,
-        ButtonComponent
+        ButtonComponent,
+        PerspectOnHoverDirective
     ],
     declarations: [
         InputComponent,
@@ -34,7 +36,8 @@ import { ButtonComponent } from './components/buttons/button/button.component';
         NgLetDirective,
         ArrowDownButtonComponent,
         DeleteButtonComponent,
-        ButtonComponent
+        ButtonComponent,
+        PerspectOnHoverDirective
     ],
     imports: [
         CommonModule,

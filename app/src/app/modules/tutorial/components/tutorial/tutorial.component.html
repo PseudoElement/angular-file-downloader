@@ -1,0 +1,33 @@
+<h1>How to use this API?</h1>
+<br />
+<p>This api offers you to generate text files(including sql-files) with specific table structure.</p>
+<p>You can manually add columns and configurate its with providen properties.</p>
+<br />
+
+<h2>List of properties</h2>
+<ul>
+    <li>Document type - type of file that you want to create.</li>
+    <li>Document name - file name.</li>
+    <li>Add table creation query* - add query for creation new table wtih providen columns.</li>
+    <li>Column name - name of column in table.</li>
+    <li>
+        Max - for columns with type NUMBER - max available number, with STRINGlike** types - max length of randomly generated string value.
+    </li>
+    <li>
+        Min - for columns with type NUMBER - min available number, with STRINGlike** types - min length of randomly generated string value.
+    </li>
+    <li>% of rows with nullable value - percent of rows in column with value 'null'.</li>
+    <li>Foreign key table* - if you need to reference column's value to another table, use this property.</li>
+    <li>
+        Foreign key column* - used together with 'Foreign key table' property and specifies name of column you want to reference created
+        column.
+    </li>
+    <li>Set as primary key* - add PRIMARY KEY flag for created column.</li>
+</ul>
+<br />
+
+<h3>Hints</h3>
+<ul>
+    <li>* - only sql table property.</li>
+    <li>** - STRINGlike types are Random string, Car name, Country, First name, Last name.</li>
+</ul>

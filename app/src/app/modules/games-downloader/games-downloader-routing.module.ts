@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { GamesDownloaderComponent } from './components/games-downloader.component';
+import { GamesDownloaderComponent } from './components/games-downloader/games-downloader.component';
 
 const routes: Routes = [{ path: '', component: GamesDownloaderComponent }];
 

@@ -1,0 +1,7 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    p {
+        font-size: $fs-regular;
+    }
+}
