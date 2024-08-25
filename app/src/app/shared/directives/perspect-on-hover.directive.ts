@@ -27,6 +27,7 @@ export class PerspectOnHoverDirective {
         const tiltY = -deltaX / (clientRect.width / 2);
         this.transform = `perspective(${this.perspective}px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
     }
+
     @HostListener('mouseleave') onLeave() {
         this.transform = null;
     }

@@ -2,12 +2,12 @@
         xmlns="http://www.w3.org/2000/svg"
         x="0px"
         y="0px"
-        width="50"
-        height="50"
+        width="60"
+        height="60"
         viewBox="0 0 50 50"
     >
         <path
-            fill="gray"
+            fill="black"
             d="M24,4C12.954,4,4,12.954,4,24c0,8.887,5.801,16.411,13.82,19.016h12.36	C38.199,40.411,44,32.887,44,24C44,12.954,35.046,4,24,4z"
         ></path>
         <path
