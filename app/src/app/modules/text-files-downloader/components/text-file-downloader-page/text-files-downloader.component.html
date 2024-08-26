@@ -1,5 +1,8 @@
 <div *ngLet="isSqlDocType$ | async as isSql" class="wrapper">
-    <h2>Create txt/sql/doc/pdf/csv file</h2>
+    <div class="header">
+        <h2>Create txt/sql/doc/pdf/csv file</h2>
+        <app-download-button (click)="downloadFile()"></app-download-button>
+    </div>
     <div class="form-controls">
         <div class="form-controls__columns">
             <app-one-column-settings

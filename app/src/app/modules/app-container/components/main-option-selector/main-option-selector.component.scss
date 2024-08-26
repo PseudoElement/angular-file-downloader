@@ -8,7 +8,9 @@
         background: rgb(240, 240, 240);
         top: 69px;
         left: 0;
-        height: calc(100vh - 50px);
+        bottom: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
         border: 1px solid gray;
     }
 }

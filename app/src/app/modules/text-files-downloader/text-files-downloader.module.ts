@@ -7,10 +7,11 @@ import { OneTextColumnSettingsComponent } from './components/one-text-column-set
 import { SharedModule } from 'src/app/shared/shared.module';
 import { FileBuilderService } from './services/file-builder.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpApiService } from 'src/app/core/api/http-api.service';
 
 @NgModule({
     declarations: [TextFilesDownloaderPageComponent, OneTextColumnSettingsComponent],
     imports: [CommonModule, TextFilesDownloaderRoutingModule, SharedModule, ReactiveFormsModule, FormsModule],
-    providers: [FileBuilderService]
+    providers: [FileBuilderService, HttpApiService]
 })
 export class TextFilesDownloaderModule {}

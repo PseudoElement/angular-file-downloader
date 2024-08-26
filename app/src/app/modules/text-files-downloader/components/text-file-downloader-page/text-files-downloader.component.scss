@@ -1,6 +1,10 @@
 @use 'src/styles.scss' as *;
 
 :host {
+    .header {
+        @include flex-row(space-between, center);
+    }
+
     .form-controls {
         @include flex-column(flex-start, flex-start);
         gap: 20px;

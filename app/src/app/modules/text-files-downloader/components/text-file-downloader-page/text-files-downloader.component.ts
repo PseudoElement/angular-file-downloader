@@ -1,14 +1,16 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FileBuilderService } from '../../services/file-builder.service';
 import { DocumentType, FileBuilderForm, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT_TYPE_OPTIONS } from '../../constants/document-type-options';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { HttpApiService } from 'src/app/core/api/http-api.service';
 
 @Component({
     selector: 'app-text-files-downloader-page',
     templateUrl: './text-files-downloader.component.html',
     styleUrl: './text-files-downloader.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [
         trigger('opacityAnimation', [
             transition(':enter', [
@@ -31,7 +33,7 @@ export class TextFilesDownloaderPageComponent {
 
     public readonly isSqlDocType$ = this.fileBuilderSrv.isSqlDocType$;
 
-    constructor(private readonly fileBuilderSrv: FileBuilderService) {}
+    constructor(private readonly fileBuilderSrv: FileBuilderService, private readonly httpApi: HttpApiService) {}
 
     public get form(): FormGroup<FileBuilderForm> {
         return this.fileBuilderSrv.fileBuilderForm;
@@ -67,5 +69,9 @@ export class TextFilesDownloaderPageComponent {
 
     public deleteColumn(index: number): void {
         this.fileBuilderSrv.deleteColumn(index);
+    }
+
+    public downloadFile(): void {
+        this.httpApi.downloadFile('/download/sync/test-txt-file');
     }
 }

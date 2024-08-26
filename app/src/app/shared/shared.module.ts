@@ -16,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ButtonComponent } from './components/buttons/button/button.component';
 import { PerspectOnHoverDirective } from './directives/perspect-on-hover.directive';
+import { DownloadButtonComponent } from './components/buttons/download-button/download-button.component';
 
 @NgModule({
     exports: [
@@ -26,7 +27,8 @@ import { PerspectOnHoverDirective } from './directives/perspect-on-hover.directi
         ArrowDownButtonComponent,
         DeleteButtonComponent,
         ButtonComponent,
-        PerspectOnHoverDirective
+        PerspectOnHoverDirective,
+        DownloadButtonComponent
     ],
     declarations: [
         InputComponent,
@@ -37,7 +39,8 @@ import { PerspectOnHoverDirective } from './directives/perspect-on-hover.directi
         ArrowDownButtonComponent,
         DeleteButtonComponent,
         ButtonComponent,
-        PerspectOnHoverDirective
+        PerspectOnHoverDirective,
+        DownloadButtonComponent
     ],
     imports: [
         CommonModule,
