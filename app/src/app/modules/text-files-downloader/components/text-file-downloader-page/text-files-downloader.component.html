@@ -7,7 +7,7 @@
         <div class="form-controls__columns">
             <app-one-column-settings
                 *ngFor="let columnFormGroup of columnsControls; let i = index"
-                [@fadeIn]
+                @opacityAnimation
                 [columnFormGroup]="columnFormGroup"
                 [isSqlDocType]="isSql"
                 (handleRemove)="deleteColumn(i)"
