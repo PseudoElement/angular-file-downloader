@@ -19,7 +19,9 @@ export class FileBuilderService {
         columns: new FormArray<FormGroup<TextColumnControl | SqlColumnControl>>([], [Validators.required]),
         docType: new FormControl<DocumentType>(DOCUMENT_TYPE_OPTIONS[0].value, [Validators.required]) as FormControl,
         docName: new FormControl<string>('default', [Validators.required]) as FormControl,
-        needCreateSqlTable: new FormControl<boolean>(false, [Validators.required]) as FormControl
+        rowsCount: new FormControl<number>(100, [Validators.required, Validators.max(40_000), Validators.min(1)]) as FormControl,
+        needCreateSqlTable: new FormControl<boolean>(false, [Validators.required]) as FormControl,
+        tableName: new FormControl<string>('default_table', [Validators.required]) as FormControl
     });
 
     public get docTypeControl(): FormControl<DocumentType> {
@@ -30,8 +32,16 @@ export class FileBuilderService {
         return this.fileBuilderForm.controls['docName'];
     }
 
+    public get rowsCountControl(): FormControl<number> {
+        return this.fileBuilderForm.controls['rowsCount'];
+    }
+
     public get needCreateSqlTableControl(): FormControl<boolean> | undefined {
         return this.fileBuilderForm.controls['needCreateSqlTable'];
+    }
+
+    public get tableNameControl(): FormControl<string> | undefined {
+        return this.fileBuilderForm.controls['tableName'];
     }
 
     public get columnsFormArray(): FormArray<FormGroup<TextColumnControl | SqlColumnControl>> {
@@ -40,6 +50,10 @@ export class FileBuilderService {
 
     public get columnsFormArrayControls(): FormGroup<TextColumnControl | SqlColumnControl>[] {
         return this.fileBuilderForm.controls.columns.controls;
+    }
+
+    public get isSqlDocType(): boolean {
+        return this.fileBuilderForm.value.docType === 'sql';
     }
 
     public readonly isSqlDocType$ = this.fileBuilderForm.valueChanges.pipe(
@@ -102,15 +116,23 @@ export class FileBuilderService {
 
     private handleDocTypeChange(val: FileBuilderFormValue): void {
         if (val.docType === 'sql') {
-            const ctrl = new FormControl(false, [Validators.required]) as FormControl;
-            this.fileBuilderForm.addControl('needCreateSqlTable', ctrl, {
+            const createTableCtrl = new FormControl(false, [Validators.required]) as FormControl;
+            this.fileBuilderForm.addControl('needCreateSqlTable', createTableCtrl, {
                 emitEvent: false
             });
+
+            const tableNameCtrl = new FormControl('my_table', [Validators.required]) as FormControl;
+            this.fileBuilderForm.addControl('tableName', tableNameCtrl, {
+                emitEvent: false
+            });
+
             this.columnsFormArray.controls.forEach((column) => this.addSqlSpecificControlsInColumn(column));
         } else {
-            if (this.fileBuilderForm.contains('needCreateSqlTable')) {
+            if (this.fileBuilderForm.contains('needCreateSqlTable') && this.fileBuilderForm.contains('tableName')) {
                 this.fileBuilderForm.removeControl('needCreateSqlTable', { emitEvent: false });
+                this.fileBuilderForm.removeControl('tableName', { emitEvent: false });
             }
+
             this.columnsFormArray.controls.forEach((column) => this.deleteSqlSpecificControlsInColumn(column));
         }
     }

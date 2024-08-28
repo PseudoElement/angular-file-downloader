@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 @Component({
     selector: 'app-download-button',
@@ -6,4 +6,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     styleUrl: './download-button.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DownloadButtonComponent {}
+export class DownloadButtonComponent {
+    @Input() isDownloading: boolean = false;
+}

@@ -23,7 +23,7 @@ export class HttpApiService {
         return firstValueFrom(this.httpClient.post<T>(`${this.baseUrl}/${path}`, body, { headers }));
     }
 
-    public async downloadFile(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }): Promise<void> {
+    public async downloadFileGet(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }): Promise<void> {
         const res = await firstValueFrom(
             this.httpClient.get(`${this.baseUrl}/${path}`, {
                 headers: options?.headers,

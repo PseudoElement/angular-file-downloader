@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { FileBuilderService } from '../../services/file-builder.service';
 import { DocumentType, FileBuilderForm, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT_TYPE_OPTIONS } from '../../constants/document-type-options';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { HttpApiService } from 'src/app/core/api/http-api.service';
+import { DownloadService } from '../../../services/download.service';
 
 @Component({
     selector: 'app-text-files-downloader-page',
@@ -29,11 +29,19 @@ export class TextFilesDownloaderPageComponent {
 
     public readonly isSqlDocType$ = this.fileBuilderSrv.isSqlDocType$;
 
-    constructor(private readonly fileBuilderSrv: FileBuilderService, private readonly httpApi: HttpApiService) {}
-
     public get form(): FormGroup<FileBuilderForm> {
         return this.fileBuilderSrv.fileBuilderForm;
     }
+
+    public get isTxtFileDownloading(): boolean {
+        return this.downloadSrv.isTxtFileDownloading;
+    }
+
+    constructor(
+        private readonly fileBuilderSrv: FileBuilderService,
+        private readonly downloadSrv: DownloadService,
+        private readonly cdr: ChangeDetectorRef
+    ) {}
 
     ngOnInit(): void {
         if (this.fileBuilderSrv.needAddDefaultColumns) {
@@ -55,6 +63,14 @@ export class TextFilesDownloaderPageComponent {
         return this.fileBuilderSrv.docNameControl;
     }
 
+    public get rowsCountControl(): FormControl<number> {
+        return this.fileBuilderSrv.rowsCountControl;
+    }
+
+    public get tableNameControl(): FormControl<string> | undefined {
+        return this.fileBuilderSrv.tableNameControl;
+    }
+
     public get needCreateSqlTableControl(): FormControl<boolean> | undefined {
         return this.fileBuilderSrv.needCreateSqlTableControl;
     }
@@ -67,7 +83,8 @@ export class TextFilesDownloaderPageComponent {
         this.fileBuilderSrv.deleteColumn(index);
     }
 
-    public downloadFile(): void {
-        this.httpApi.downloadFile('/download/sync/test-txt-file');
+    public async downloadFile(): Promise<void> {
+        await this.downloadSrv.downloadTxtFile(this.fileBuilderSrv.isSqlDocType);
+        this.cdr.markForCheck();
     }
 }

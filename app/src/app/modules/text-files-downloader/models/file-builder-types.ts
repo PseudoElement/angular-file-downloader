@@ -9,7 +9,8 @@ export const COLUMN_TYPES = {
     LAST_NAME: 'LAST_NAME',
     COUNTRY: 'COUNTRY',
     DATE: 'DATE',
-    CAR: 'CAR'
+    CAR: 'CAR',
+    WORK: 'WORK'
 } as const;
 
 export type ColumnType = (typeof COLUMN_TYPES)[keyof typeof COLUMN_TYPES];
@@ -51,7 +52,9 @@ export interface FileBuilderForm {
     columns: FormArray<FormGroup<TextColumnControl | SqlColumnControl>>;
     docType: FormControl<DocumentType>;
     docName: FormControl<string>;
+    rowsCount: FormControl<number>;
     needCreateSqlTable?: FormControl<boolean>;
+    tableName?: FormControl<string>;
 }
 
 export interface FileBuilderFormValue {
@@ -78,5 +81,7 @@ export interface FileBuilderFormValue {
     >;
     docType: DocumentType;
     docName: string;
+    rowsCount: number;
     needCreateSqlTable?: boolean | undefined;
+    tableName?: string | undefined;
 }

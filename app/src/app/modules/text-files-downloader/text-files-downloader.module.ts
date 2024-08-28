@@ -8,10 +8,11 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { FileBuilderService } from './services/file-builder.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpApiService } from 'src/app/core/api/http-api.service';
+import { DownloadService } from '../services/download.service';
 
 @NgModule({
     declarations: [TextFilesDownloaderPageComponent, OneTextColumnSettingsComponent],
     imports: [CommonModule, TextFilesDownloaderRoutingModule, SharedModule, ReactiveFormsModule, FormsModule],
-    providers: [FileBuilderService, HttpApiService]
+    providers: [FileBuilderService, DownloadService, HttpApiService]
 })
 export class TextFilesDownloaderModule {}

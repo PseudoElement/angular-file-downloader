@@ -1,7 +1,7 @@
 <div *ngLet="isSqlDocType$ | async as isSql" class="wrapper">
     <div class="header">
         <h2>Create txt/sql/doc/pdf/csv file</h2>
-        <app-download-button (click)="downloadFile()"></app-download-button>
+        <app-download-button (click)="downloadFile()" [isDownloading]="isTxtFileDownloading"></app-download-button>
     </div>
     <div class="form-controls">
         <div class="form-controls__columns">
@@ -21,9 +21,22 @@
         <div class="form-controls__others">
             <app-select [control]="docTypeControl" [label]="'Document type'" [options]="docTypeOptions"></app-select>
             <app-input [control]="docNameControl" [label]="'Document name'" [placeholder]="'Enter file name'"></app-input>
+            <app-input
+                [control]="rowsCountControl"
+                [label]="'Rows count'"
+                [placeholder]="'Enter rows count in table'"
+                [type]="'number'"
+            ></app-input>
+            <app-input
+                *ngIf="isSql"
+                @opacityAnimation
+                [control]="tableNameControl!"
+                [label]="'Table name'"
+                [placeholder]="'Enter name of sql table'"
+            ></app-input>
             <app-checkbox
                 *ngIf="isSql"
-                [@opacityAnimation]
+                @opacityAnimation
                 [control]="needCreateSqlTableControl!"
                 [label]="'Add table creation query'"
             ></app-checkbox>
