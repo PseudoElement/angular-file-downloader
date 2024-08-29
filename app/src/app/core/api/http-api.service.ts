@@ -23,6 +23,21 @@ export class HttpApiService {
         return firstValueFrom(this.httpClient.post<T>(`${this.baseUrl}/${path}`, body, { headers }));
     }
 
+    public async downloadFilePost(path: string, body: object, headers?: HttpHeaders): Promise<void> {
+        const res = await firstValueFrom(
+            this.httpClient.post(`${this.baseUrl}/${path}`, body, {
+                headers,
+                responseType: 'blob'
+            })
+        );
+        const binaryData = [res];
+        const downloadLink = document.createElement('a');
+        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: res.type }));
+        downloadLink.setAttribute('download', 'table');
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+    }
+
     public async downloadFileGet(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }): Promise<void> {
         const res = await firstValueFrom(
             this.httpClient.get(`${this.baseUrl}/${path}`, {

@@ -7,8 +7,6 @@ export const DEFAULT_COLUMN_DATA: SqlColumnInfo = {
     nullValuesPercent: '0',
     type: COLUMN_TYPES.AUTO_INCREMENT,
     isPrimaryKey: false,
-    foreignKeyData: {
-        refColumnName: 'RefDefaultName',
-        refTableName: 'RefDefaultTable'
-    }
+    refColumnName: 'RefDefaultName',
+    refTableName: 'RefDefaultTable'
 };

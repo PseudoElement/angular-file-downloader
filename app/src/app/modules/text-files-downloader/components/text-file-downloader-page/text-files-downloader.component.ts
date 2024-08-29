@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { FileBuilderService } from '../../services/file-builder.service';
-import { DocumentType, FileBuilderForm, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
+import { DocumentType, FileBuilderForm, FileBuilderFormValue, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT_TYPE_OPTIONS } from '../../constants/document-type-options';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { DownloadService } from '../../../services/download.service';
+import { DownloadService } from '../../services/download.service';
+import { SintolLibDynamicComponentService, SintolLibModalComponent } from 'dynamic-rendering';
 
 @Component({
     selector: 'app-text-files-downloader-page',
@@ -33,14 +34,15 @@ export class TextFilesDownloaderPageComponent {
         return this.fileBuilderSrv.fileBuilderForm;
     }
 
-    public get isTxtFileDownloading(): boolean {
-        return this.downloadSrv.isTxtFileDownloading;
+    public get isDownloading(): boolean {
+        return this.downloadSrv.isDownloading;
     }
 
     constructor(
         private readonly fileBuilderSrv: FileBuilderService,
         private readonly downloadSrv: DownloadService,
-        private readonly cdr: ChangeDetectorRef
+        private readonly cdr: ChangeDetectorRef,
+        private readonly sintolModalSrv: SintolLibDynamicComponentService
     ) {}
 
     ngOnInit(): void {
@@ -84,7 +86,18 @@ export class TextFilesDownloaderPageComponent {
     }
 
     public async downloadFile(): Promise<void> {
-        await this.downloadSrv.downloadTxtFile(this.fileBuilderSrv.isSqlDocType);
+        if (this.form.invalid) {
+            await this.sintolModalSrv.openConfirmModal(SintolLibModalComponent, {
+                size: 'fullscreen',
+                title: 'Fix incorrect values in form!'
+            });
+            this.form.markAllAsTouched();
+            this.form.markAsDirty();
+            console.log(this.form.controls);
+            return;
+        }
+
+        await this.downloadSrv.downloadTxtFile(this.form.value as FileBuilderFormValue, this.fileBuilderSrv.isSqlDocType);
         this.cdr.markForCheck();
     }
 }

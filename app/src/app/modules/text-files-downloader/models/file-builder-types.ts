@@ -25,21 +25,17 @@ export interface TextColumnInfo {
 }
 
 export interface SqlColumnInfo extends TextColumnInfo {
-    isPrimaryKey: boolean;
-    foreignKeyData: ForeignKeyData;
-}
-
-export interface ForeignKeyData {
-    refTableName: string;
-    refColumnName: string;
+    isPrimaryKey?: boolean;
+    refTableName?: string;
+    refColumnName?: string;
 }
 
 export interface TextColumnControl {
     name: FormControl<string>;
     type: FormControl<ColumnType>;
-    nullValuesPercent: FormControl<number>;
-    min: FormControl<number>;
-    max: FormControl<number>;
+    nullValuesPercent: FormControl<string>;
+    min: FormControl<string>;
+    max: FormControl<string>;
 }
 
 export interface SqlColumnControl extends TextColumnControl {
@@ -58,30 +54,19 @@ export interface FileBuilderForm {
 }
 
 export interface FileBuilderFormValue {
-    columns: Array<
-        Partial<
-            | {
-                  name: string;
-                  type: ColumnType;
-                  nullValuesPercent: number;
-                  min: number;
-                  max: number;
-              }
-            | {
-                  isPrimaryKey: boolean;
-                  refTableName: string;
-                  refColumnName: string;
-                  name: string;
-                  type: ColumnType;
-                  nullValuesPercent: number;
-                  min: number;
-                  max: number;
-              }
-        >
-    >;
+    columns: Array<{
+        name: string;
+        type: ColumnType;
+        nullValuesPercent: string;
+        min: string;
+        max: string;
+        isPrimaryKey?: boolean;
+        refTableName?: string;
+        refColumnName?: string;
+    }>;
     docType: DocumentType;
     docName: string;
     rowsCount: number;
-    needCreateSqlTable?: boolean | undefined;
-    tableName?: string | undefined;
+    needCreateSqlTable?: boolean;
+    tableName?: string;
 }

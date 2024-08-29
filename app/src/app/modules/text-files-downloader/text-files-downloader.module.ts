@@ -8,11 +8,12 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { FileBuilderService } from './services/file-builder.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpApiService } from 'src/app/core/api/http-api.service';
-import { DownloadService } from '../services/download.service';
+import { DownloadService } from './services/download.service';
+import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 
 @NgModule({
     declarations: [TextFilesDownloaderPageComponent, OneTextColumnSettingsComponent],
     imports: [CommonModule, TextFilesDownloaderRoutingModule, SharedModule, ReactiveFormsModule, FormsModule],
-    providers: [FileBuilderService, DownloadService, HttpApiService]
+    providers: [FileBuilderService, DownloadService, HttpApiService, SintolLibDynamicComponentService]
 })
 export class TextFilesDownloaderModule {}
