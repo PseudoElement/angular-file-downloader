@@ -1,5 +1,5 @@
 <mat-form-field class="app-input">
     <mat-label>{{ label }}</mat-label>
-    <input matInput [type]="type" [formControl]="control" [errorStateMatcher]="errorMatcher" [placeholder]="placeholder" />
+    <input matInput [type]="type" [formControl]="control" [placeholder]="placeholder" />
     <mat-error *ngIf="error">{{ error | errorMapping }}</mat-error>
 </mat-form-field>

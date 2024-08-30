@@ -1,19 +1,16 @@
 import { FormControl } from '@angular/forms';
-import { AppErrorStateMatcher } from '../utils/error-matcher';
 
 export abstract class InputBase {
     public abstract control: FormControl;
 
     public abstract label: string;
 
-    public readonly errorMatcher = new AppErrorStateMatcher();
-
     public get value(): unknown {
         return this.control.value;
     }
 
     public get showError(): boolean {
-        return !!this.error && this.control.touched && this.control.dirty;
+        return (this.control.touched && this.control.dirty) || (this.control.root.touched && this.control.root.dirty);
     }
 
     public get error(): { [k: string]: { [key: string]: string | number } } | null {
