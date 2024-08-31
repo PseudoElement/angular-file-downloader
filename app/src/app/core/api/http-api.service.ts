@@ -32,10 +32,11 @@ export class HttpApiService {
         );
         const binaryData = [res];
         const downloadLink = document.createElement('a');
-        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: res.type }));
+        downloadLink.href = URL.createObjectURL(new Blob(binaryData, { type: res.type }));
         downloadLink.setAttribute('download', 'table');
         document.body.appendChild(downloadLink);
         downloadLink.click();
+        downloadLink.remove();
     }
 
     public async downloadFileGet(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }): Promise<void> {
@@ -48,9 +49,10 @@ export class HttpApiService {
         );
         const binaryData = [res];
         const downloadLink = document.createElement('a');
-        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: res.type }));
+        downloadLink.href = URL.createObjectURL(new Blob(binaryData, { type: res.type }));
         downloadLink.setAttribute('download', 'table');
         document.body.appendChild(downloadLink);
         downloadLink.click();
+        downloadLink.remove();
     }
 }

@@ -18,6 +18,7 @@ import { ButtonComponent } from './components/buttons/button/button.component';
 import { PerspectOnHoverDirective } from './directives/perspect-on-hover.directive';
 import { DownloadButtonComponent } from './components/buttons/download-button/download-button.component';
 import { ArrowDownLongComponent } from './components/icons/arrow-down-long/arrow-down-long.component';
+import { ModalComponent } from './components/modal/modal.component';
 
 @NgModule({
     exports: [
@@ -30,7 +31,8 @@ import { ArrowDownLongComponent } from './components/icons/arrow-down-long/arrow
         ButtonComponent,
         PerspectOnHoverDirective,
         DownloadButtonComponent,
-        ArrowDownLongComponent
+        ArrowDownLongComponent,
+        ModalComponent
     ],
     declarations: [
         InputComponent,
@@ -43,7 +45,8 @@ import { ArrowDownLongComponent } from './components/icons/arrow-down-long/arrow
         ButtonComponent,
         PerspectOnHoverDirective,
         DownloadButtonComponent,
-        ArrowDownLongComponent
+        ArrowDownLongComponent,
+        ModalComponent
     ],
     imports: [
         CommonModule,

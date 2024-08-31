@@ -6,6 +6,7 @@ import { DOCUMENT_TYPE_OPTIONS } from '../../constants/document-type-options';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { DownloadService } from '../../services/download.service';
 import { SintolLibDynamicComponentService, SintolLibModalComponent } from 'dynamic-rendering';
+import { ModalComponent } from 'src/app/shared/components/modal/modal.component';
 
 @Component({
     selector: 'app-text-files-downloader-page',
@@ -87,17 +88,20 @@ export class TextFilesDownloaderPageComponent {
 
     public async downloadFile(): Promise<void> {
         if (this.form.invalid) {
-            await this.sintolModalSrv.openConfirmModal(SintolLibModalComponent, {
-                size: 'fullscreen',
-                title: 'Fix incorrect values in form!'
+            await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+                title: 'Invalid values!',
+                text: 'Fill all inputs in form properly.',
+                isConfirmModal: false
             });
+
             this.form.markAllAsTouched();
             this.form.markAsDirty();
-            console.log(this.form.controls);
             return;
         }
 
-        await this.downloadSrv.downloadTxtFile(this.form.value as FileBuilderFormValue, this.fileBuilderSrv.isSqlDocType);
-        this.cdr.markForCheck();
+        console.log('FORM IS VALID ==> ', this.form.value);
+
+        // await this.downloadSrv.downloadTxtFile(this.form.value as FileBuilderFormValue, this.fileBuilderSrv.isSqlDocType);
+        // this.cdr.markForCheck();
     }
 }

@@ -1,0 +1,10 @@
+<div class="modal-wrapper">
+    <div @showHideAnimation class="modal">
+        <h2 class="modal-title">{{ title }}</h2>
+        <p class="modal-body">{{ text }}</p>
+        <div class="modal-buttons">
+            <app-button (click)="accept()" [text]="'OK'" [type]="'flat'"></app-button>
+            <app-button (click)="reject()" *ngIf="isConfirmModal" [text]="'NO'" [type]="'flat'"></app-button>
+        </div>
+    </div>
+</div>

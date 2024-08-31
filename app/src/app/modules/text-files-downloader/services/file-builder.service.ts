@@ -20,7 +20,7 @@ export class FileBuilderService {
         docType: new FormControl<DocumentType>(DOCUMENT_TYPE_OPTIONS[0].value, [Validators.required]) as FormControl,
         docName: new FormControl<string>('default', [Validators.required]) as FormControl,
         rowsCount: new FormControl<number>(100, [Validators.required, Validators.max(40_000), Validators.min(1)]) as FormControl,
-        needCreateSqlTable: new FormControl<boolean>(false, [Validators.required]) as FormControl,
+        needCreateSqlTable: new FormControl<boolean>(false) as FormControl,
         tableName: new FormControl<string>('default_table', [Validators.required]) as FormControl
     });
 
@@ -116,7 +116,7 @@ export class FileBuilderService {
 
     private handleDocTypeChange(val: FileBuilderFormValue): void {
         if (val.docType === 'sql') {
-            const createTableCtrl = new FormControl(false, [Validators.required]) as FormControl;
+            const createTableCtrl = new FormControl(false) as FormControl;
             this.fileBuilderForm.addControl('needCreateSqlTable', createTableCtrl, {
                 emitEvent: false
             });
