@@ -48,7 +48,7 @@ export interface FileBuilderForm {
     columns: FormArray<FormGroup<TextColumnControl | SqlColumnControl>>;
     docType: FormControl<DocumentType>;
     docName: FormControl<string>;
-    rowsCount: FormControl<number>;
+    rowsCount: FormControl<string>;
     needCreateSqlTable?: FormControl<boolean>;
     tableName?: FormControl<string>;
 }
@@ -66,7 +66,7 @@ export interface FileBuilderFormValue {
     }>;
     docType: DocumentType;
     docName: string;
-    rowsCount: number;
+    rowsCount: string;
     needCreateSqlTable?: boolean;
     tableName?: string;
 }

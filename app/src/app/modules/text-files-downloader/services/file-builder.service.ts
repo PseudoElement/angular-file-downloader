@@ -19,7 +19,7 @@ export class FileBuilderService {
         columns: new FormArray<FormGroup<TextColumnControl | SqlColumnControl>>([], [Validators.required]),
         docType: new FormControl<DocumentType>(DOCUMENT_TYPE_OPTIONS[0].value, [Validators.required]) as FormControl,
         docName: new FormControl<string>('default', [Validators.required]) as FormControl,
-        rowsCount: new FormControl<number>(100, [Validators.required, Validators.max(40_000), Validators.min(1)]) as FormControl,
+        rowsCount: new FormControl<string>('100', [Validators.required, Validators.max(40_000), Validators.min(1)]) as FormControl,
         needCreateSqlTable: new FormControl<boolean>(false) as FormControl,
         tableName: new FormControl<string>('default_table', [Validators.required]) as FormControl
     });
@@ -32,7 +32,7 @@ export class FileBuilderService {
         return this.fileBuilderForm.controls['docName'];
     }
 
-    public get rowsCountControl(): FormControl<number> {
+    public get rowsCountControl(): FormControl<string> {
         return this.fileBuilderForm.controls['rowsCount'];
     }
 

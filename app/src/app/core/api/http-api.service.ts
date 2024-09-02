@@ -26,7 +26,7 @@ export class HttpApiService {
     public async downloadFilePost(path: string, body: object, headers?: HttpHeaders): Promise<void> {
         const res = await firstValueFrom(
             this.httpClient.post(`${this.baseUrl}/${path}`, body, {
-                headers,
+                headers: { 'Content-Type': 'application/json', ...headers },
                 responseType: 'blob'
             })
         );

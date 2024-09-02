@@ -2,14 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpApiService } from 'src/app/core/api/http-api.service';
 import { FileBuilderFormValue, SqlColumnInfo, TextColumnInfo } from '../models/file-builder-types';
 import { DownloadSqlReqBody, DownloadTextReqBody, SqlColumnInfoApi, TextColumnInfoApi } from '../models/txt-download-api-types';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
 export class DownloadService {
-    private _isDownloading = false;
+    private readonly _isDownloading$ = new BehaviorSubject<boolean>(false);
 
-    public get isDownloading(): boolean {
-        return this._isDownloading;
-    }
+    public readonly isDownloading$ = this._isDownloading$.asObservable();
 
     constructor(private readonly httpApi: HttpApiService) {}
 
@@ -34,13 +33,13 @@ export class DownloadService {
                   doc_type: value.docType,
                   need_create_table: value.needCreateSqlTable,
                   table_name: value.tableName,
-                  rows_count: value.rowsCount,
+                  rows_count: Number(value.rowsCount),
                   columns_data: value.columns.map((column) => this.convertSqlColumnToApi(column))
               } as DownloadSqlReqBody)
             : ({
                   doc_name: value.docName,
                   doc_type: value.docType,
-                  rows_count: value.rowsCount,
+                  rows_count: Number(value.rowsCount),
                   columns_data: value.columns.map((column) => this.convertTxtColumnToApi(column))
               } as DownloadTextReqBody);
     }
@@ -71,6 +70,6 @@ export class DownloadService {
     }
 
     private toggleDownloading(isDownloading: boolean): void {
-        this._isDownloading = isDownloading;
+        this._isDownloading$.next(isDownloading);
     }
 }

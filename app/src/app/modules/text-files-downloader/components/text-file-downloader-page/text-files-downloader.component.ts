@@ -5,7 +5,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT_TYPE_OPTIONS } from '../../constants/document-type-options';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { DownloadService } from '../../services/download.service';
-import { SintolLibDynamicComponentService, SintolLibModalComponent } from 'dynamic-rendering';
+import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 import { ModalComponent } from 'src/app/shared/components/modal/modal.component';
 
 @Component({
@@ -31,12 +31,10 @@ export class TextFilesDownloaderPageComponent {
 
     public readonly isSqlDocType$ = this.fileBuilderSrv.isSqlDocType$;
 
+    public readonly isDownloading$ = this.downloadSrv.isDownloading$;
+
     public get form(): FormGroup<FileBuilderForm> {
         return this.fileBuilderSrv.fileBuilderForm;
-    }
-
-    public get isDownloading(): boolean {
-        return this.downloadSrv.isDownloading;
     }
 
     constructor(
@@ -66,7 +64,7 @@ export class TextFilesDownloaderPageComponent {
         return this.fileBuilderSrv.docNameControl;
     }
 
-    public get rowsCountControl(): FormControl<number> {
+    public get rowsCountControl(): FormControl<string> {
         return this.fileBuilderSrv.rowsCountControl;
     }
 
@@ -99,9 +97,13 @@ export class TextFilesDownloaderPageComponent {
             return;
         }
 
-        console.log('FORM IS VALID ==> ', this.form.value);
+        const ok = await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+            text: 'Are you sure you want to download file?',
+            isConfirmModal: true
+        });
+        if (!ok) return;
 
-        // await this.downloadSrv.downloadTxtFile(this.form.value as FileBuilderFormValue, this.fileBuilderSrv.isSqlDocType);
-        // this.cdr.markForCheck();
+        await this.downloadSrv.downloadTxtFile(this.form.value as FileBuilderFormValue, this.fileBuilderSrv.isSqlDocType);
+        this.cdr.markForCheck();
     }
 }
