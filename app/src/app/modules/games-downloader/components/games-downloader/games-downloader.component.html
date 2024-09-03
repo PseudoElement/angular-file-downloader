@@ -1,1 +1,6 @@
-<p>games-downloader works!</p>
+<div class="games-downloader">
+    <h2>Games</h2>
+    <div class="games">
+        <p *ngFor="let game of games$ | async">{{ game.name }}</p>
+    </div>
+</div>

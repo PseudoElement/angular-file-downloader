@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { SOCIALS } from '../../constants/links';
 
 @Component({
     selector: 'app-header',
@@ -6,4 +7,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     styleUrl: './app-header.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppHeaderComponent {}
+export class AppHeaderComponent {
+    public readonly socials = SOCIALS;
+}

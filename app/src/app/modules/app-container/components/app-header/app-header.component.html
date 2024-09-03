@@ -1,14 +1,8 @@
 <header>
     <h2>Links</h2>
     <div class="links">
-        <a href="https://www.linkedin.com/in/pavel-davidovich/" target="_blank">
-            <img appPerspectOnHover [perspective]="5" src="../../../../../assets/icons/linkedin.svg" alt="LinkedIn" />
-        </a>
-        <a href="https://t.me/BigChad" target="_blank">
-            <img appPerspectOnHover [perspective]="5" src="../../../../../assets/icons/telegram.svg" alt="Telegram" />
-        </a>
-        <a href="https://github.com/PseudoElement" target="_blank">
-            <img appPerspectOnHover [perspective]="5" src="../../../../../assets/icons/github.svg" alt="GitHub" />
+        <a *ngFor="let social of socials" [href]="social.href" target="_blank">
+            <img appPerspectOnHover [perspective]="5" [src]="social.absPath" [alt]="social.alt" />
         </a>
     </div>
 </header>

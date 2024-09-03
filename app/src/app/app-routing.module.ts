@@ -18,6 +18,10 @@ const routes: Routes = [
         path: 'license',
         loadChildren: () => import('./modules/license/license.module').then((m) => m.LicenseModule)
     },
+    {
+        path: 'telegram-bots',
+        loadChildren: () => import('./modules/bots/bots.module').then((m) => m.BotsModule)
+    },
     { path: '**', redirectTo: '' }
 ];
 
