@@ -37,8 +37,8 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                         navigationUrl: `/download-games/${GAMES_IDS.CS_2}`,
                         children: []
                     }
-                ]
-                // navigationUrl: '/download-games'
+                ],
+                navigationUrl: '/download-games'
             }
         ]
     },

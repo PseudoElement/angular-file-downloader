@@ -16,9 +16,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ButtonComponent } from './components/buttons/button/button.component';
 import { PerspectOnHoverDirective } from './directives/perspect-on-hover.directive';
-import { DownloadButtonComponent } from './components/buttons/download-button/download-button.component';
+import { AnimatedButtonComponent } from './components/buttons/animated-button/animated-button.component';
 import { ArrowDownLongComponent } from './components/icons/arrow-down-long/arrow-down-long.component';
 import { ModalComponent } from './components/modal/modal.component';
+import { ExternalAppInfoComponent } from './components/external-app-info/external-app-info.component';
 
 @NgModule({
     exports: [
@@ -30,9 +31,10 @@ import { ModalComponent } from './components/modal/modal.component';
         DeleteButtonComponent,
         ButtonComponent,
         PerspectOnHoverDirective,
-        DownloadButtonComponent,
+        AnimatedButtonComponent,
         ArrowDownLongComponent,
-        ModalComponent
+        ModalComponent,
+        ExternalAppInfoComponent
     ],
     declarations: [
         InputComponent,
@@ -44,9 +46,10 @@ import { ModalComponent } from './components/modal/modal.component';
         DeleteButtonComponent,
         ButtonComponent,
         PerspectOnHoverDirective,
-        DownloadButtonComponent,
+        AnimatedButtonComponent,
         ArrowDownLongComponent,
-        ModalComponent
+        ModalComponent,
+        ExternalAppInfoComponent
     ],
     imports: [
         CommonModule,

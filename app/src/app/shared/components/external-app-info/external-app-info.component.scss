@@ -1,0 +1,25 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .external-app-info {
+        @include flex-row(flex-start, center);
+
+        height: 200px;
+        margin: 20px 0;
+        padding: 10px;
+        box-shadow: 0 0 2px 2px gray;
+        border-radius: 20px;
+    }
+
+    .logo {
+        border-radius: 50%;
+        margin-right: 50px;
+        img {
+            width: 150px;
+        }
+    }
+
+    .body {
+        @include flex-column(flex-start, flex-start);
+    }
+}

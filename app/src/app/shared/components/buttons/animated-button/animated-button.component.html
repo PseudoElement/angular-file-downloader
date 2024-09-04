@@ -1,0 +1,6 @@
+<div class="container">
+    <button class="button">
+        {{ text }}
+        <app-arrow-down-long *ngIf="type === 'download'" [isActive]="isDownloading"></app-arrow-down-long>
+    </button>
+</div>

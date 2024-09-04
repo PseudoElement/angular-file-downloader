@@ -1,12 +1,10 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { FileBuilderService } from '../../services/file-builder.service';
-import { DocumentType, FileBuilderForm, FileBuilderFormValue, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
+import { DocumentType, FileBuilderForm, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT_TYPE_OPTIONS } from '../../constants/document-type-options';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { DownloadService } from '../../services/download.service';
-import { SintolLibDynamicComponentService } from 'dynamic-rendering';
-import { ModalComponent } from 'src/app/shared/components/modal/modal.component';
 
 @Component({
     selector: 'app-text-files-downloader-page',
@@ -40,8 +38,7 @@ export class TextFilesDownloaderPageComponent {
     constructor(
         private readonly fileBuilderSrv: FileBuilderService,
         private readonly downloadSrv: DownloadService,
-        private readonly cdr: ChangeDetectorRef,
-        private readonly sintolModalSrv: SintolLibDynamicComponentService
+        private readonly cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
@@ -85,25 +82,7 @@ export class TextFilesDownloaderPageComponent {
     }
 
     public async downloadFile(): Promise<void> {
-        if (this.form.invalid) {
-            await this.sintolModalSrv.openConfirmModal(ModalComponent, {
-                title: 'Invalid values!',
-                text: 'Fill all inputs in form properly.',
-                isConfirmModal: false
-            });
-
-            this.form.markAllAsTouched();
-            this.form.markAsDirty();
-            return;
-        }
-
-        const ok = await this.sintolModalSrv.openConfirmModal(ModalComponent, {
-            text: 'Are you sure you want to download file?',
-            isConfirmModal: true
-        });
-        if (!ok) return;
-
-        await this.downloadSrv.downloadTxtFile(this.form.value as FileBuilderFormValue, this.fileBuilderSrv.isSqlDocType);
+        await this.downloadSrv.downloadTxtFile(this.form, this.fileBuilderSrv.isSqlDocType);
         this.cdr.markForCheck();
     }
 }

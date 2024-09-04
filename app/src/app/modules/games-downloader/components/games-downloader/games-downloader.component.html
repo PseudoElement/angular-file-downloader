@@ -1,6 +1,14 @@
 <div class="games-downloader">
     <h2>Games</h2>
     <div class="games">
-        <p *ngFor="let game of games$ | async">{{ game.name }}</p>
+        <app-external-app-info
+            *ngFor="let game of games$ | async"
+            [description]="game.description"
+            [img]="game.img"
+            [title]="game.title"
+            [hasArrow]="true"
+            [isDownloading]="isDownloadingGame(game)"
+            [onClick]="callbackOnInfoClick(game)"
+        ></app-external-app-info>
     </div>
 </div>

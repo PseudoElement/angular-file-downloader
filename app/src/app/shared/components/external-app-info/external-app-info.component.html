@@ -1,0 +1,19 @@
+<div class="external-app-info">
+    <div class="logo">
+        <img [src]="img" alt="App" />
+    </div>
+    <div class="body">
+        <h3>{{ title }}</h3>
+        <p>{{ description }}</p>
+        @if (hasArrow) {
+        <app-animated-button
+            (click)="onClick()"
+            [text]="'Download'"
+            [type]="'download'"
+            [isDownloading]="isDownloading"
+        ></app-animated-button>
+        }@else{
+        <app-animated-button (click)="onClick()" [text]="'Open'" [type]="'link'"></app-animated-button>
+        }
+    </div>
+</div>

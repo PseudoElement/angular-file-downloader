@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpApiService } from 'src/app/core/api/http-api.service';
-import { FileBuilderFormValue, SqlColumnInfo, TextColumnInfo } from '../models/file-builder-types';
+import { FileBuilderForm, FileBuilderFormValue, SqlColumnInfo, TextColumnInfo } from '../models/file-builder-types';
 import { DownloadSqlReqBody, DownloadTextReqBody, SqlColumnInfoApi, TextColumnInfoApi } from '../models/txt-download-api-types';
 import { BehaviorSubject } from 'rxjs';
+import { FormGroup } from '@angular/forms';
+import { ModalComponent } from 'src/app/shared/components/modal/modal.component';
+import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 
 @Injectable()
 export class DownloadService {
@@ -10,15 +13,34 @@ export class DownloadService {
 
     public readonly isDownloading$ = this._isDownloading$.asObservable();
 
-    constructor(private readonly httpApi: HttpApiService) {}
+    constructor(private readonly httpApi: HttpApiService, private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
 
-    public async downloadTxtFile(formValue: FileBuilderFormValue, isSqlFile: boolean): Promise<void> {
+    public async downloadTxtFile(form: FormGroup<FileBuilderForm>, isSqlFile: boolean): Promise<void> {
+        if (form.invalid) {
+            await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+                title: 'Invalid values!',
+                text: 'Fill all inputs in form properly.',
+                isConfirmModal: false
+            });
+
+            form.markAllAsTouched();
+            form.markAsDirty();
+            return;
+        }
+
+        const ok = await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+            text: 'Are you sure you want to download file?',
+            isConfirmModal: true
+        });
+        if (!ok) return;
+
         try {
             this.toggleDownloading(true);
+            const formValue = form.value as FileBuilderFormValue;
             const path = `download/${isSqlFile ? 'sql-file' : 'txt-file'}`;
             const body = this.convertFormValueToReqBody(formValue, isSqlFile);
 
-            await this.httpApi.downloadFilePost(path, body);
+            await this.httpApi.downloadFilePost(path, body, formValue.docName);
         } catch (err) {
             console.log('[DownloadService_downloadTxtFile] Error occured: ', err);
         } finally {
