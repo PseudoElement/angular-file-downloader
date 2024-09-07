@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { matcherGuard } from './guards/matcher.guard';
 
 const routes: Routes = [
     {
@@ -15,6 +16,7 @@ const routes: Routes = [
         loadChildren: () => import('./modules/tutorial/tutorial.module').then((m) => m.TutorialModule)
     },
     {
+        canMatch: [matcherGuard],
         path: 'license',
         loadChildren: () => import('./modules/license/license.module').then((m) => m.LicenseModule)
     },
