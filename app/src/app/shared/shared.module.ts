@@ -20,6 +20,7 @@ import { AnimatedButtonComponent } from './components/buttons/animated-button/an
 import { ArrowDownLongComponent } from './components/icons/arrow-down-long/arrow-down-long.component';
 import { ModalComponent } from './components/modal/modal.component';
 import { ExternalAppInfoComponent } from './components/external-app-info/external-app-info.component';
+import { ShortifyTextPipe } from './pipes/shortify-text.pipe';
 
 @NgModule({
     exports: [
@@ -34,7 +35,8 @@ import { ExternalAppInfoComponent } from './components/external-app-info/externa
         AnimatedButtonComponent,
         ArrowDownLongComponent,
         ModalComponent,
-        ExternalAppInfoComponent
+        ExternalAppInfoComponent,
+        ShortifyTextPipe
     ],
     declarations: [
         InputComponent,
@@ -49,7 +51,8 @@ import { ExternalAppInfoComponent } from './components/external-app-info/externa
         AnimatedButtonComponent,
         ArrowDownLongComponent,
         ModalComponent,
-        ExternalAppInfoComponent
+        ExternalAppInfoComponent,
+        ShortifyTextPipe
     ],
     imports: [
         CommonModule,

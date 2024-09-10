@@ -6,7 +6,7 @@ const START_RGB = 'rgb(240, 240, 240)';
 export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
     {
         isOpen: false,
-        value: 'Tools',
+        value: 'Downloads',
         bgColorRGB: START_RGB,
         children: [
             {
@@ -21,8 +21,20 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                 children: [
                     {
                         isOpen: false,
-                        value: 'Vampire Survivors',
-                        navigationUrl: `/download-games/${GAMES_IDS.VAMPIRE_SURVIVORS}`,
+                        value: 'Asteroids',
+                        navigationUrl: `/download-games/${GAMES_IDS.ASTEROIDS}`,
+                        children: []
+                    },
+                    {
+                        isOpen: false,
+                        value: 'Knight platformer',
+                        navigationUrl: `/download-games/${GAMES_IDS.KNIGTH_PLATFORMER}`,
+                        children: []
+                    },
+                    {
+                        isOpen: false,
+                        value: 'Space shooter',
+                        navigationUrl: `/download-games/${GAMES_IDS.SPACE_SHOOTER}`,
                         children: []
                     },
                     {
@@ -35,6 +47,12 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                         isOpen: false,
                         value: 'CS 2.0',
                         navigationUrl: `/download-games/${GAMES_IDS.CS_2}`,
+                        children: []
+                    },
+                    {
+                        isOpen: false,
+                        value: 'WH40K Space Marine 2',
+                        navigationUrl: `/download-games/${GAMES_IDS.SPACE_MARINE_2}`,
                         children: []
                     }
                 ],

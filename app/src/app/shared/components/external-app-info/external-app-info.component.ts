@@ -20,5 +20,12 @@ export class ExternalAppInfoComponent {
      */
     @Input() isDownloading: boolean = false;
 
-    @Input() hasArrow: boolean = false;
+    @Input() isDownloader: boolean = false;
+
+    @Input() maxDescriptionLength: number = 100;
+
+    public handleButtonClick(e: MouseEvent): void {
+        e.stopPropagation();
+        this.onClick();
+    }
 }

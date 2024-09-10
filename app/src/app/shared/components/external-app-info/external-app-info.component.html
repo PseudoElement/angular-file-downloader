@@ -4,16 +4,16 @@
     </div>
     <div class="body">
         <h3>{{ title }}</h3>
-        <p>{{ description }}</p>
-        @if (hasArrow) {
+        <p>{{ description | shortifyText : maxDescriptionLength }}</p>
+        @if (isDownloader) {
         <app-animated-button
-            (click)="onClick()"
+            (click)="handleButtonClick($event)"
             [text]="'Download'"
             [type]="'download'"
             [isDownloading]="isDownloading"
         ></app-animated-button>
         }@else{
-        <app-animated-button (click)="onClick()" [text]="'Open'" [type]="'link'"></app-animated-button>
+        <app-animated-button (click)="handleButtonClick($event)" [text]="'Open'" [type]="'link'"></app-animated-button>
         }
     </div>
 </div>

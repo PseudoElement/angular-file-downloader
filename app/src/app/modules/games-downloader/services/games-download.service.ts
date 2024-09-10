@@ -9,10 +9,12 @@ import { ModalComponent } from 'src/app/shared/components/modal/modal.component'
 @Injectable()
 export class GamesDownloadService {
     private readonly downloadingStatuses = new BehaviorSubject<Record<GameId, boolean>>({
-        [GAMES_IDS.VAMPIRE_SURVIVORS]: false,
+        [GAMES_IDS.ASTEROIDS]: false,
+        [GAMES_IDS.KNIGTH_PLATFORMER]: false,
+        [GAMES_IDS.SPACE_SHOOTER]: false,
+        [GAMES_IDS.RUST]: false,
         [GAMES_IDS.CS_2]: false,
-        [GAMES_IDS.FLAPPY_BIRD]: false,
-        [GAMES_IDS.RUST]: false
+        [GAMES_IDS.SPACE_MARINE_2]: false
     });
 
     constructor(private readonly httpApi: HttpApiService, private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
@@ -28,7 +30,7 @@ export class GamesDownloadService {
 
         try {
             this.toggleDownloadStatus(game.id, true);
-            await wait(3_000);
+            await wait(2_000);
             await this.httpApi.downloadFileGet(game.link);
         } catch (err) {
             console.log('GamesDownloadService_downloadGame] Error occured: ', err);
