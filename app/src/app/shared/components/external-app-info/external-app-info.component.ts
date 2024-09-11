@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
     selector: 'app-external-app-info',
@@ -13,8 +13,6 @@ export class ExternalAppInfoComponent {
 
     @Input({ required: true }) description!: string;
 
-    @Input({ required: true }) onClick!: () => Promise<void>;
-
     /**
      * Whether downloading arrow is moving or not, use only where isDownloader prop = true
      */
@@ -24,8 +22,10 @@ export class ExternalAppInfoComponent {
 
     @Input() maxDescriptionLength: number = 100;
 
+    @Output() onButtonClick: EventEmitter<void> = new EventEmitter();
+
     public handleButtonClick(e: MouseEvent): void {
         e.stopPropagation();
-        this.onClick();
+        this.onButtonClick.emit();
     }
 }

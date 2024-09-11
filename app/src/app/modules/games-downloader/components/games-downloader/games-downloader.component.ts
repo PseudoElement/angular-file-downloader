@@ -34,15 +34,12 @@ export class GamesDownloaderComponent {
         });
     }
 
-    public callbackOnButtonClick(game: Game): () => Promise<void> {
+    public async callbackOnButtonClick(game: Game): Promise<void> {
         if (game.isDownloader) {
-            return async () => {
-                await this.gamesDownloadSrv.downloadGame(game, this.cdr);
-            };
+            await this.gamesDownloadSrv.downloadGame(game, this.cdr);
+            return;
         }
-        return async () => {
-            window.open(game.link, '_blank');
-        };
+        window.open(game.link, '_blank');
     }
 
     public isDownloadingGame(game: Game): boolean {
