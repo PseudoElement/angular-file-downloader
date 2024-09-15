@@ -39,6 +39,12 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                     },
                     {
                         isOpen: false,
+                        value: 'Flappy bird',
+                        navigationUrl: `/download-games/${GAMES_IDS.FLAPPY_BIRD}`,
+                        children: []
+                    },
+                    {
+                        isOpen: false,
                         value: 'Rust',
                         navigationUrl: `/download-games/${GAMES_IDS.RUST}`,
                         children: []
@@ -62,8 +68,8 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
     },
     {
         isOpen: false,
-        value: 'Telegram-bot',
-        navigationUrl: '/tg-bot',
+        value: 'Telegram Bots',
+        navigationUrl: '/telegram-bots',
         bgColorRGB: START_RGB,
         children: []
     },

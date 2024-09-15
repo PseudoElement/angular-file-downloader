@@ -20,11 +20,15 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
     ]
 })
 export class ModalComponent {
-    @Input() isConfirmModal: boolean = false;
-
     @Input({ required: true }) title: string = '';
 
     @Input({ required: true }) text: string = '';
+
+    @Input() isConfirmModal: boolean = false;
+
+    @Input() width: number = 400;
+
+    @Input() height: number = 300;
 
     @Output() isConfirmed: EventEmitter<boolean> = new EventEmitter();
 

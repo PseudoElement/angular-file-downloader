@@ -1,5 +1,5 @@
 <div class="modal-wrapper">
-    <div @showHideAnimation class="modal">
+    <div @showHideAnimation class="modal" [style.width]="width + 'px'" [style.height]="height + 'px'">
         <h2 class="modal-title">{{ title }}</h2>
         <p class="modal-body">{{ text }}</p>
         <div class="modal-buttons">

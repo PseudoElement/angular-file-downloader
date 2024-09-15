@@ -1,6 +1,6 @@
 import { ENVIRONMENT } from 'src/environments/environment';
 
-export interface Game {
+export interface GameUiInfo {
     img: string;
     description: string;
     title: string;
@@ -17,12 +17,13 @@ export const GAMES_IDS = {
     CS_2: 'cs2',
     SPACE_SHOOTER: 'space-shooter',
     KNIGTH_PLATFORMER: 'knight-platformer',
-    ASTEROIDS: 'asteroids'
+    ASTEROIDS: 'asteroids',
+    FLAPPY_BIRD: 'flappy-bird'
 } as const;
 
 export type GameId = (typeof GAMES_IDS)[keyof typeof GAMES_IDS];
 
-export const GAMES: Game[] = [
+export const GAMES: GameUiInfo[] = [
     {
         img: `${basePath}/knight-platformer.jpg`,
         description: `Basic template of platformer.`,
@@ -46,6 +47,14 @@ The main idea is to score as many points as possible, as in all games created fo
         id: GAMES_IDS.ASTEROIDS,
         link: `${ENVIRONMENT.apiBaseUrl}/games/${GAMES_IDS.ASTEROIDS}`,
         title: 'Asteroids',
+        isDownloader: true
+    },
+    {
+        img: `${basePath}/flappy-bird.jpg`,
+        description: `Legendary "Flappy Bird" game.`,
+        id: GAMES_IDS.FLAPPY_BIRD,
+        link: `${ENVIRONMENT.apiBaseUrl}/games/${GAMES_IDS.FLAPPY_BIRD}`,
+        title: 'Flappy Bird',
         isDownloader: true
     },
     {

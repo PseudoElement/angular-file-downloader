@@ -9,6 +9,6 @@ import { Router } from '@angular/router';
 export class AppComponent {
     constructor(private readonly router: Router) {
         document.body.classList.remove('mat-typography');
-        this.router.navigate(['download-files']);
+        this.router.navigate(['download-games']);
     }
 }

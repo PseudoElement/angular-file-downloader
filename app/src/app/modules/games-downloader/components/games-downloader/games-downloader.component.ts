@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/
 import { NavigationService } from '../../services/navigation.service';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { Game } from '../../constants/games';
+import { GameUiInfo } from '../../constants/games';
 import { GamesDownloadService } from '../../services/games-download.service';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 import { ModalComponent } from 'src/app/shared/components/modal/modal.component';
@@ -16,7 +16,7 @@ import { ModalComponent } from 'src/app/shared/components/modal/modal.component'
 export class GamesDownloaderComponent {
     private readonly MAX_DESCRIPTION_LEN = 100;
 
-    public readonly games$: Observable<Game[]> = this.navigationSrv.getFilteredGames$(this.route);
+    public readonly games$: Observable<GameUiInfo[]> = this.navigationSrv.getFilteredGames$(this.route);
 
     constructor(
         private readonly navigationSrv: NavigationService,
@@ -26,15 +26,17 @@ export class GamesDownloaderComponent {
         private readonly sintolModalSrv: SintolLibDynamicComponentService
     ) {}
 
-    public async onGameCardClick(game: Game): Promise<void> {
+    public async onGameCardClick(game: GameUiInfo): Promise<void> {
         await this.sintolModalSrv.openConfirmModal(ModalComponent, {
             isConfirmModal: false,
             title: game.title,
-            text: game.description
+            text: game.description,
+            height: 300,
+            width: 450
         });
     }
 
-    public async callbackOnButtonClick(game: Game): Promise<void> {
+    public async onButtonClick(game: GameUiInfo): Promise<void> {
         if (game.isDownloader) {
             await this.gamesDownloadSrv.downloadGame(game, this.cdr);
             return;
@@ -42,7 +44,7 @@ export class GamesDownloaderComponent {
         window.open(game.link, '_blank');
     }
 
-    public isDownloadingGame(game: Game): boolean {
+    public isDownloadingGame(game: GameUiInfo): boolean {
         return this.gamesDownloadSrv.isDownloadingGame(game.id);
     }
 }

@@ -1,1 +1,14 @@
-<p>bots-list works!</p>
+<div class="tg-bots-wrapper">
+    <h2>Telegram bots</h2>
+    <div class="tg-bots">
+        <app-external-app-info
+            *ngFor="let bot of bots"
+            (click)="onBotCardClick(bot)"
+            (onButtonClick)="onButtonClick(bot.link)"
+            [description]="bot.description"
+            [img]="bot.img"
+            [title]="bot.title"
+            [isDownloader]="false"
+        ></app-external-app-info>
+    </div>
+</div>

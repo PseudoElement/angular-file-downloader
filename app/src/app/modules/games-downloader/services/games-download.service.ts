@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Injectable } from '@angular/core';
-import { Game, GameId, GAMES_IDS } from '../constants/games';
+import { GameUiInfo, GameId, GAMES_IDS } from '../constants/games';
 import { HttpApiService } from 'src/app/core/api/http-api.service';
 import { BehaviorSubject } from 'rxjs';
 import { wait } from 'src/app/utils/wait';
@@ -12,6 +12,7 @@ export class GamesDownloadService {
         [GAMES_IDS.ASTEROIDS]: false,
         [GAMES_IDS.KNIGTH_PLATFORMER]: false,
         [GAMES_IDS.SPACE_SHOOTER]: false,
+        [GAMES_IDS.FLAPPY_BIRD]: false,
         [GAMES_IDS.RUST]: false,
         [GAMES_IDS.CS_2]: false,
         [GAMES_IDS.SPACE_MARINE_2]: false
@@ -19,11 +20,13 @@ export class GamesDownloadService {
 
     constructor(private readonly httpApi: HttpApiService, private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
 
-    public async downloadGame(game: Game, cdr: ChangeDetectorRef): Promise<void> {
+    public async downloadGame(game: GameUiInfo, cdr: ChangeDetectorRef): Promise<void> {
         const ok = await this.sintolModalSrv.openConfirmModal(ModalComponent, {
             isConfirmModal: true,
             text: `Are you sure you want download ${game.title}?`,
-            title: 'Notification'
+            title: 'Notification',
+            width: 350,
+            height: 250
         });
         if (!ok) return;
         cdr.markForCheck();

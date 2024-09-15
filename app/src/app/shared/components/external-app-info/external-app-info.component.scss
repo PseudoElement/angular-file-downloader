@@ -4,18 +4,22 @@
     .external-app-info {
         @include flex-row(flex-start, center);
 
+        position: relative;
+        top: 0;
+        left: 0;
         height: 200px;
         margin: 20px 0;
         padding: 10px 20px;
-        box-shadow: 0 0 2px 2px gray;
-        border-radius: 30px;
+        box-shadow: 7px 5px 2px 2px gray;
         background-color: rgba(64, 215, 165, 0.7);
         cursor: pointer;
-        opacity: 1;
         transition: all 0.1s;
+        transform: skewX(-8deg);
 
         &:hover {
-            opacity: 0.8;
+            box-shadow: 4px 4px 0 0;
+            top: 4px;
+            left: 4px;
         }
     }
 

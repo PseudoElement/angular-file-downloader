@@ -4,7 +4,7 @@
         <app-external-app-info
             *ngFor="let game of games$ | async"
             (click)="onGameCardClick(game)"
-            (onButtonClick)="callbackOnButtonClick(game)"
+            (onButtonClick)="onButtonClick(game)"
             [description]="game.description"
             [img]="game.img"
             [title]="game.title"
