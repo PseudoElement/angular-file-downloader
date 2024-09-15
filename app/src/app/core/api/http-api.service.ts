@@ -39,7 +39,7 @@ export class HttpApiService {
         downloadLink.remove();
     }
 
-    public async downloadFileGet(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }): Promise<void> {
+    public async downloadFileGet(path: string, fileName: string, options?: { params?: HttpParams; headers?: HttpHeaders }): Promise<void> {
         const res = await firstValueFrom(
             this.httpClient.get(`${this.baseUrl}/${path}`, {
                 headers: options?.headers,
@@ -50,7 +50,7 @@ export class HttpApiService {
         const binaryData = [res];
         const downloadLink = document.createElement('a');
         downloadLink.href = URL.createObjectURL(new Blob(binaryData, { type: res.type }));
-        downloadLink.setAttribute('download', 'table');
+        downloadLink.setAttribute('download', fileName);
         document.body.appendChild(downloadLink);
         downloadLink.click();
         downloadLink.remove();

@@ -1,5 +1,3 @@
-import { ENVIRONMENT } from 'src/environments/environment';
-
 export interface GameUiInfo {
     img: string;
     description: string;
@@ -28,7 +26,7 @@ export const GAMES: GameUiInfo[] = [
         img: `${basePath}/knight-platformer.jpg`,
         description: `Basic template of platformer.`,
         id: GAMES_IDS.KNIGTH_PLATFORMER,
-        link: `${ENVIRONMENT.apiBaseUrl}/games/${GAMES_IDS.KNIGTH_PLATFORMER}`,
+        link: `games/${GAMES_IDS.KNIGTH_PLATFORMER}`,
         title: "Knight's platformer",
         isDownloader: true
     },
@@ -36,7 +34,7 @@ export const GAMES: GameUiInfo[] = [
         img: `${basePath}/space-shooter.jpg`,
         description: `Classic space shooter.`,
         id: GAMES_IDS.SPACE_SHOOTER,
-        link: `${ENVIRONMENT.apiBaseUrl}/games/${GAMES_IDS.SPACE_SHOOTER}`,
+        link: `games/${GAMES_IDS.SPACE_SHOOTER}`,
         title: 'Space shooter',
         isDownloader: true
     },
@@ -45,7 +43,7 @@ export const GAMES: GameUiInfo[] = [
         description: `This is a clone of the cult game "Asteroids" from Atari. 
 The main idea is to score as many points as possible, as in all games created for slot machines.`,
         id: GAMES_IDS.ASTEROIDS,
-        link: `${ENVIRONMENT.apiBaseUrl}/games/${GAMES_IDS.ASTEROIDS}`,
+        link: `games/${GAMES_IDS.ASTEROIDS}`,
         title: 'Asteroids',
         isDownloader: true
     },
@@ -53,7 +51,7 @@ The main idea is to score as many points as possible, as in all games created fo
         img: `${basePath}/flappy-bird.jpg`,
         description: `Legendary "Flappy Bird" game.`,
         id: GAMES_IDS.FLAPPY_BIRD,
-        link: `${ENVIRONMENT.apiBaseUrl}/games/${GAMES_IDS.FLAPPY_BIRD}`,
+        link: `games/${GAMES_IDS.FLAPPY_BIRD}`,
         title: 'Flappy Bird',
         isDownloader: true
     },

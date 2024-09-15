@@ -33,8 +33,10 @@ export class GamesDownloadService {
 
         try {
             this.toggleDownloadStatus(game.id, true);
-            await wait(2_000);
-            await this.httpApi.downloadFileGet(game.link);
+            const fileName = game.title.toLowerCase().replace(/\s/g, '-');
+
+            await wait(1_000);
+            await this.httpApi.downloadFileGet(game.link, fileName);
         } catch (err) {
             console.log('GamesDownloadService_downloadGame] Error occured: ', err);
         } finally {

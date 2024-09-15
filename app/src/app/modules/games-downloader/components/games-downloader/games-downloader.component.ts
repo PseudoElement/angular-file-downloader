@@ -14,8 +14,6 @@ import { ModalComponent } from 'src/app/shared/components/modal/modal.component'
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GamesDownloaderComponent {
-    private readonly MAX_DESCRIPTION_LEN = 100;
-
     public readonly games$: Observable<GameUiInfo[]> = this.navigationSrv.getFilteredGames$(this.route);
 
     constructor(
