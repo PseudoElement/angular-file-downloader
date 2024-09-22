@@ -5,7 +5,7 @@ export const DEFAULT_COLUMN_DATA: SqlColumnInfo = {
     max: '20',
     name: 'Default',
     nullValuesPercent: '0',
-    type: COLUMN_TYPES.AUTO_INCREMENT,
+    type: COLUMN_TYPES.NUMBER,
     isPrimaryKey: false,
     refColumnName: 'RefDefaultName',
     refTableName: 'RefDefaultTable'

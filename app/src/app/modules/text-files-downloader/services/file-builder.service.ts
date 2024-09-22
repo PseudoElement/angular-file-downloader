@@ -12,6 +12,8 @@ import {
 } from '../models/file-builder-types';
 import { distinctUntilChanged, map, startWith, tap } from 'rxjs';
 import { DOCUMENT_TYPE_OPTIONS } from '../constants/document-type-options';
+import { MAX_CTRL_VALIDATORS, MIN_CTRL_VALIDATORS, NULL_VALUE_PERCENT_VALIDATORS } from '../constants/control-validators';
+import { FileBuilderFormObserver } from '../utils/file-builder-form-observer';
 
 @Injectable()
 export class FileBuilderService {
@@ -48,10 +50,6 @@ export class FileBuilderService {
         return this.fileBuilderForm.controls.columns;
     }
 
-    public get columnsFormArrayControls(): FormGroup<TextColumnControl | SqlColumnControl>[] {
-        return this.fileBuilderForm.controls.columns.controls;
-    }
-
     public get isSqlDocType(): boolean {
         return this.fileBuilderForm.value.docType === 'sql';
     }
@@ -67,8 +65,11 @@ export class FileBuilderService {
         return this._needAddDefaultColumns;
     }
 
+    private readonly formObserver: FileBuilderFormObserver;
+
     constructor() {
-        this.handleValueChanges();
+        this.formObserver = new FileBuilderFormObserver(this.fileBuilderForm);
+        this.subscribeOnValueChanges();
     }
 
     public disableAddingDefaultColumns(): void {
@@ -79,13 +80,9 @@ export class FileBuilderService {
         const newColumn = new FormGroup<TextColumnControl | SqlColumnControl>({
             name: new FormControl('', [Validators.required]) as FormControl,
             type: new FormControl(DEFAULT_COLUMN_DATA.type, [Validators.required]) as FormControl,
-            max: new FormControl(DEFAULT_COLUMN_DATA.max, [Validators.required, Validators.max(30), Validators.min(11)]) as FormControl,
-            min: new FormControl(DEFAULT_COLUMN_DATA.min, [Validators.required, Validators.max(10), Validators.min(0)]) as FormControl,
-            nullValuesPercent: new FormControl(DEFAULT_COLUMN_DATA.nullValuesPercent, [
-                Validators.required,
-                Validators.max(100),
-                Validators.min(0)
-            ]) as FormControl,
+            max: new FormControl(DEFAULT_COLUMN_DATA.max, MAX_CTRL_VALIDATORS) as FormControl,
+            min: new FormControl(DEFAULT_COLUMN_DATA.min, MIN_CTRL_VALIDATORS) as FormControl,
+            nullValuesPercent: new FormControl(DEFAULT_COLUMN_DATA.nullValuesPercent, NULL_VALUE_PERCENT_VALIDATORS) as FormControl,
             isPrimaryKey: new FormControl(DEFAULT_COLUMN_DATA.isPrimaryKey) as FormControl,
             refColumnName: new FormControl('') as FormControl,
             refTableName: new FormControl('') as FormControl
@@ -108,53 +105,10 @@ export class FileBuilderService {
         control.patchValue(newValue);
     }
 
-    private handleValueChanges(): void {
+    private subscribeOnValueChanges(): void {
         this.fileBuilderForm.valueChanges.pipe(distinctUntilChanged()).subscribe((val) => {
-            this.handleDocTypeChange(val as FileBuilderFormValue);
+            this.formObserver.handleDocTypeChange(val as FileBuilderFormValue);
+            this.formObserver.handleColumnTypeChange();
         });
-    }
-
-    private handleDocTypeChange(val: FileBuilderFormValue): void {
-        if (val.docType === 'sql') {
-            const createTableCtrl = new FormControl(false) as FormControl;
-            this.fileBuilderForm.addControl('needCreateSqlTable', createTableCtrl, {
-                emitEvent: false
-            });
-
-            const tableNameCtrl = new FormControl('my_table', [Validators.required]) as FormControl;
-            this.fileBuilderForm.addControl('tableName', tableNameCtrl, {
-                emitEvent: false
-            });
-
-            this.columnsFormArray.controls.forEach((column) => this.addSqlSpecificControlsInColumn(column));
-        } else {
-            if (this.fileBuilderForm.contains('needCreateSqlTable') && this.fileBuilderForm.contains('tableName')) {
-                this.fileBuilderForm.removeControl('needCreateSqlTable', { emitEvent: false });
-                this.fileBuilderForm.removeControl('tableName', { emitEvent: false });
-            }
-
-            this.columnsFormArray.controls.forEach((column) => this.deleteSqlSpecificControlsInColumn(column));
-        }
-    }
-
-    private addSqlSpecificControlsInColumn(column: FormGroup<any>): void {
-        if (!column.contains('isPrimaryKey')) {
-            const primaryKeyCtrl = new FormControl(DEFAULT_COLUMN_DATA.isPrimaryKey) as FormControl;
-            column.addControl('isPrimaryKey', primaryKeyCtrl, { emitEvent: false });
-        }
-        if (!column.contains('refColumnName')) {
-            const refColumnNameCtrl = new FormControl('') as FormControl;
-            column.addControl('refColumnName', refColumnNameCtrl, { emitEvent: false });
-        }
-        if (!column.contains('refTableName')) {
-            const refTableNameCtrl = new FormControl('') as FormControl;
-            column.addControl('refTableName', refTableNameCtrl, { emitEvent: false });
-        }
-    }
-
-    private deleteSqlSpecificControlsInColumn(column: FormGroup<any>): void {
-        if (column.contains('isPrimaryKey')) column.removeControl('isPrimaryKey');
-        if (column.contains('refColumnName')) column.removeControl('refColumnName');
-        if (column.contains('refTableName')) column.removeControl('refTableName');
     }
 }

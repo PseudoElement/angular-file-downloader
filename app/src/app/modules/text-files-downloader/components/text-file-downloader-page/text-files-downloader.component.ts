@@ -50,7 +50,7 @@ export class TextFilesDownloaderPageComponent {
     }
 
     public get columnsControls(): FormGroup<TextColumnControl | SqlColumnControl>[] {
-        return this.fileBuilderSrv.columnsFormArrayControls;
+        return this.fileBuilderSrv.columnsFormArray.controls;
     }
 
     public get docTypeControl(): FormControl<DocumentType> {

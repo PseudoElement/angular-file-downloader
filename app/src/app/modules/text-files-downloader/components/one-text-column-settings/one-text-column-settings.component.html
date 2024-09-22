@@ -2,12 +2,16 @@
     <div class="one-text-column-settings__params">
         <app-input [control]="getControlFromColumnGroup('name')" [label]="'Column name'" [placeholder]="'Enter column name'"></app-input>
         <app-input
+            *ngIf="hasMinMaxControls"
+            [@opacityAnimation]
             [control]="getControlFromColumnGroup('max')"
             [label]="'Max'"
             [type]="'number'"
             [placeholder]="'Enter column max'"
         ></app-input>
         <app-input
+            *ngIf="hasMinMaxControls"
+            [@opacityAnimation]
             [control]="getControlFromColumnGroup('min')"
             [label]="'Min'"
             [type]="'number'"
