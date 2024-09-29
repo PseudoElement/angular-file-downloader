@@ -8,7 +8,7 @@ export const COLUMN_TYPE_OPTIONS: SelectOption[] = [
     { value: COLUMN_TYPES.BOOL, text: 'Boolean', isDisabled: false },
     { value: COLUMN_TYPES.CAR, text: 'Car name', isDisabled: false },
     { value: COLUMN_TYPES.COUNTRY, text: 'Country', isDisabled: false },
-    { value: COLUMN_TYPES.DATE, text: 'Date', isDisabled: true },
+    { value: COLUMN_TYPES.DATE, text: 'Date', isDisabled: false },
     { value: COLUMN_TYPES.FIRST_NAME, text: 'First name', isDisabled: false },
     { value: COLUMN_TYPES.LAST_NAME, text: 'Last name', isDisabled: false },
     { value: COLUMN_TYPES.WORK, text: 'Work', isDisabled: false }

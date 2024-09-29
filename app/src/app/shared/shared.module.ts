@@ -21,6 +21,9 @@ import { ArrowDownLongComponent } from './components/icons/arrow-down-long/arrow
 import { ModalComponent } from './components/modal/modal.component';
 import { ExternalAppInfoComponent } from './components/external-app-info/external-app-info.component';
 import { ShortifyTextPipe } from './pipes/shortify-text.pipe';
+import { DatePickerComponent } from './components/date-picker/date-picker.component';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @NgModule({
     exports: [
@@ -36,7 +39,8 @@ import { ShortifyTextPipe } from './pipes/shortify-text.pipe';
         ArrowDownLongComponent,
         ModalComponent,
         ExternalAppInfoComponent,
-        ShortifyTextPipe
+        ShortifyTextPipe,
+        DatePickerComponent
     ],
     declarations: [
         InputComponent,
@@ -52,7 +56,8 @@ import { ShortifyTextPipe } from './pipes/shortify-text.pipe';
         ArrowDownLongComponent,
         ModalComponent,
         ExternalAppInfoComponent,
-        ShortifyTextPipe
+        ShortifyTextPipe,
+        DatePickerComponent
     ],
     imports: [
         CommonModule,
@@ -62,8 +67,10 @@ import { ShortifyTextPipe } from './pipes/shortify-text.pipe';
         MatInputModule,
         MatSelectModule,
         MatCheckboxModule,
+        MatDatepickerModule,
         ReactiveFormsModule,
         FormsModule
-    ]
+    ],
+    providers: [provideNativeDateAdapter()]
 })
 export class SharedModule {}

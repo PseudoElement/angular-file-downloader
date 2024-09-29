@@ -107,6 +107,7 @@ export class FileBuilderService {
 
     private subscribeOnValueChanges(): void {
         this.fileBuilderForm.valueChanges.pipe(distinctUntilChanged()).subscribe((val) => {
+            console.log('VALUE', val);
             this.formObserver.handleDocTypeChange(val as FileBuilderFormValue);
             this.formObserver.handleColumnTypeChange();
         });

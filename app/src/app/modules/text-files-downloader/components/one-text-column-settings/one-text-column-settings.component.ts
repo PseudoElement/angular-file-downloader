@@ -30,7 +30,11 @@ export class OneTextColumnSettingsComponent {
     @Output() handleRemove = new EventEmitter<void>();
 
     public get hasMinMaxControls(): boolean {
-        return this.columnFormGroup.value.type !== COLUMN_TYPES.AUTO_INCREMENT;
+        return this.columnFormGroup.value.type !== COLUMN_TYPES.AUTO_INCREMENT && this.columnFormGroup.value.type !== COLUMN_TYPES.DATE;
+    }
+
+    public get hasFromToDateControl(): boolean {
+        return this.columnFormGroup.value.type === COLUMN_TYPES.DATE;
     }
 
     public readonly columnTypeOptions = COLUMN_TYPE_OPTIONS;

@@ -8,5 +8,7 @@ export const DEFAULT_COLUMN_DATA: SqlColumnInfo = {
     type: COLUMN_TYPES.NUMBER,
     isPrimaryKey: false,
     refColumnName: 'RefDefaultName',
-    refTableName: 'RefDefaultTable'
+    refTableName: 'RefDefaultTable',
+    fromDate: new Date(1990, 0, 1),
+    toDate: new Date(2030, 0, 1)
 };

@@ -36,23 +36,54 @@ export class FileBuilderFormObserver {
     public handleColumnTypeChange(): void {
         if (!this.columnsFormArray.controls.length) return;
 
-        this.columnsFormArray.controls.forEach((column) => {
-            const formGroup = column as FormGroup<any>;
-            if (column.value.type === COLUMN_TYPES.AUTO_INCREMENT && formGroup.contains('min')) {
-                formGroup.removeControl('min');
-            }
-            if (formGroup.value.type === COLUMN_TYPES.AUTO_INCREMENT && formGroup.contains('max')) {
-                formGroup.removeControl('max');
-            }
-            if (formGroup.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !formGroup.contains('min')) {
-                const minCtrl = new FormControl('0', MIN_CTRL_VALIDATORS) as FormControl;
-                formGroup.addControl('min', minCtrl);
-            }
-            if (formGroup.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !formGroup.contains('max')) {
-                const maxCtrl = new FormControl('0', MAX_CTRL_VALIDATORS) as FormControl;
-                formGroup.addControl('max', maxCtrl);
-            }
+        this.columnsFormArray.controls.forEach((column: FormGroup<any>) => {
+            this.handleAutoIncrementSpecificControls(column);
+            this.handleDateSpecificControls(column);
         });
+    }
+
+    private handleDateSpecificControls(column: FormGroup<any>): any {
+        if (column.value.type === COLUMN_TYPES.DATE) {
+            if (column.contains('max')) column.removeControl('max');
+            if (column.contains('min')) column.removeControl('min');
+
+            if (!column.contains('fromDate')) {
+                const fromDateCtrl = new FormControl(null, [Validators.required]) as FormControl;
+                column.addControl('fromDate', fromDateCtrl);
+            }
+            if (!column.contains('toDate')) {
+                const toDateCtrl = new FormControl(null, [Validators.required]) as FormControl;
+                column.addControl('toDate', toDateCtrl);
+            }
+        } else {
+            if (column.contains('fromDate')) column.removeControl('fromDate');
+            if (column.contains('toDate')) column.removeControl('toDate');
+            if (!column.contains('min')) {
+                const minCtrl = new FormControl('0', MIN_CTRL_VALIDATORS) as FormControl;
+                column.addControl('min', minCtrl);
+            }
+            if (!column.contains('max')) {
+                const maxCtrl = new FormControl('0', MAX_CTRL_VALIDATORS) as FormControl;
+                column.addControl('max', maxCtrl);
+            }
+        }
+    }
+
+    private handleAutoIncrementSpecificControls(column: FormGroup<any>): void {
+        if (column.value.type === COLUMN_TYPES.AUTO_INCREMENT && column.contains('min')) {
+            column.removeControl('min');
+        }
+        if (column.value.type === COLUMN_TYPES.AUTO_INCREMENT && column.contains('max')) {
+            column.removeControl('max');
+        }
+        if (column.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !column.contains('min')) {
+            const minCtrl = new FormControl('0', MIN_CTRL_VALIDATORS) as FormControl;
+            column.addControl('min', minCtrl);
+        }
+        if (column.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !column.contains('max')) {
+            const maxCtrl = new FormControl('0', MAX_CTRL_VALIDATORS) as FormControl;
+            column.addControl('max', maxCtrl);
+        }
     }
 
     private addSqlSpecificControlsInColumn(column: FormGroup<any>): void {

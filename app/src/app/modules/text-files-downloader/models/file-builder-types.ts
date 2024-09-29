@@ -22,6 +22,8 @@ export interface TextColumnInfo {
     nullValuesPercent: string;
     min: string;
     max: string;
+    fromDate?: Date;
+    toDate?: Date;
 }
 
 export interface SqlColumnInfo extends TextColumnInfo {
@@ -36,6 +38,8 @@ export interface TextColumnControl {
     nullValuesPercent: FormControl<string>;
     min: FormControl<string>;
     max: FormControl<string>;
+    fromDate?: FormControl<Date>;
+    toDate?: FormControl<Date>;
 }
 
 export interface SqlColumnControl extends TextColumnControl {

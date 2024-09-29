@@ -1,13 +1,15 @@
 <div class="one-text-column-settings" [formGroup]="columnFormGroup">
     <div class="one-text-column-settings__params">
         <app-input [control]="getControlFromColumnGroup('name')" [label]="'Column name'" [placeholder]="'Enter column name'"></app-input>
+        <app-select [control]="getControlFromColumnGroup('type')" [label]="'Column type'" [options]="columnTypeOptions"></app-select>
+
         <app-input
             *ngIf="hasMinMaxControls"
             [@opacityAnimation]
             [control]="getControlFromColumnGroup('max')"
             [label]="'Max'"
             [type]="'number'"
-            [placeholder]="'Enter column max'"
+            [placeholder]="'Enter max limit'"
         ></app-input>
         <app-input
             *ngIf="hasMinMaxControls"
@@ -15,14 +17,15 @@
             [control]="getControlFromColumnGroup('min')"
             [label]="'Min'"
             [type]="'number'"
-            [placeholder]="'Enter column min'"
+            [placeholder]="'Enter min limit'"
         ></app-input>
+        <app-date-picker *ngIf="hasFromToDateControl" [formGroup]="columnFormGroup"></app-date-picker>
+
         <app-input
             [control]="getControlFromColumnGroup('nullValuesPercent')"
             [label]="'% of rows with nullable value'"
             [type]="'number'"
         ></app-input>
-        <app-select [control]="getControlFromColumnGroup('type')" [label]="'Column type'" [options]="columnTypeOptions"></app-select>
         <ng-container *ngIf="isSqlDocType">
             <app-input
                 [@opacityAnimation]
