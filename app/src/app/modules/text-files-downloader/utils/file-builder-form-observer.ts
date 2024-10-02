@@ -39,50 +39,56 @@ export class FileBuilderFormObserver {
         this.columnsFormArray.controls.forEach((column: FormGroup<any>) => {
             this.handleAutoIncrementSpecificControls(column);
             this.handleDateSpecificControls(column);
+            this.handleMinMaxControls(column);
         });
+    }
+
+    private handleMinMaxControls(column: FormGroup<any>): any {
+        if (column.value.type === COLUMN_TYPES.NUMBER || column.value.type === COLUMN_TYPES.STRING) {
+            if (!column.contains('min')) {
+                const minCtrl = new FormControl(DEFAULT_COLUMN_DATA.max, MIN_CTRL_VALIDATORS) as FormControl;
+                column.addControl('min', minCtrl, { emitEvent: false });
+            }
+            if (!column.contains('max')) {
+                const maxCtrl = new FormControl(DEFAULT_COLUMN_DATA.max, MAX_CTRL_VALIDATORS) as FormControl;
+                column.addControl('max', maxCtrl, { emitEvent: false });
+            }
+        } else {
+            if (column.contains('max')) column.removeControl('max', { emitEvent: false });
+            if (column.contains('min')) column.removeControl('min', { emitEvent: false });
+        }
     }
 
     private handleDateSpecificControls(column: FormGroup<any>): any {
         if (column.value.type === COLUMN_TYPES.DATE) {
-            if (column.contains('max')) column.removeControl('max');
-            if (column.contains('min')) column.removeControl('min');
-
             if (!column.contains('fromDate')) {
                 const fromDateCtrl = new FormControl(null, [Validators.required]) as FormControl;
-                column.addControl('fromDate', fromDateCtrl);
+                column.addControl('fromDate', fromDateCtrl, { emitEvent: false });
             }
             if (!column.contains('toDate')) {
                 const toDateCtrl = new FormControl(null, [Validators.required]) as FormControl;
-                column.addControl('toDate', toDateCtrl);
+                column.addControl('toDate', toDateCtrl, { emitEvent: false });
             }
         } else {
-            if (column.contains('fromDate')) column.removeControl('fromDate');
-            if (column.contains('toDate')) column.removeControl('toDate');
-            if (!column.contains('min')) {
-                const minCtrl = new FormControl('0', MIN_CTRL_VALIDATORS) as FormControl;
-                column.addControl('min', minCtrl);
-            }
-            if (!column.contains('max')) {
-                const maxCtrl = new FormControl('0', MAX_CTRL_VALIDATORS) as FormControl;
-                column.addControl('max', maxCtrl);
-            }
+            if (column.contains('fromDate')) column.removeControl('fromDate', { emitEvent: false });
+            if (column.contains('toDate')) column.removeControl('toDate', { emitEvent: false });
         }
     }
 
     private handleAutoIncrementSpecificControls(column: FormGroup<any>): void {
         if (column.value.type === COLUMN_TYPES.AUTO_INCREMENT && column.contains('min')) {
-            column.removeControl('min');
+            column.removeControl('min', { emitEvent: false });
         }
         if (column.value.type === COLUMN_TYPES.AUTO_INCREMENT && column.contains('max')) {
-            column.removeControl('max');
+            column.removeControl('max', { emitEvent: false });
         }
         if (column.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !column.contains('min')) {
             const minCtrl = new FormControl('0', MIN_CTRL_VALIDATORS) as FormControl;
-            column.addControl('min', minCtrl);
+            column.addControl('min', minCtrl, { emitEvent: false });
         }
         if (column.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !column.contains('max')) {
             const maxCtrl = new FormControl('0', MAX_CTRL_VALIDATORS) as FormControl;
-            column.addControl('max', maxCtrl);
+            column.addControl('max', maxCtrl, { emitEvent: false });
         }
     }
 
@@ -102,8 +108,8 @@ export class FileBuilderFormObserver {
     }
 
     private deleteSqlSpecificControlsInColumn(column: FormGroup<any>): void {
-        if (column.contains('isPrimaryKey')) column.removeControl('isPrimaryKey');
-        if (column.contains('refColumnName')) column.removeControl('refColumnName');
-        if (column.contains('refTableName')) column.removeControl('refTableName');
+        if (column.contains('isPrimaryKey')) column.removeControl('isPrimaryKey', { emitEvent: false });
+        if (column.contains('refColumnName')) column.removeControl('refColumnName', { emitEvent: false });
+        if (column.contains('refTableName')) column.removeControl('refTableName', { emitEvent: false });
     }
 }

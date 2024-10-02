@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 @Component({
     selector: 'app-animated-button',
@@ -12,6 +12,4 @@ export class AnimatedButtonComponent {
     @Input() isDownloading: boolean = false;
 
     @Input() text: string = 'Download';
-
-    @Output() onClick: EventEmitter<void> = new EventEmitter();
 }

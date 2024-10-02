@@ -1,10 +1,11 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { REGEX_PATTERN_ERRORS, RegexPattern } from '../constants/regex-patterns';
 
 @Pipe({
     name: 'errorMapping'
 })
 export class ErrorMappingPipe implements PipeTransform {
-    transform(errors: { [k: string]: { [key: string]: number | string } }, ...args: unknown[]): string {
+    transform(errors: { [k: string]: { [key: string]: number | string } }, pattern?: RegexPattern): string {
         if ('min' in errors && 'min' in errors['min'] && 'actual' in errors['min']) {
             return `Min value is ${errors['min']['min']}. Current is ${errors['min']['actual']}.`;
         } else if ('max' in errors && 'max' in errors['max'] && 'actual' in errors['max']) {
@@ -17,6 +18,8 @@ export class ErrorMappingPipe implements PipeTransform {
             return `Min length is ${errors['minlength']['requiredLength']}. Current is ${errors['minlength']['actualLength']}.`;
         } else if ('required' in errors) {
             return 'Field is required.';
+        } else if ('pattern' in errors && !!pattern) {
+            return REGEX_PATTERN_ERRORS[pattern];
         } else {
             return 'Invalid input data.';
         }

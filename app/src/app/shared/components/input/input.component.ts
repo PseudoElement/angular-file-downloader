@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { InputType } from '../../models/inputs';
 import { InputBase } from '../../abstract/input-base';
+import { RegexPattern } from '../../constants/regex-patterns';
 
 @Component({
     selector: 'app-input',
@@ -13,6 +14,8 @@ export class InputComponent extends InputBase {
     @Input({ required: true }) label: string = '';
 
     @Input({ required: true }) control!: FormControl;
+
+    @Input() pattern?: RegexPattern;
 
     @Input() type: InputType = 'text';
 

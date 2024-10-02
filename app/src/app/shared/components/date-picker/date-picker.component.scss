@@ -1,7 +1,7 @@
 @use 'src/styles.scss' as *;
 
 :host {
-    .app-select {
+    .app-date-picker {
         @include flex-column(center, flex-start);
         gap: 2px;
         max-width: 350px;

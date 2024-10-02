@@ -1,6 +1,11 @@
 <div class="one-text-column-settings" [formGroup]="columnFormGroup">
     <div class="one-text-column-settings__params">
-        <app-input [control]="getControlFromColumnGroup('name')" [label]="'Column name'" [placeholder]="'Enter column name'"></app-input>
+        <app-input
+            [control]="getControlFromColumnGroup('name')"
+            [label]="'Column name'"
+            [placeholder]="'Enter column name'"
+            [pattern]="nameCtrlPattern"
+        ></app-input>
         <app-select [control]="getControlFromColumnGroup('type')" [label]="'Column type'" [options]="columnTypeOptions"></app-select>
 
         <app-input
@@ -19,7 +24,12 @@
             [type]="'number'"
             [placeholder]="'Enter min limit'"
         ></app-input>
-        <app-date-picker *ngIf="hasFromToDateControl" [formGroup]="columnFormGroup"></app-date-picker>
+        <app-date-picker
+            *ngIf="hasFromToDateControl"
+            [formGroup]="columnFormGroup"
+            [fromDateControlName]="'fromDate'"
+            [toDateControlName]="'toDate'"
+        ></app-date-picker>
 
         <app-input
             [control]="getControlFromColumnGroup('nullValuesPercent')"

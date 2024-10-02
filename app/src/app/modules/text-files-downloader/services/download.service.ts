@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpApiService } from 'src/app/core/api/http-api.service';
-import { FileBuilderForm, FileBuilderFormValue, SqlColumnInfo, TextColumnInfo } from '../models/file-builder-types';
+import { COLUMN_TYPES, FileBuilderForm, FileBuilderFormValue, SqlColumnInfo, TextColumnInfo } from '../models/file-builder-types';
 import { DownloadSqlReqBody, DownloadTextReqBody, SqlColumnInfoApi, TextColumnInfoApi } from '../models/txt-download-api-types';
 import { BehaviorSubject } from 'rxjs';
 import { FormGroup } from '@angular/forms';
@@ -70,8 +70,8 @@ export class DownloadService {
         return {
             name: columnInfo.name,
             type: columnInfo.type,
-            max: Number(columnInfo.max),
-            min: Number(columnInfo.min),
+            max: this.convertMaxValueToApi(columnInfo),
+            min: this.convertMinValueToApi(columnInfo),
             null_values_percent: Number(columnInfo.nullValuesPercent),
             is_primary_key: columnInfo.isPrimaryKey!,
             foreign_key_data: {
@@ -85,10 +85,26 @@ export class DownloadService {
         return {
             name: columnInfo.name,
             type: columnInfo.type,
-            max: Number(columnInfo.max),
-            min: Number(columnInfo.min),
+            max: this.convertMaxValueToApi(columnInfo),
+            min: this.convertMinValueToApi(columnInfo),
             null_values_percent: Number(columnInfo.nullValuesPercent)
         };
+    }
+
+    private convertMinValueToApi(columnInfo: SqlColumnInfo | TextColumnInfo): number {
+        if (columnInfo.type === COLUMN_TYPES.DATE) {
+            return columnInfo.fromDate!.getTime();
+        } else {
+            return Number(columnInfo.min);
+        }
+    }
+
+    private convertMaxValueToApi(columnInfo: SqlColumnInfo | TextColumnInfo): number {
+        if (columnInfo.type === COLUMN_TYPES.DATE) {
+            return columnInfo.toDate!.getTime();
+        } else {
+            return Number(columnInfo.max);
+        }
     }
 
     private toggleDownloading(isDownloading: boolean): void {

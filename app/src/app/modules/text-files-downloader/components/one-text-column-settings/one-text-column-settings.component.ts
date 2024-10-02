@@ -3,6 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { COLUMN_TYPES, SqlColumnControl, TextColumnControl } from '../../models/file-builder-types';
 import { COLUMN_TYPE_OPTIONS } from '../../constants/column-type-options';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { START_WITH_LETTER_AND_ALLOWED_HAVE_DIGITS } from 'src/app/shared/constants/regex-patterns';
 
 @Component({
     selector: 'app-one-column-settings',
@@ -29,8 +30,10 @@ export class OneTextColumnSettingsComponent {
 
     @Output() handleRemove = new EventEmitter<void>();
 
+    public readonly nameCtrlPattern = START_WITH_LETTER_AND_ALLOWED_HAVE_DIGITS;
+
     public get hasMinMaxControls(): boolean {
-        return this.columnFormGroup.value.type !== COLUMN_TYPES.AUTO_INCREMENT && this.columnFormGroup.value.type !== COLUMN_TYPES.DATE;
+        return this.columnFormGroup.value.type === COLUMN_TYPES.NUMBER || this.columnFormGroup.value.type === COLUMN_TYPES.STRING;
     }
 
     public get hasFromToDateControl(): boolean {

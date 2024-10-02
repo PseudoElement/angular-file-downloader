@@ -10,9 +10,14 @@ import {
     TextColumnControl,
     TextColumnInfo
 } from '../models/file-builder-types';
-import { distinctUntilChanged, map, startWith, tap } from 'rxjs';
+import { distinctUntilChanged, map, startWith } from 'rxjs';
 import { DOCUMENT_TYPE_OPTIONS } from '../constants/document-type-options';
-import { MAX_CTRL_VALIDATORS, MIN_CTRL_VALIDATORS, NULL_VALUE_PERCENT_VALIDATORS } from '../constants/control-validators';
+import {
+    COLUMN_NAME_CTRL_VALIDATORS,
+    MAX_CTRL_VALIDATORS,
+    MIN_CTRL_VALIDATORS,
+    NULL_VALUE_PERCENT_VALIDATORS
+} from '../constants/control-validators';
 import { FileBuilderFormObserver } from '../utils/file-builder-form-observer';
 
 @Injectable()
@@ -78,7 +83,7 @@ export class FileBuilderService {
 
     public addNewColumn(): void {
         const newColumn = new FormGroup<TextColumnControl | SqlColumnControl>({
-            name: new FormControl('', [Validators.required]) as FormControl,
+            name: new FormControl('', COLUMN_NAME_CTRL_VALIDATORS) as FormControl,
             type: new FormControl(DEFAULT_COLUMN_DATA.type, [Validators.required]) as FormControl,
             max: new FormControl(DEFAULT_COLUMN_DATA.max, MAX_CTRL_VALIDATORS) as FormControl,
             min: new FormControl(DEFAULT_COLUMN_DATA.min, MIN_CTRL_VALIDATORS) as FormControl,
@@ -107,7 +112,6 @@ export class FileBuilderService {
 
     private subscribeOnValueChanges(): void {
         this.fileBuilderForm.valueChanges.pipe(distinctUntilChanged()).subscribe((val) => {
-            console.log('VALUE', val);
             this.formObserver.handleDocTypeChange(val as FileBuilderFormValue);
             this.formObserver.handleColumnTypeChange();
         });
