@@ -1,7 +1,14 @@
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { COLUMN_TYPES, FileBuilderForm, FileBuilderFormValue, SqlColumnControl, TextColumnControl } from '../models/file-builder-types';
-import { MAX_CTRL_VALIDATORS, MIN_CTRL_VALIDATORS } from '../constants/control-validators';
+import {
+    MAX_NUM_CTRL_VALIDATORS,
+    MAX_STRING_LEN_CTRL_VALIDATORS,
+    MIN_NUM_CTRL_VALIDATORS,
+    MIN_STRING_LEN_CTRL_VALIDATORS,
+    NULL_VALUE_PERCENT_VALIDATORS
+} from '../constants/control-validators';
 import { DEFAULT_COLUMN_DATA } from '../constants/default-column-data';
+import { MIN_MAX_VALIDATORS_PER_COLUMN_TYPE } from '../constants/validators-per-column-type';
 
 export class FileBuilderFormObserver {
     public get columnsFormArray(): FormArray<FormGroup<TextColumnControl | SqlColumnControl>> {
@@ -37,29 +44,45 @@ export class FileBuilderFormObserver {
         if (!this.columnsFormArray.controls.length) return;
 
         this.columnsFormArray.controls.forEach((column: FormGroup<any>) => {
+            this.handleMinMaxControls(column);
             this.handleAutoIncrementSpecificControls(column);
             this.handleDateSpecificControls(column);
-            this.handleMinMaxControls(column);
         });
     }
 
-    private handleMinMaxControls(column: FormGroup<any>): any {
+    private handleMinMaxControls(column: FormGroup<any>): void {
         if (column.value.type === COLUMN_TYPES.NUMBER || column.value.type === COLUMN_TYPES.STRING) {
             if (!column.contains('min')) {
-                const minCtrl = new FormControl(DEFAULT_COLUMN_DATA.max, MIN_CTRL_VALIDATORS) as FormControl;
+                const minCtrl = new FormControl(DEFAULT_COLUMN_DATA.max, MIN_NUM_CTRL_VALIDATORS) as FormControl;
                 column.addControl('min', minCtrl, { emitEvent: false });
             }
             if (!column.contains('max')) {
-                const maxCtrl = new FormControl(DEFAULT_COLUMN_DATA.max, MAX_CTRL_VALIDATORS) as FormControl;
+                const maxCtrl = new FormControl(DEFAULT_COLUMN_DATA.max, MAX_NUM_CTRL_VALIDATORS) as FormControl;
                 column.addControl('max', maxCtrl, { emitEvent: false });
             }
+            this.changeMinMaxValidators(column);
         } else {
             if (column.contains('max')) column.removeControl('max', { emitEvent: false });
             if (column.contains('min')) column.removeControl('min', { emitEvent: false });
         }
     }
 
-    private handleDateSpecificControls(column: FormGroup<any>): any {
+    private changeMinMaxValidators(column: FormGroup<any>): void {
+        column.controls['min'].clearValidators();
+        column.controls['max'].clearValidators();
+        if (column.value.type === COLUMN_TYPES.NUMBER) {
+            column.controls['min'].addValidators(MIN_NUM_CTRL_VALIDATORS);
+            column.controls['max'].addValidators(MAX_NUM_CTRL_VALIDATORS);
+        }
+        if (column.value.type === COLUMN_TYPES.STRING) {
+            column.controls['min'].addValidators(MIN_STRING_LEN_CTRL_VALIDATORS);
+            column.controls['max'].addValidators(MAX_STRING_LEN_CTRL_VALIDATORS);
+        }
+        column.controls['min'].updateValueAndValidity();
+        column.controls['max'].updateValueAndValidity();
+    }
+
+    private handleDateSpecificControls(column: FormGroup<any>): void {
         if (column.value.type === COLUMN_TYPES.DATE) {
             if (!column.contains('fromDate')) {
                 const fromDateCtrl = new FormControl(null, [Validators.required]) as FormControl;
@@ -76,19 +99,12 @@ export class FileBuilderFormObserver {
     }
 
     private handleAutoIncrementSpecificControls(column: FormGroup<any>): void {
-        if (column.value.type === COLUMN_TYPES.AUTO_INCREMENT && column.contains('min')) {
-            column.removeControl('min', { emitEvent: false });
+        if (column.value.type === COLUMN_TYPES.AUTO_INCREMENT && column.contains('nullValuesPercent')) {
+            column.removeControl('nullValuesPercent', { emitEvent: false });
         }
-        if (column.value.type === COLUMN_TYPES.AUTO_INCREMENT && column.contains('max')) {
-            column.removeControl('max', { emitEvent: false });
-        }
-        if (column.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !column.contains('min')) {
-            const minCtrl = new FormControl('0', MIN_CTRL_VALIDATORS) as FormControl;
-            column.addControl('min', minCtrl, { emitEvent: false });
-        }
-        if (column.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !column.contains('max')) {
-            const maxCtrl = new FormControl('0', MAX_CTRL_VALIDATORS) as FormControl;
-            column.addControl('max', maxCtrl, { emitEvent: false });
+        if (column.value.type !== COLUMN_TYPES.AUTO_INCREMENT && !column.contains('nullValuesPercent')) {
+            const nullValueCtrl = new FormControl('0', NULL_VALUE_PERCENT_VALIDATORS) as FormControl;
+            column.addControl('nullValuesPercent', nullValueCtrl, { emitEvent: false });
         }
     }
 

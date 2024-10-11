@@ -14,8 +14,8 @@ import { distinctUntilChanged, map, startWith } from 'rxjs';
 import { DOCUMENT_TYPE_OPTIONS } from '../constants/document-type-options';
 import {
     COLUMN_NAME_CTRL_VALIDATORS,
-    MAX_CTRL_VALIDATORS,
-    MIN_CTRL_VALIDATORS,
+    MAX_NUM_CTRL_VALIDATORS,
+    MIN_NUM_CTRL_VALIDATORS,
     NULL_VALUE_PERCENT_VALIDATORS
 } from '../constants/control-validators';
 import { FileBuilderFormObserver } from '../utils/file-builder-form-observer';
@@ -26,7 +26,7 @@ export class FileBuilderService {
         columns: new FormArray<FormGroup<TextColumnControl | SqlColumnControl>>([], [Validators.required]),
         docType: new FormControl<DocumentType>(DOCUMENT_TYPE_OPTIONS[0].value, [Validators.required]) as FormControl,
         docName: new FormControl<string>('default', [Validators.required]) as FormControl,
-        rowsCount: new FormControl<string>('100', [Validators.required, Validators.max(40_000), Validators.min(1)]) as FormControl,
+        rowsCount: new FormControl<string>('100', [Validators.required, Validators.max(500_000), Validators.min(1)]) as FormControl,
         needCreateSqlTable: new FormControl<boolean>(false) as FormControl,
         tableName: new FormControl<string>('default_table', [Validators.required]) as FormControl
     });
@@ -85,8 +85,8 @@ export class FileBuilderService {
         const newColumn = new FormGroup<TextColumnControl | SqlColumnControl>({
             name: new FormControl('', COLUMN_NAME_CTRL_VALIDATORS) as FormControl,
             type: new FormControl(DEFAULT_COLUMN_DATA.type, [Validators.required]) as FormControl,
-            max: new FormControl(DEFAULT_COLUMN_DATA.max, MAX_CTRL_VALIDATORS) as FormControl,
-            min: new FormControl(DEFAULT_COLUMN_DATA.min, MIN_CTRL_VALIDATORS) as FormControl,
+            max: new FormControl(DEFAULT_COLUMN_DATA.max, MAX_NUM_CTRL_VALIDATORS) as FormControl,
+            min: new FormControl(DEFAULT_COLUMN_DATA.min, MIN_NUM_CTRL_VALIDATORS) as FormControl,
             nullValuesPercent: new FormControl(DEFAULT_COLUMN_DATA.nullValuesPercent, NULL_VALUE_PERCENT_VALIDATORS) as FormControl,
             isPrimaryKey: new FormControl(DEFAULT_COLUMN_DATA.isPrimaryKey) as FormControl,
             refColumnName: new FormControl('') as FormControl,
@@ -94,6 +94,7 @@ export class FileBuilderService {
         });
 
         this.columnsFormArray.push(newColumn);
+        this.fileBuilderForm.updateValueAndValidity();
     }
 
     public deleteColumn(index: number): void {
@@ -111,9 +112,23 @@ export class FileBuilderService {
     }
 
     private subscribeOnValueChanges(): void {
-        this.fileBuilderForm.valueChanges.pipe(distinctUntilChanged()).subscribe((val) => {
+        // @ts-ignore
+        this.fileBuilderForm.valueChanges.pipe(distinctUntilChanged((prev, curr) => this.notChangedForm(prev, curr))).subscribe((val) => {
             this.formObserver.handleDocTypeChange(val as FileBuilderFormValue);
             this.formObserver.handleColumnTypeChange();
         });
+    }
+
+    private notChangedForm(prev: FileBuilderFormValue, curr: FileBuilderFormValue): boolean {
+        return (
+            prev.columns.length === curr.columns.length &&
+            prev.docType === curr.docType &&
+            prev.docName === curr.docName &&
+            prev.rowsCount === curr.rowsCount &&
+            prev.docName === curr.docName &&
+            prev.tableName === curr.tableName &&
+            prev.needCreateSqlTable === curr.needCreateSqlTable &&
+            prev.columns!.every((col, idx) => JSON.stringify(col) === JSON.stringify(curr.columns?.[idx]))
+        );
     }
 }

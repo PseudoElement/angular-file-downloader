@@ -40,6 +40,10 @@ export class OneTextColumnSettingsComponent {
         return this.columnFormGroup.value.type === COLUMN_TYPES.DATE;
     }
 
+    public get hasNullValuePercentControl(): boolean {
+        return this.columnFormGroup.value.type !== COLUMN_TYPES.AUTO_INCREMENT;
+    }
+
     public readonly columnTypeOptions = COLUMN_TYPE_OPTIONS;
 
     public getControlFromColumnGroup(controlName: keyof SqlColumnControl): FormControl {

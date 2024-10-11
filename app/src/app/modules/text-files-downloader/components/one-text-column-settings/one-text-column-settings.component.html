@@ -26,12 +26,15 @@
         ></app-input>
         <app-date-picker
             *ngIf="hasFromToDateControl"
+            [@opacityAnimation]
             [formGroup]="columnFormGroup"
             [fromDateControlName]="'fromDate'"
             [toDateControlName]="'toDate'"
         ></app-date-picker>
 
         <app-input
+            *ngIf="hasNullValuePercentControl"
+            [@opacityAnimation]
             [control]="getControlFromColumnGroup('nullValuesPercent')"
             [label]="'% of rows with nullable value'"
             [type]="'number'"
