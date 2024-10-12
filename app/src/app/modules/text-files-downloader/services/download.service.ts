@@ -6,12 +6,17 @@ import { BehaviorSubject } from 'rxjs';
 import { FormGroup } from '@angular/forms';
 import { ModalComponent } from 'src/app/shared/components/modal/modal.component';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
+import { wait } from 'src/app/utils/wait';
 
 @Injectable()
 export class DownloadService {
     private readonly _isDownloading$ = new BehaviorSubject<boolean>(false);
 
     public readonly isDownloading$ = this._isDownloading$.asObservable();
+
+    public get isDownloading(): boolean {
+        return this._isDownloading$.value;
+    }
 
     constructor(private readonly httpApi: HttpApiService, private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
 
@@ -27,6 +32,14 @@ export class DownloadService {
             form.markAsDirty();
             return;
         }
+        if (this.isDownloading) {
+            await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+                title: 'Already downloading!',
+                text: 'Wait till previous file will be downloaded.',
+                isConfirmModal: false
+            });
+            return;
+        }
 
         const ok = await this.sintolModalSrv.openConfirmModal(ModalComponent, {
             text: 'Are you sure you want to download file?',
@@ -36,6 +49,7 @@ export class DownloadService {
 
         try {
             this.toggleDownloading(true);
+            await wait(3000);
             const formValue = form.value as FileBuilderFormValue;
             const path = `download/${isSqlFile ? 'sql-file' : 'txt-file'}`;
             const body = this.convertFormValueToReqBody(formValue, isSqlFile);

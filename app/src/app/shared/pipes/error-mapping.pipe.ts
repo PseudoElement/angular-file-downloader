@@ -20,6 +20,8 @@ export class ErrorMappingPipe implements PipeTransform {
             return 'Field is required.';
         } else if ('maxLessMin' in errors) {
             return "Max value can't be less than min.";
+        } else if ('notInteger' in errors) {
+            return 'Only integers available.';
         } else if ('pattern' in errors && !!pattern) {
             return REGEX_PATTERN_ERRORS[pattern];
         } else {
