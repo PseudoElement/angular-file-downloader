@@ -6,7 +6,6 @@ import { BehaviorSubject } from 'rxjs';
 import { FormGroup } from '@angular/forms';
 import { ModalComponent } from 'src/app/shared/components/modal/modal.component';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
-import { wait } from 'src/app/utils/wait';
 
 @Injectable()
 export class DownloadService {
@@ -49,7 +48,6 @@ export class DownloadService {
 
         try {
             this.toggleDownloading(true);
-            await wait(3000);
             const formValue = form.value as FileBuilderFormValue;
             const path = `download/${isSqlFile ? 'sql-file' : 'txt-file'}`;
             const body = this.convertFormValueToReqBody(formValue, isSqlFile);
