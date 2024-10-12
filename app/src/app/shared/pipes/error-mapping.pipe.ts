@@ -18,6 +18,8 @@ export class ErrorMappingPipe implements PipeTransform {
             return `Min length is ${errors['minlength']['requiredLength']}. Current is ${errors['minlength']['actualLength']}.`;
         } else if ('required' in errors) {
             return 'Field is required.';
+        } else if ('maxLessMin' in errors) {
+            return "Max value can't be less than min.";
         } else if ('pattern' in errors && !!pattern) {
             return REGEX_PATTERN_ERRORS[pattern];
         } else {
