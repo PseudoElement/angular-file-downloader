@@ -1,12 +1,14 @@
 @use 'src/styles.scss' as *;
 
 :host {
+    app-option-in-selector {
+        cursor: pointer;
+    }
     .option-in-selector {
         @include flex-column(center, center);
         cursor: pointer;
 
         width: 300px;
-        // position: relative;
         border-bottom: 1px solid gray;
 
         &__content {

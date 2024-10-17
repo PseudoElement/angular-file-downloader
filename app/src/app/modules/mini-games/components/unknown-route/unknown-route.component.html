@@ -1,0 +1,8 @@
+<h3>You can check mini-games by next links:</h3>
+<ul>
+    <li *ngFor="let gameName of availableGames">
+        <a [routerLink]="'/mini-games/' + gameName">
+            {{ getFullPath(gameName) }}
+        </a>
+    </li>
+</ul>

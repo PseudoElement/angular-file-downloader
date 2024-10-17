@@ -1,4 +1,5 @@
 import { GAMES_IDS } from '../../games-downloader/constants/games';
+import { MINI_GAMES } from '../../mini-games/constants/mini-game-names';
 import { MainSelectorOption } from '../models/components-types';
 
 const START_RGB = 'rgb(240, 240, 240)';
@@ -68,6 +69,25 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
     },
     {
         isOpen: false,
+        value: 'My mini-games',
+        bgColorRGB: START_RGB,
+        children: [
+            {
+                isOpen: false,
+                value: 'Chrome Dino',
+                navigationUrl: `/mini-games/${MINI_GAMES.DINO_GAME}`,
+                children: []
+            },
+            {
+                isOpen: false,
+                value: 'Flappy Birds',
+                navigationUrl: `/mini-games/${MINI_GAMES.FLAPPY_BIRD}`,
+                children: []
+            }
+        ]
+    },
+    {
+        isOpen: false,
         value: 'Telegram Bots',
         navigationUrl: '/telegram-bots',
         bgColorRGB: START_RGB,
@@ -84,12 +104,6 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
         isOpen: false,
         value: 'License',
         navigationUrl: '/license',
-        bgColorRGB: START_RGB,
-        children: []
-    },
-    {
-        isOpen: false,
-        value: 'About',
         bgColorRGB: START_RGB,
         children: []
     },

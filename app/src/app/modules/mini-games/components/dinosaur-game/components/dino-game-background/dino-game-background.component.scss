@@ -1,0 +1,82 @@
+:root {
+    --start: 0px;
+    --end: 0px;
+}
+
+:host {
+    .dino-game-container {
+        overflow: hidden;
+    }
+
+    // .dino-game-bg {
+    //     background: url('../../../../../../../assets/games/desert-background.png');
+    //     background-repeat: repeat;
+    //     background-position: 0 0;
+    //     background-size: auto 100%;
+    //     width: 100%;
+    //     height: 600px;
+    //     position: absolute;
+    //     top: 0;
+    //     left: 20px;
+    //     border-radius: 10px;
+    //     // background-size: contain;
+    //     // height: 550px;
+    //     // width: 5076px;
+    // }
+
+    .dino-game-bg {
+        height: 100%;
+        padding: 5px;
+        margin: auto;
+        overflow: hidden;
+        position: relative;
+        width: 100%;
+        display: flex;
+    }
+
+    // .active {
+    //     // animation: slide 15s linear infinite;
+    //     animation: animatedBackground 20s linear infinite;
+    // }
+
+    .inactive {
+        animation: none;
+    }
+
+    img {
+        object-fit: cover;
+        margin: 0 -14px;
+    }
+
+    .active {
+        animation: left-to-right 10s linear infinite;
+    }
+
+    @keyframes left-to-right {
+        0% {
+            transform: translateX(var(--end));
+        }
+        100% {
+            transform: translateX(var(--start));
+        }
+    }
+
+    @keyframes animatedBackground {
+        from {
+            background-position: 0 0;
+        }
+        /*use negative width if you want it to flow right to left else and positive for left to right*/
+        to {
+            background-position: -10000px 0;
+        }
+    }
+
+    @keyframes slide {
+        0% {
+            transform: translate3d(0, 0, 0);
+        }
+        100% {
+            transform: translate3d(-1692px, 0, 0); /* The image width */
+        }
+    }
+}

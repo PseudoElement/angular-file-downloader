@@ -24,7 +24,11 @@ const routes: Routes = [
         path: 'telegram-bots',
         loadChildren: () => import('./modules/bots/bots.module').then((m) => m.BotsModule)
     },
-    { path: '**', redirectTo: '' }
+    {
+        path: 'mini-games',
+        loadChildren: () => import('./modules/mini-games/mini-games.module').then((m) => m.MiniGamesModule)
+    },
+    { path: '**', redirectTo: 'download-files' }
 ];
 
 @NgModule({
