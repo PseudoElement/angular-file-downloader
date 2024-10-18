@@ -1,82 +1,60 @@
-:root {
-    --start: 0px;
-    --end: 0px;
-}
-
 :host {
     .dino-game-container {
         overflow: hidden;
     }
 
-    // .dino-game-bg {
-    //     background: url('../../../../../../../assets/games/desert-background.png');
-    //     background-repeat: repeat;
-    //     background-position: 0 0;
-    //     background-size: auto 100%;
-    //     width: 100%;
-    //     height: 600px;
-    //     position: absolute;
-    //     top: 0;
-    //     left: 20px;
-    //     border-radius: 10px;
-    //     // background-size: contain;
-    //     // height: 550px;
-    //     // width: 5076px;
-    // }
-
     .dino-game-bg {
-        height: 100%;
-        padding: 5px;
-        margin: auto;
-        overflow: hidden;
-        position: relative;
-        width: 100%;
-        display: flex;
+        background: url('../../../../../../../assets/games/desert-background.png') repeat-x;
+        background-size: 600px 500px;
+        width: 12000px;
     }
 
-    // .active {
-    //     // animation: slide 15s linear infinite;
-    //     animation: animatedBackground 20s linear infinite;
-    // }
+    .active-difficulty-1 {
+        // 12000px / 35s = 342.857px in 1000 ms
+        // 342.857 / 1000 = 0.342857px in 1 ms
+        // 3600 / 0.342857 = 10500ms is tick for changing animation type after sliding 6 images(600px(width) * 6)
+
+        animation: slide 35s linear infinite;
+    }
+
+    .active-difficulty-2 {
+        // 12_000px / 30_000ms = 0.4px in ms
+        // 3600 / 0.4 = 9_000ms
+        animation: slide 30s linear infinite;
+    }
+
+    .active-difficulty-3 {
+        // 12_000px / 25_000ms = 0.48px in ms
+        // 3600 / 0.48 = 7500ms
+        animation: slide 25s linear infinite;
+    }
+
+    .active-difficulty-4 {
+        // 12_000px / 20_000ms = 0.6px in ms
+        // 7200 / 0.6 = 12_000ms
+        animation: slide 20s linear infinite;
+    }
+
+    .active-difficulty-5 {
+        // 12_000px / 15_000 = 0.8px in ms
+        // 7200 / 0.8 = 9_000ms
+        animation: slide 15s linear infinite;
+    }
+
+    .active-difficulty-6 {
+        animation: slide 12s linear infinite;
+    }
 
     .inactive {
         animation: none;
     }
 
-    img {
-        object-fit: cover;
-        margin: 0 -14px;
-    }
-
-    .active {
-        animation: left-to-right 10s linear infinite;
-    }
-
-    @keyframes left-to-right {
-        0% {
-            transform: translateX(var(--end));
-        }
-        100% {
-            transform: translateX(var(--start));
-        }
-    }
-
-    @keyframes animatedBackground {
-        from {
-            background-position: 0 0;
-        }
-        /*use negative width if you want it to flow right to left else and positive for left to right*/
-        to {
-            background-position: -10000px 0;
-        }
-    }
-
     @keyframes slide {
         0% {
-            transform: translate3d(0, 0, 0);
+            transform: translateX(0);
         }
         100% {
-            transform: translate3d(-1692px, 0, 0); /* The image width */
+            transform: translateX(-10200px);
         }
     }
 }

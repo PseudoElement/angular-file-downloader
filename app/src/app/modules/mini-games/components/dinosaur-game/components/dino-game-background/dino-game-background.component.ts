@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { DinoGameService } from '../../services/dino-game.service';
 
 @Component({
     selector: 'app-dino-game-background',
@@ -6,25 +7,16 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@a
     styleUrl: './dino-game-background.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DinoGameBackgroundComponent {
-    @Input() isActive: boolean = true;
-
-    public readonly imgWidth = 630;
-
-    public readonly imgHeight = 380;
-
-    public readonly imgSrc = '../../../../../../../assets/games/desert-background.png';
-
-    public readonly imagesLen = Array.from({ length: 30 });
-
-    constructor(private readonly cdr: ChangeDetectorRef) {}
+export class DinoGameBackgroundComponent implements OnDestroy, OnInit {
+    constructor(private readonly dynoGameSrv: DinoGameService) {}
 
     ngOnInit(): void {
-        const root = document.documentElement;
-        const marginRight = 0; // change it if margin-right was changed in css (img tag) - default 10px
-        const translateX = -(this.imgWidth * this.imagesLen.length + marginRight * this.imagesLen.length);
-
-        root.style.setProperty('--start', translateX + 'px');
-        root.style.setProperty('--end', 0 + 'px');
+        this.dynoGameSrv.startGame();
     }
+
+    ngOnDestroy(): void {
+        this.dynoGameSrv.endGame();
+    }
+
+    public readonly bgAnimation$ = this.dynoGameSrv.bgAnimationStyle$;
 }

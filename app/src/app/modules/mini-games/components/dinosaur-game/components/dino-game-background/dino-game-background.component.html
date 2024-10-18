@@ -1,18 +1,7 @@
-<!-- <div class="dino-game-container">
-    <div class="dino-game-bg" [class.active]="isActive" [class.inactive]="!isActive">
-        <ng-content></ng-content>
+<ng-container *ngLet="bgAnimation$ | async as animationStyle">
+    <div class="dino-game-container">
+        <div class="dino-game-bg" [ngClass]="[animationStyle]">
+            <ng-content></ng-content>
+        </div>
     </div>
-</div> -->
-<div class="dino-game-bg">
-    <img
-        *ngFor="let item of imagesLen"
-        class="active"
-        [class.active]="isActive"
-        [class.inactive]="!isActive"
-        [src]="imgSrc"
-        [width]="imgWidth"
-        [height]="imgHeight"
-        alt="Image"
-    />
-    <ng-content></ng-content>
-</div>
+</ng-container>
