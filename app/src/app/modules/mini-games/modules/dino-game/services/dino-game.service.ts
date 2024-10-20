@@ -36,7 +36,7 @@ export class DinoGameService {
 
         while (this.difficulty < 6) {
             await wait(ANIMATION_TICKS[this.difficulty]);
-            this.raiseDifficulty();
+            // this.raiseDifficulty();
         }
     }
 
