@@ -1,17 +1,13 @@
-import { Observable } from 'rxjs';
-import { AnimationType, MobileAnimatedObj } from '../abstract/game-objects-types';
+import { ActionType, ActiveObject } from '../abstract/game-objects-types';
 
-export class Bird implements MobileAnimatedObj {
-    animate(animation: AnimationType): void {
+export class Bird implements ActiveObject {
+    doAction(action: ActionType): Promise<void> {
         throw new Error('Method not implemented.');
     }
-    getCoords$(): Observable<{ x: number; y: number }> {
+    _changeCoordX(): void {
         throw new Error('Method not implemented.');
     }
-    changeCoordX(): void {
-        throw new Error('Method not implemented.');
-    }
-    changeCoordY(): void {
+    _changeCoordY(): void {
         throw new Error('Method not implemented.');
     }
 }

@@ -38,16 +38,15 @@ export class DinoGameService {
 
         this.setPlayState(true);
         this._difficulty$.next(1);
-        // await wait(3_000);
 
-        this.player.animate('moveRightSlow');
+        this.player.doAction('moveRightSlow');
 
         while (this.difficulty < 6) {
             // await wait(ANIMATION_TICKS[this.difficulty]);
             await wait(4_000);
             await this.player.jump();
-            this.player.animate('moveRightSlow');
-            // this.raiseDifficulty();
+            this.player.doAction('moveRightSlow');
+            this.raiseDifficulty();
         }
     }
 
@@ -65,7 +64,7 @@ export class DinoGameService {
     }
 
     private spawnPlayer(): Player {
-        return new Player({ height: '150px', width: '150px', startX: 50, startY: 240 }, this._difficulty$);
+        return new Player({ height: '150px', width: '200px', startX: 50, startY: 240 }, this._difficulty$);
     }
 
     private setPlayState(isPlaying: boolean): void {

@@ -1,12 +1,16 @@
-import { Observable } from 'rxjs';
-import { AnimationType, MobileAnimatedObj } from '../abstract/game-objects-types';
-import { Difficulty } from '../models/animation-types';
+import { defaultIfEmpty, firstValueFrom, Observable, pairwise, startWith } from 'rxjs';
+import { ActionType, ActiveObject } from '../abstract/game-objects-types';
 import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
 import { DYNO_CONTAINER_ID } from '../constants/common-consts';
 import { wait } from 'src/app/utils/wait';
+import { Difficulty } from '../models/animation-types';
 
-export class Player extends BaseGameObject implements MobileAnimatedObj {
-    public currAnimation: AnimationType = 'inactive';
+export class Player extends BaseGameObject implements ActiveObject {
+    public currAction: ActionType = 'inactive';
+
+    private readonly initialOffsetTop: number;
+
+    private delay: number = 100;
 
     protected get defaultImgSrc(): string {
         return '../../../../../../assets/dino-game/png/Idle (1).png';
@@ -15,33 +19,38 @@ export class Player extends BaseGameObject implements MobileAnimatedObj {
     constructor(params: BaseGameObjectParams, private readonly difficulty$: Observable<Difficulty>) {
         const rootNode = document.getElementById(DYNO_CONTAINER_ID)!;
         super(params, rootNode);
+
+        this.initialOffsetTop = params.startY - 100;
     }
 
-    public async animate(animation: AnimationType): Promise<void> {
-        this.currAnimation = animation;
+    public async doAction(action: ActionType): Promise<void> {
+        this.currAction = action;
 
-        if (animation === 'moveRightFast') await this.moveRightFast();
-        if (animation === 'moveRightSlow') await this.moveRightSlow();
-        if (animation === 'moveUp') await this.moveUp();
-        if (animation === 'moveDown') await this.moveDown();
-        if (animation === 'die') return;
-        if (animation === 'inactive') await this.inactive();
+        if (action === 'moveRightFast') await this.moveRightFast();
+        if (action === 'moveRightSlow') await this.moveRightSlow();
+        if (action === 'moveUp') await this.moveUp();
+        if (action === 'moveDown') await this.moveDown();
+        if (action === 'die') return;
+        if (action === 'inactive') await this.inactive();
     }
 
     public async jump(): Promise<void> {
-        this.currAnimation = 'moveUp';
-        await this.moveUp();
+        const [prev, curr] = await firstValueFrom(this.difficulty$.pipe(pairwise(), startWith([1, 1]), defaultIfEmpty([1, 1])));
+        if (prev !== curr) {
+            this.delay = 100 - 6 * curr;
+            this.el.style.transition = `all ${this.delay}ms`;
+        }
 
-        this.currAnimation = 'moveDown';
-        await this.moveDown();
+        await this.doAction('moveUp');
+        await this.doAction('moveDown');
     }
 
-    public changeCoordX(): void {
+    public _changeCoordX(deltaX: number): void {
         throw new Error('Method not implemented.');
     }
 
-    public changeCoordY(): void {
-        throw new Error('Method not implemented.');
+    public _changeCoordY(deltaY: number): void {
+        this.el.style.top = `${this.initialOffsetTop + deltaY}px`;
     }
 
     private async moveRightFast(): Promise<void> {
@@ -57,7 +66,7 @@ export class Player extends BaseGameObject implements MobileAnimatedObj {
         ] as const;
 
         (async () => {
-            while (this.currAnimation === 'moveRightFast') {
+            while (this.currAction === 'moveRightFast') {
                 for (const img of imgs) {
                     this.changeImg(img);
                     await wait(50);
@@ -81,7 +90,7 @@ export class Player extends BaseGameObject implements MobileAnimatedObj {
         ] as const;
 
         (async () => {
-            while (this.currAnimation === 'moveRightSlow') {
+            while (this.currAction === 'moveRightSlow') {
                 for (const img of imgs) {
                     this.changeImg(img);
                     await wait(100);
@@ -95,14 +104,14 @@ export class Player extends BaseGameObject implements MobileAnimatedObj {
             '../../../../../../assets/dino-game/png/Jump (2).png',
             '../../../../../../assets/dino-game/png/Jump (3).png',
             '../../../../../../assets/dino-game/png/Jump (4).png',
-            '../../../../../../assets/dino-game/png/Jump (5).png',
             '../../../../../../assets/dino-game/png/Jump (6).png',
             '../../../../../../assets/dino-game/png/Jump (7).png'
         ] as const;
 
         for (const img of imgs) {
             this.changeImg(img);
-            await wait(100);
+            this._changeCoordY(-100);
+            await wait(this.delay);
         }
     }
 
@@ -117,7 +126,8 @@ export class Player extends BaseGameObject implements MobileAnimatedObj {
 
         for (const img of imgs) {
             this.changeImg(img);
-            await wait(100);
+            this._changeCoordY(100);
+            await wait(this.delay);
         }
     }
 

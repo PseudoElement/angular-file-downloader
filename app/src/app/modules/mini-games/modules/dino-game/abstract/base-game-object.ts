@@ -21,6 +21,10 @@ export abstract class BaseGameObject {
     constructor(private readonly params: BaseGameObjectParams, private readonly rootNode: HTMLElement) {
         this._coords$ = new BehaviorSubject<ObjectCoords>({ x: params.startX, y: params.startY });
         this.create();
+        console.log({
+            offsetHeight: this.el.offsetHeight,
+            offTop: this.el.offsetTop
+        });
     }
 
     public getCoords$(): Observable<{ x: number; y: number }> {
@@ -40,7 +44,7 @@ export abstract class BaseGameObject {
         this.el.style.position = 'relative';
         this.el.style.top = `${this.params.startY}px`;
         this.el.style.left = `${this.params.startX}px`;
-        this.el.style.transition = 'all 0.2s';
+        this.el.style.transition = 'all 100ms';
         this.el.style.width = this.params.width;
         this.el.style.height = this.params.height;
 

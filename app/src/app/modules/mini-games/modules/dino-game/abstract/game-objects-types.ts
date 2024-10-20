@@ -1,21 +1,11 @@
-export type AnimationType =
-    | 'moveLeftSlow'
-    | 'moveRightSlow'
-    | 'moveLeftFast'
-    | 'moveRightFast'
-    | 'moveUp'
-    | 'moveDown'
-    | 'inactive'
-    | 'die';
+import { Difficulty } from '../models/animation-types';
 
-export type MobileAnimatedObj = AnimatedObject & MobileObject;
+export type ActionType = 'moveLeftSlow' | 'moveRightSlow' | 'moveLeftFast' | 'moveRightFast' | 'moveUp' | 'moveDown' | 'inactive' | 'die';
 
-export interface AnimatedObject {
-    animate(animation: AnimationType): Promise<void>;
-}
+export interface ActiveObject {
+    doAction(action: ActionType): Promise<void>;
 
-export interface MobileObject {
-    changeCoordX(): void;
+    _changeCoordX(deltaX: number): void;
 
-    changeCoordY(): void;
+    _changeCoordY(deltaY: number): void;
 }
