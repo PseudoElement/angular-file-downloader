@@ -11,7 +11,9 @@ export class DinoGameBackgroundComponent implements OnDestroy, OnInit {
     constructor(private readonly dynoGameSrv: DinoGameService) {}
 
     ngOnInit(): void {
-        this.dynoGameSrv.startGame();
+        setTimeout(() => {
+            this.dynoGameSrv.startGame();
+        }, 2000);
     }
 
     ngOnDestroy(): void {

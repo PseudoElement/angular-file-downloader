@@ -3,6 +3,7 @@ import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
 import { Difficulty } from '../models/animation-types';
 import { wait } from 'src/app/utils/wait';
 import { ANIMATION_TICKS } from '../constants/animation-ticks';
+import { Player } from '../game-objects/player';
 
 /**   left: line1.length * imgWidth;
  * 1. line1(left: 0) - line2(left: line1.length * imgWidth)
@@ -19,6 +20,8 @@ export class DinoGameService {
 
     public readonly _isPlaying = new BehaviorSubject(false);
 
+    private player!: Player;
+
     public get difficulty(): Difficulty {
         return this._difficulty$.value;
     }
@@ -31,11 +34,19 @@ export class DinoGameService {
     constructor() {}
 
     public async startGame(): Promise<void> {
+        this.player = this.spawnPlayer();
+
         this.setPlayState(true);
         this._difficulty$.next(1);
+        // await wait(3_000);
+
+        this.player.animate('moveRightSlow');
 
         while (this.difficulty < 6) {
-            await wait(ANIMATION_TICKS[this.difficulty]);
+            // await wait(ANIMATION_TICKS[this.difficulty]);
+            await wait(4_000);
+            await this.player.jump();
+            this.player.animate('moveRightSlow');
             // this.raiseDifficulty();
         }
     }
@@ -51,6 +62,10 @@ export class DinoGameService {
     public endGame(): void {
         this.setPlayState(false);
         this._difficulty$.next(1);
+    }
+
+    private spawnPlayer(): Player {
+        return new Player({ height: '150px', width: '150px', startX: 50, startY: 240 }, this._difficulty$);
     }
 
     private setPlayState(isPlaying: boolean): void {
