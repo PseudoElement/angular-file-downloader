@@ -1,16 +1,26 @@
-import { defaultIfEmpty, firstValueFrom, Observable, pairwise, startWith } from 'rxjs';
-import { ActionType, ActiveObject } from '../abstract/game-objects-types';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { ActionType, ActiveObject, PlayerAction } from '../abstract/game-objects-types';
 import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
 import { DYNO_CONTAINER_ID } from '../constants/common-consts';
 import { wait } from 'src/app/utils/wait';
-import { Difficulty } from '../models/animation-types';
+import { Difficulty, PlayerAnimation } from '../models/animation-types';
+import { ObjectCoords } from '../../../models/game-object-types';
+import { ANIMATION_PER_ACTION } from '../constants/animation-ticks';
 
-export class Player extends BaseGameObject implements ActiveObject {
-    public currAction: ActionType = 'inactive';
+export class Player extends BaseGameObject implements ActiveObject<PlayerAction> {
+    public readonly animations: Record<PlayerAnimation, () => void> = {
+        inactive: this.animateInactive,
+        jump: this.animateJump,
+        move: this.animateMove
+    };
 
-    private readonly initialOffsetTop: number;
+    private readonly _coords$: BehaviorSubject<ObjectCoords>;
 
-    private delay: number = 100;
+    public currAction: PlayerAction = 'inactive';
+
+    private currAnimation: PlayerAnimation = 'inactive';
+
+    // private readonly initialOffsetTop: number;
 
     protected get defaultImgSrc(): string {
         return '../../../../../../assets/dino-game/png/Idle (1).png';
@@ -20,41 +30,67 @@ export class Player extends BaseGameObject implements ActiveObject {
         const rootNode = document.getElementById(DYNO_CONTAINER_ID)!;
         super(params, rootNode);
 
-        this.initialOffsetTop = params.startY - 100;
+        this._coords$ = new BehaviorSubject<ObjectCoords>({
+            leftX: params.startX,
+            topY: params.startY,
+            rightX: params.startX + this.el.offsetWidth,
+            bottomY: params.startY + this.el.offsetHeight,
+            visibleTopY: params.startY - this.el.offsetHeight * 0.5,
+            visibleRightX: params.startX + this.el.offsetWidth * 0.5
+        });
+        // this.initialOffsetTop = params.startY - 100;
     }
 
-    public async doAction(action: ActionType): Promise<void> {
+    public getCoords$(): Observable<ObjectCoords> {
+        return this._coords$.asObservable();
+    }
+
+    public async doAction(action: PlayerAction): Promise<void> {
         this.currAction = action;
+        const notShowAnimation = this.currAnimation === ANIMATION_PER_ACTION[action] && this.currAnimation === 'move';
+        this.currAnimation = ANIMATION_PER_ACTION[action];
 
-        if (action === 'moveRightFast') await this.moveRightFast();
-        if (action === 'moveRightSlow') await this.moveRightSlow();
-        if (action === 'moveUp') await this.moveUp();
-        if (action === 'moveDown') await this.moveDown();
-        if (action === 'die') return;
-        if (action === 'inactive') await this.inactive();
+        if (!notShowAnimation) this.animations[this.currAnimation].call(this);
+
+        if (action === 'moveRight') this.moveRightSlow();
+        if (action === 'moveLeft') this.moveLeftSlow();
+        if (action === 'jump') await this.jump();
+        if (action === 'die') this.die();
+        if (action === 'crawl') this.crawl();
+        if (action === 'uncrawl') this.uncrawl();
     }
 
-    public async jump(): Promise<void> {
-        const [prev, curr] = await firstValueFrom(this.difficulty$.pipe(pairwise(), startWith([1, 1]), defaultIfEmpty([1, 1])));
-        if (prev !== curr) {
-            this.delay = 100 - 6 * curr;
-            this.el.style.transition = `all ${this.delay}ms`;
-        }
+    public animateJump(): void {
+        const imgsUp = [
+            '../../../../../../assets/dino-game/png/Jump (2).png',
+            '../../../../../../assets/dino-game/png/Jump (3).png',
+            '../../../../../../assets/dino-game/png/Jump (4).png',
+            '../../../../../../assets/dino-game/png/Jump (6).png',
+            '../../../../../../assets/dino-game/png/Jump (7).png'
+        ] as const;
 
-        await this.doAction('moveUp');
-        await this.doAction('moveDown');
+        const imgsDown = [
+            '../../../../../../assets/dino-game/png/Jump (10).png',
+            '../../../../../../assets/dino-game/png/Jump (11).png',
+            '../../../../../../assets/dino-game/png/Jump (12).png',
+            '../../../../../../assets/dino-game/png/Jump (4).png',
+            '../../../../../../assets/dino-game/png/Jump (2).png'
+        ] as const;
+
+        (async () => {
+            for (const img of imgsUp) {
+                this.changeImg(img);
+                await wait(50);
+            }
+            for (const img of imgsDown) {
+                this.changeImg(img);
+                await wait(50);
+            }
+        })();
     }
 
-    public _changeCoordX(deltaX: number): void {
-        throw new Error('Method not implemented.');
-    }
-
-    public _changeCoordY(deltaY: number): void {
-        this.el.style.top = `${this.initialOffsetTop + deltaY}px`;
-    }
-
-    private async moveRightFast(): Promise<void> {
-        const imgs = [
+    private animateMove(): void {
+        const imgsFast = [
             '../../../../../../assets/dino-game/png/Run (1).png',
             '../../../../../../assets/dino-game/png/Run (2).png',
             '../../../../../../assets/dino-game/png/Run (3).png',
@@ -64,33 +100,20 @@ export class Player extends BaseGameObject implements ActiveObject {
             '../../../../../../assets/dino-game/png/Run (7).png',
             '../../../../../../assets/dino-game/png/Run (8).png'
         ] as const;
-
-        (async () => {
-            while (this.currAction === 'moveRightFast') {
-                for (const img of imgs) {
-                    this.changeImg(img);
-                    await wait(50);
-                }
-            }
-        })();
-    }
-
-    private async moveRightSlow(): Promise<void> {
-        const imgs = [
+        const imgsSlow = [
             '../../../../../../assets/dino-game/png/Walk (1).png',
             '../../../../../../assets/dino-game/png/Walk (2).png',
             '../../../../../../assets/dino-game/png/Walk (3).png',
-            '../../../../../../assets/dino-game/png/Walk (4).png',
             '../../../../../../assets/dino-game/png/Walk (5).png',
-            '../../../../../../assets/dino-game/png/Walk (6).png',
             '../../../../../../assets/dino-game/png/Walk (7).png',
             '../../../../../../assets/dino-game/png/Walk (8).png',
-            '../../../../../../assets/dino-game/png/Walk (9).png',
             '../../../../../../assets/dino-game/png/Walk (10).png'
         ] as const;
 
+        const imgs = true ? imgsSlow : imgsFast;
+
         (async () => {
-            while (this.currAction === 'moveRightSlow') {
+            while (this.currAnimation === 'move') {
                 for (const img of imgs) {
                     this.changeImg(img);
                     await wait(100);
@@ -99,41 +122,65 @@ export class Player extends BaseGameObject implements ActiveObject {
         })();
     }
 
-    private async moveUp(): Promise<void> {
-        const imgs = [
-            '../../../../../../assets/dino-game/png/Jump (2).png',
-            '../../../../../../assets/dino-game/png/Jump (3).png',
-            '../../../../../../assets/dino-game/png/Jump (4).png',
-            '../../../../../../assets/dino-game/png/Jump (6).png',
-            '../../../../../../assets/dino-game/png/Jump (7).png'
-        ] as const;
-
-        for (const img of imgs) {
-            this.changeImg(img);
-            this._changeCoordY(-100);
-            await wait(this.delay);
-        }
+    private animateInactive(): void {
+        this.changeImg('../../../../../../assets/dino-game/png/Idle (1).png');
     }
 
-    private async moveDown(): Promise<void> {
-        const imgs = [
-            '../../../../../../assets/dino-game/png/Jump (10).png',
-            '../../../../../../assets/dino-game/png/Jump (11).png',
-            '../../../../../../assets/dino-game/png/Jump (12).png',
-            '../../../../../../assets/dino-game/png/Jump (4).png',
-            '../../../../../../assets/dino-game/png/Jump (2).png'
-        ] as const;
+    private async jump(): Promise<void> {
+        this.el.style.transition = `all 500ms`;
+        this._changeCoordY(-300);
+        await wait(515);
+        this._changeCoordY(250);
+        // await wait(200);
+    }
 
-        for (const img of imgs) {
-            this.changeImg(img);
-            this._changeCoordY(100);
-            await wait(this.delay);
-        }
+    public _changeCoordX(deltaX: number): void {
+        this.el.style.left = `${this.el.offsetLeft + deltaX}px`;
+        this._coords$.next({
+            ...this._coords$.value,
+            leftX: this.el.offsetLeft + deltaX,
+            rightX: this.el.offsetLeft + this.el.offsetWidth + deltaX,
+            visibleRightX: this.el.offsetLeft - this.el.offsetWidth * 0.5 + deltaX
+        });
+    }
+
+    public _changeCoordY(deltaY: number): void {
+        this.el.style.top = `${this.el.offsetTop + deltaY}px`;
+        this._coords$.next({
+            ...this._coords$.value,
+            topY: this.el.offsetTop + deltaY,
+            bottomY: this.el.offsetTop + this.el.offsetHeight + deltaY,
+            visibleTopY: this.el.offsetTop - this.el.offsetHeight * 0.5 + deltaY
+        });
+    }
+
+    private moveRightFast(): void {
+        this.el.style.transition = `all 50ms`;
+        this._changeCoordX(75);
+    }
+
+    private moveLeftFast(): void {
+        this.el.style.transition = `all 50ms`;
+        this._changeCoordX(-75);
+    }
+
+    private async moveRightSlow(): Promise<void> {
+        this.el.style.transition = `all 50ms`;
+        this._changeCoordX(50);
+    }
+
+    private async moveLeftSlow(): Promise<void> {
+        this.el.style.transition = `all 50ms`;
+        this._changeCoordX(-75);
     }
 
     private async die(): Promise<void> {}
 
-    private async inactive(): Promise<void> {
-        this.changeImg('../../../../../../assets/dino-game/png/Idle (1).png');
+    private async crawl(): Promise<void> {
+        this._changeCoordY(150);
+    }
+
+    private async uncrawl(): Promise<void> {
+        this._changeCoordY(-150);
     }
 }

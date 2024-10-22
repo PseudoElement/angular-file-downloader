@@ -1,6 +1,3 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { ObjectCoords } from '../../../models/game-object-types';
-
 export interface BaseGameObjectParams {
     startX: number;
     startY: number;
@@ -10,8 +7,6 @@ export interface BaseGameObjectParams {
 }
 
 export abstract class BaseGameObject {
-    protected readonly _coords$: BehaviorSubject<ObjectCoords>;
-
     protected abstract get defaultImgSrc(): string;
 
     protected el!: HTMLDivElement;
@@ -19,16 +14,12 @@ export abstract class BaseGameObject {
     protected imgEl!: HTMLImageElement;
 
     constructor(private readonly params: BaseGameObjectParams, private readonly rootNode: HTMLElement) {
-        this._coords$ = new BehaviorSubject<ObjectCoords>({ x: params.startX, y: params.startY });
         this.create();
-        console.log({
-            offsetHeight: this.el.offsetHeight,
-            offTop: this.el.offsetTop
-        });
     }
 
-    public getCoords$(): Observable<{ x: number; y: number }> {
-        return this._coords$.asObservable();
+    public destroy(): void {
+        this.imgEl.remove();
+        this.el.remove();
     }
 
     private create(): void {

@@ -1,18 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
 import { Difficulty } from '../models/animation-types';
-import { wait } from 'src/app/utils/wait';
-import { ANIMATION_TICKS } from '../constants/animation-ticks';
 import { Player } from '../game-objects/player';
-
-/**   left: line1.length * imgWidth;
- * 1. line1(left: 0) - line2(left: line1.length * imgWidth)
- *  When Math
- * 2.
- * 3.
- * 4.
- *
- * */
+import { DinoGameControlsService } from './dino-game-controls.service';
 
 @Injectable()
 export class DinoGameService {
@@ -20,7 +10,7 @@ export class DinoGameService {
 
     public readonly _isPlaying = new BehaviorSubject(false);
 
-    private player!: Player;
+    private player: Player | null = null;
 
     public get difficulty(): Difficulty {
         return this._difficulty$.value;
@@ -31,36 +21,33 @@ export class DinoGameService {
         map(([diff, isPlaying]) => (!isPlaying ? 'inactive' : `active-difficulty-${diff}`))
     );
 
-    constructor() {}
+    constructor(private readonly dinoGameControls: DinoGameControlsService) {}
 
     public async startGame(): Promise<void> {
         this.player = this.spawnPlayer();
 
+        this.dinoGameControls.listenKeyEvents(this.player);
         this.setPlayState(true);
         this._difficulty$.next(1);
 
-        this.player.doAction('moveRightSlow');
-
-        while (this.difficulty < 6) {
-            // await wait(ANIMATION_TICKS[this.difficulty]);
-            await wait(4_000);
-            await this.player.jump();
-            this.player.doAction('moveRightSlow');
-            this.raiseDifficulty();
-        }
+        this.player.doAction('inactive');
     }
 
     public pauseGame(): void {
         this.setPlayState(false);
+        this.dinoGameControls.clearListeners();
     }
 
     public unpauseGame(): void {
         this.setPlayState(true);
+        this.dinoGameControls.listenKeyEvents(this.player!);
     }
 
     public endGame(): void {
         this.setPlayState(false);
+        this.dinoGameControls.clearListeners();
         this._difficulty$.next(1);
+        this.player = null;
     }
 
     private spawnPlayer(): Player {
