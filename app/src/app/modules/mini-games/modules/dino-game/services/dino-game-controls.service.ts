@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Player } from '../game-objects/player';
-import { BehaviorSubject, debounceTime, filter, fromEvent, Subscription, takeUntil, takeWhile, tap } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, fromEvent, Subscription, takeUntil, takeWhile, tap, throttleTime } from 'rxjs';
 import { PlayerAction, PlayerKeyboardAction } from '../abstract/game-objects-types';
+import { wait } from 'src/app/utils/wait';
 
 type KeyCodes = {
     [key in PlayerKeyboardAction]: string;
@@ -17,10 +18,10 @@ export class DinoGameControlsService {
         inactive: 'Escape'
     });
 
-    private readonly _currAction$ = new BehaviorSubject<PlayerAction>('inactive');
+    private readonly _currActions$ = new BehaviorSubject<Set<PlayerAction>>(new Set(['inactive']));
 
-    private get currAction(): PlayerAction {
-        return this._currAction$.value;
+    private get currActions(): Set<PlayerAction> {
+        return this._currActions$.value;
     }
 
     private readonly subs: Subscription[] = [];
@@ -32,10 +33,9 @@ export class DinoGameControlsService {
     public listenKeyEvents(player: Player): void {
         const sub = fromEvent(window, 'keydown')
             .pipe(
-                tap(console.log),
-                debounceTime(10),
+                throttleTime(100),
                 filter((e: Event) => Object.values(this.keyCodes).includes((e as KeyboardEvent).key)),
-                filter(() => this.currAction !== 'jump')
+                filter(() => !this.currActions.has('jump'))
             )
             .subscribe(async (e) => {
                 const keyboardEvent = e as KeyboardEvent;
@@ -43,14 +43,14 @@ export class DinoGameControlsService {
                     await this.inactive(player);
                 }
                 if (keyboardEvent.key === this.keyCodes.jump) {
-                    if (this.currAction === 'crawl') {
+                    if (this.currActions.has('crawl')) {
                         await this.uncrawl(player);
                     } else {
                         await this.jump(player);
                     }
                 }
                 if (keyboardEvent.key === this.keyCodes.crawl) {
-                    if (this.currAction === 'crawl') return;
+                    if (this.currActions.has('crawl')) return;
                     await this.crawl(player);
                 }
                 if (keyboardEvent.key === this.keyCodes.moveLeft) {
@@ -67,35 +67,51 @@ export class DinoGameControlsService {
         this.subs.forEach((sub) => sub.unsubscribe());
     }
 
+    private updateCurrActions(action: PlayerAction): void {
+        if (action === 'inactiveRun' || action === 'inactive') {
+            this.currActions.clear();
+            this.currActions.add(action);
+        } else if (action === 'jump' && this.currActions.has('crawl')) {
+            this.currActions.delete('crawl');
+        } else if (action === 'uncrawl') {
+            this.currActions.delete('crawl');
+        } else {
+            this.currActions.add(action);
+        }
+
+        this._currActions$.next(this.currActions);
+    }
+
     private async jump(player: Player): Promise<void> {
-        this._currAction$.next('jump');
+        this.updateCurrActions('jump');
         await player.doAction('jump');
-        this._currAction$.next('inactiveRun');
+        await wait(200);
+        this.updateCurrActions('inactiveRun');
         await player.doAction('inactiveRun');
     }
 
     private async crawl(player: Player): Promise<void> {
-        this._currAction$.next('crawl');
+        this.updateCurrActions('crawl');
         await player.doAction('crawl');
     }
 
     private async uncrawl(player: Player): Promise<void> {
-        this._currAction$.next('uncrawl');
+        this.updateCurrActions('uncrawl');
         await player.doAction('uncrawl');
     }
 
     private async moveLeft(player: Player): Promise<void> {
-        this._currAction$.next('moveLeft');
+        this.updateCurrActions('moveLeft');
         await player.doAction('moveLeft');
     }
 
     private async moveRight(player: Player): Promise<void> {
-        this._currAction$.next('moveRight');
+        this.updateCurrActions('moveRight');
         await player.doAction('moveRight');
     }
 
     private async inactive(player: Player): Promise<void> {
-        this._currAction$.next('inactive');
+        this.updateCurrActions('inactive');
         await player.doAction('inactive');
     }
 }

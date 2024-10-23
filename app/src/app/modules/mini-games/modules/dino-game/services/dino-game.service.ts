@@ -30,7 +30,7 @@ export class DinoGameService {
         this.setPlayState(true);
         this._difficulty$.next(1);
 
-        this.player.doAction('inactive');
+        this.player.doAction('inactiveRun');
     }
 
     public pauseGame(): void {
@@ -51,7 +51,7 @@ export class DinoGameService {
     }
 
     private spawnPlayer(): Player {
-        return new Player({ height: '150px', width: '200px', startX: 50, startY: 240 }, this._difficulty$);
+        return new Player({ height: '150px', width: '200px', startX: 50, startY: 390 }, this._difficulty$);
     }
 
     private setPlayState(isPlaying: boolean): void {

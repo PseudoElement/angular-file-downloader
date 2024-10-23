@@ -29,5 +29,5 @@ export const ANIMATION_PER_ACTION: Record<PlayerAction, PlayerAnimation> = {
     uncrawl: 'move',
     moveLeft: 'move',
     moveRight: 'move',
-    jump: 'jump'
+    jump: 'move'
 } as const;

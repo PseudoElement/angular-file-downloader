@@ -1,12 +1,12 @@
 :host {
     .dino-game-container {
         // position: relative;
-        overflow: hidden;
+        overflow-x: hidden;
     }
 
     .dino-game-bg {
         background: url('../../../../../../../assets/games/desert-background.png') repeat-x;
-        background-size: 600px 500px;
+        background-size: 600px 700px;
         width: 12000px;
     }
 
