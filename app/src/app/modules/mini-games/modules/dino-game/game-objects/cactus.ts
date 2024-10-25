@@ -1,21 +1,27 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { ObjectCoords } from '../../../models/game-object-types';
+import { BehaviorSubject } from 'rxjs';
+import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
 import { CactusAction, MobileObject } from '../abstract/game-objects-types';
 import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
 import { Difficulty } from '../models/animation-types';
-import { DYNO_CONTAINER_ID } from '../constants/common-consts';
+import { CACTUS_SPEED_RATIO } from '../constants/speeds';
+import { wait } from 'src/app/utils/wait';
 
 export class Cactus extends BaseGameObject implements MobileObject<CactusAction> {
     protected get defaultImgSrc(): string {
-        throw new Error('Method not implemented.');
+        return '../../../../../../assets/dino-game/svg/cactus.svg';
     }
-    protected readonly _coords$: BehaviorSubject<ObjectCoords>;
 
-    constructor(params: BaseGameObjectParams, private readonly difficulty$: Observable<Difficulty>) {
-        const rootNode = document.getElementById(DYNO_CONTAINER_ID)!;
-        super(params, rootNode);
+    protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
 
-        this._coords$ = new BehaviorSubject<ObjectCoords>({
+    private get difficulty(): Difficulty {
+        return this.difficulty$.value;
+    }
+
+    constructor(params: BaseGameObjectParams, containerInfo: GameContainerInfo, private readonly difficulty$: BehaviorSubject<Difficulty>) {
+        const rootNode = document.getElementById(containerInfo.id)!;
+        super(params, containerInfo, rootNode);
+
+        this._coords$ = new BehaviorSubject<RelObjectCoords>({
             leftX: params.startX,
             topY: params.startY,
             rightX: params.startX + this.el.offsetWidth,
@@ -23,11 +29,20 @@ export class Cactus extends BaseGameObject implements MobileObject<CactusAction>
             visibleTopY: params.startY - this.el.offsetHeight * 0.5,
             visibleRightX: params.startX + this.el.offsetWidth * 0.5
         });
+        this.move('moveLeft');
     }
 
-    public async move(_action: CactusAction): Promise<void> {}
+    public move(_action: CactusAction): void {
+        (async () => {
+            while (!this.isDestroyed) {
+                await wait(60);
+                if (this.checkEnds().isLeftEnd) this.destroy();
+                this._changeCoordX(CACTUS_SPEED_RATIO[this.difficulty]);
+            }
+        })();
+    }
 
-    private _changeCoordX(): void {
+    private _changeCoordX(deltaX: number): void {
         this.el.style.left = `${this.el.offsetLeft + deltaX}px`;
         this._coords$.next({
             ...this._coords$.value,

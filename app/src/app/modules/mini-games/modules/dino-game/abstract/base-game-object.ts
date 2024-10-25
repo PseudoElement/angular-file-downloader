@@ -1,5 +1,6 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ObjectCoords } from '../../../models/game-object-types';
+import { AbsObjectCoords, GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
+import { ContainerEnds } from '../models/common';
 
 export interface BaseGameObjectParams {
     startX: number;
@@ -10,7 +11,7 @@ export interface BaseGameObjectParams {
 }
 
 export abstract class BaseGameObject {
-    protected abstract _coords$: BehaviorSubject<ObjectCoords>;
+    protected abstract _coords$: BehaviorSubject<RelObjectCoords>;
 
     protected abstract get defaultImgSrc(): string;
 
@@ -18,17 +19,28 @@ export abstract class BaseGameObject {
 
     protected imgEl!: HTMLImageElement;
 
-    constructor(private readonly params: BaseGameObjectParams, private readonly rootNode: HTMLElement) {
+    public isDestroyed: boolean = false;
+
+    private get absContainerCoords(): AbsObjectCoords {
+        return this.containerInfo.coords$.value;
+    }
+
+    constructor(
+        private readonly params: BaseGameObjectParams,
+        private readonly containerInfo: GameContainerInfo,
+        private readonly rootNode: HTMLElement
+    ) {
         this.create();
     }
 
-    public getCoords$(): Observable<ObjectCoords> {
+    public getCoords$(): Observable<RelObjectCoords> {
         return this._coords$.asObservable();
     }
 
     public destroy(): void {
         this.imgEl.remove();
         this.el.remove();
+        this.isDestroyed = true;
     }
 
     private create(): void {
@@ -41,7 +53,7 @@ export abstract class BaseGameObject {
     }
 
     private setDefaultStyles(): void {
-        this.el.style.position = 'relative';
+        this.el.style.position = 'absolute';
         this.el.style.top = `${this.params.startY}px`;
         this.el.style.left = `${this.params.startX}px`;
         this.el.style.transition = 'all 100ms';
@@ -55,5 +67,28 @@ export abstract class BaseGameObject {
 
     protected changeImg(imgSrc: string): void {
         this.imgEl.setAttribute('src', imgSrc);
+    }
+
+    protected checkEnds(): ContainerEnds {
+        const elAbsCoords = this.getAbsoluteCoords();
+        const ends = {
+            isLeftEnd: elAbsCoords.left <= this.absContainerCoords.left + 50,
+            isRightEnd: elAbsCoords.right >= this.absContainerCoords.right - 50,
+            isTopEnd: elAbsCoords.top <= this.absContainerCoords.top + 10,
+            isBottomEnd: elAbsCoords.bottom >= this.absContainerCoords.bottom - 10
+        } as ContainerEnds;
+
+        return ends;
+    }
+
+    private getAbsoluteCoords(): AbsObjectCoords {
+        const rect = this.el.getBoundingClientRect();
+
+        return {
+            top: rect.top + window.scrollY,
+            bottom: rect.bottom + window.scrollY,
+            left: rect.left + window.scrollX,
+            right: rect.right + window.scrollX
+        };
     }
 }

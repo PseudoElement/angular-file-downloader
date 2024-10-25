@@ -4,11 +4,11 @@ import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-obje
 import { DYNO_CONTAINER_ID } from '../constants/common-consts';
 import { wait } from 'src/app/utils/wait';
 import { Difficulty, PlayerAnimation } from '../models/animation-types';
-import { ObjectCoords } from '../../../models/game-object-types';
+import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
 import { ANIMATION_PER_ACTION } from '../constants/animation-ticks';
 
 export class Player extends BaseGameObject {
-    protected readonly _coords$: BehaviorSubject<ObjectCoords>;
+    protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
 
     public readonly animations: Record<PlayerAnimation, () => Promise<void>> = {
         inactive: this.animateInactive,
@@ -25,12 +25,12 @@ export class Player extends BaseGameObject {
         return '../../../../../../assets/dino-game/png/Idle (1).png';
     }
 
-    constructor(params: BaseGameObjectParams, private readonly difficulty$: Observable<Difficulty>) {
-        const rootNode = document.getElementById(DYNO_CONTAINER_ID)!;
-        super(params, rootNode);
+    constructor(params: BaseGameObjectParams, containerInfo: GameContainerInfo, private readonly difficulty$: BehaviorSubject<Difficulty>) {
+        const rootNode = document.getElementById(containerInfo.id)!;
+        super(params, containerInfo, rootNode);
 
         this.initParams = params;
-        this._coords$ = new BehaviorSubject<ObjectCoords>({
+        this._coords$ = new BehaviorSubject<RelObjectCoords>({
             leftX: params.startX,
             topY: params.startY,
             rightX: params.startX + this.el.offsetWidth,
@@ -38,6 +38,7 @@ export class Player extends BaseGameObject {
             visibleTopY: params.startY - this.el.offsetHeight * 0.5,
             visibleRightX: params.startX + this.el.offsetWidth * 0.5
         });
+        this.updateStyles();
     }
 
     public async doAction(action: PlayerAction): Promise<void> {
@@ -97,7 +98,7 @@ export class Player extends BaseGameObject {
         this._changeCoordY(true);
     }
 
-    private async _changeCoordX(deltaX: number): Promise<void> {
+    private _changeCoordX(deltaX: number): void {
         this.el.style.left = `${this.el.offsetLeft + deltaX}px`;
         this._coords$.next({
             ...this._coords$.value,
@@ -132,23 +133,27 @@ export class Player extends BaseGameObject {
     }
 
     private moveRightFast(): void {
+        if (this.checkEnds().isRightEnd) return;
         this.el.style.transition = `all 50ms`;
         this._changeCoordX(75);
     }
 
     private moveLeftFast(): void {
+        if (this.checkEnds().isLeftEnd) return;
         this.el.style.transition = `all 50ms`;
         this._changeCoordX(-75);
     }
 
-    private async moveRightSlow(): Promise<void> {
+    private moveRightSlow(): void {
+        if (this.checkEnds().isRightEnd) return;
         this.el.style.transition = `all 50ms`;
-        await this._changeCoordX(60);
+        this._changeCoordX(60);
     }
 
-    private async moveLeftSlow(): Promise<void> {
+    private moveLeftSlow(): void {
+        if (this.checkEnds().isLeftEnd) return;
         this.el.style.transition = `all 50ms`;
-        await this._changeCoordX(-120);
+        this._changeCoordX(-120);
     }
 
     private async die(): Promise<void> {}
@@ -179,5 +184,9 @@ export class Player extends BaseGameObject {
         this.imgEl.style.height = this.initParams.height;
 
         this._changeCoordY(true);
+    }
+
+    private updateStyles(): void {
+        this.el.style.zIndex = '1000';
     }
 }

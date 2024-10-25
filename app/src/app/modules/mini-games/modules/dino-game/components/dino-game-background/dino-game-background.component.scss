@@ -1,7 +1,8 @@
 :host {
     .dino-game-container {
-        // position: relative;
-        overflow-x: hidden;
+        position: relative;
+        overflow: hidden;
+        // height: 600px;
     }
 
     .dino-game-bg {

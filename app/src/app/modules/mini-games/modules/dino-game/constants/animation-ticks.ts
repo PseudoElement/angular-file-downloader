@@ -1,4 +1,4 @@
-import { ActionType, PlayerAction } from '../abstract/game-objects-types';
+import { PlayerAction } from '../abstract/game-objects-types';
 import { Difficulty, PlayerAnimation } from '../models/animation-types';
 
 type TimeMs = number;
