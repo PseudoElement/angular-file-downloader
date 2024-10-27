@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, fromEvent, map } from 'rxjs';
 import { Difficulty } from '../models/animation-types';
 import { Player } from '../game-objects/player';
-import { DinoGameControlsService } from './dino-game-controls.service';
+import { DinoGameObservers } from './dino-game-observers.service';
 import { DYNO_CONTAINER_ID } from '../constants/common-consts';
 import { DinoGameContainerService } from './dino-game-container.service';
 import { wait } from 'src/app/utils/wait';
 import { Cactus } from '../game-objects/cactus';
 import { BaseGameObject } from '../abstract/base-game-object';
+import { CactusAction, isMobileObject } from '../abstract/game-objects-types';
 
 @Injectable()
 export class DinoGameService {
@@ -28,40 +29,53 @@ export class DinoGameService {
         map(([diff, isPlaying]) => (!isPlaying ? 'inactive' : `active-difficulty-${diff}`))
     );
 
-    constructor(private readonly dinoGameControls: DinoGameControlsService, private readonly gameContainerSrv: DinoGameContainerService) {}
+    constructor(private readonly dinoGameObservers: DinoGameObservers, private readonly gameContainerSrv: DinoGameContainerService) {}
 
     public async startGame(): Promise<void> {
         this.spawnPlayer();
 
-        this.dinoGameControls.listenKeyEvents(this.player!);
+        this.dinoGameObservers.listenVisibilityChange(this.pauseGame.bind(this), this.unpauseGame.bind(this));
+        this.dinoGameObservers.listenKeyEvents(this.player!);
         this.setPlayState(true);
         this._difficulty$.next(1);
 
         this.player!.doAction('inactiveRun');
 
-        while (true) {
-            await wait(8_000);
-            this.spawnCactus();
-            this.deleteDestroyedObjects();
-            console.log(this.gameObjects);
-        }
+        this.runScene().then();
     }
 
     public pauseGame(): void {
         this.setPlayState(false);
-        this.dinoGameControls.clearListeners();
+        this.dinoGameObservers.clearListeners();
+        this.player!.doAction('inactive');
     }
 
-    public unpauseGame(): void {
+    public async unpauseGame(): Promise<void> {
         this.setPlayState(true);
-        this.dinoGameControls.listenKeyEvents(this.player!);
+        this.dinoGameObservers.listenKeyEvents(this.player!);
+        this.player!.doAction('inactiveRun');
+        this.gameObjects.forEach((obj) => {
+            if (isMobileObject<CactusAction>(obj)) {
+                obj.move('moveLeft');
+            }
+        });
+        await this.runScene();
     }
 
     public endGame(): void {
         this.setPlayState(false);
-        this.dinoGameControls.clearListeners();
+        this.dinoGameObservers.clearListeners();
         this._difficulty$.next(1);
         this.player = null;
+    }
+
+    private async runScene(): Promise<void> {
+        while (this._isPlaying.value) {
+            await wait(3_000);
+            console.log('spawnCactus');
+            this.spawnCactus();
+            this.deleteDestroyedObjects();
+        }
     }
 
     private spawnPlayer(): void {
@@ -75,9 +89,10 @@ export class DinoGameService {
     private spawnCactus(): void {
         const containerWidth = document.getElementById(DYNO_CONTAINER_ID)!.offsetWidth;
         const cactus = new Cactus(
-            { height: '150px', width: '150px', startX: containerWidth + 100, startY: 390 },
+            { height: '150px', width: '120px', startX: containerWidth - 100, startY: 390 },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
-            this._difficulty$
+            this._difficulty$,
+            this._isPlaying
         );
         this.gameObjects.push(cactus);
     }

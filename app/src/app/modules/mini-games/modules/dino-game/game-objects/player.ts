@@ -92,9 +92,9 @@ export class Player extends BaseGameObject {
     }
 
     private async jump(): Promise<void> {
-        this.el.style.transition = `all 250ms`;
-        this._changeCoordY(false, -400);
-        await wait(200);
+        this.el.style.transition = `all 500ms ease-in-out`;
+        this._changeCoordY(false, -300);
+        await wait(700);
         this._changeCoordY(true);
     }
 

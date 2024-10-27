@@ -1,6 +1,6 @@
 <ng-container *ngLet="bgAnimation$ | async as animationStyle">
     <div class="dino-game-container" id="dino-game-container">
-        <div class="dino-game-bg">
+        <div class="dino-game-bg" [ngClass]="[animationStyle]">
             <ng-content></ng-content>
         </div>
     </div>

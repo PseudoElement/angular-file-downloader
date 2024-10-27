@@ -16,7 +16,7 @@ export interface MobileObject<T> extends BaseGameObject {
     move(action: T): void;
 }
 
-function isMobileObject<T>(obj: BaseGameObject): obj is MobileObject<T> {
+export function isMobileObject<T>(obj: BaseGameObject): obj is MobileObject<T> {
     if ('move' in obj) return true;
     return false;
 }

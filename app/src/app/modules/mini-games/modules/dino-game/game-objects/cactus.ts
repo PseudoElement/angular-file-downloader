@@ -17,7 +17,12 @@ export class Cactus extends BaseGameObject implements MobileObject<CactusAction>
         return this.difficulty$.value;
     }
 
-    constructor(params: BaseGameObjectParams, containerInfo: GameContainerInfo, private readonly difficulty$: BehaviorSubject<Difficulty>) {
+    constructor(
+        params: BaseGameObjectParams,
+        containerInfo: GameContainerInfo,
+        private readonly difficulty$: BehaviorSubject<Difficulty>,
+        private readonly _isPlayingGame: BehaviorSubject<boolean>
+    ) {
         const rootNode = document.getElementById(containerInfo.id)!;
         super(params, containerInfo, rootNode);
 
@@ -34,8 +39,8 @@ export class Cactus extends BaseGameObject implements MobileObject<CactusAction>
 
     public move(_action: CactusAction): void {
         (async () => {
-            while (!this.isDestroyed) {
-                await wait(60);
+            while (!this.isDestroyed && this._isPlayingGame.value) {
+                await wait(30);
                 if (this.checkEnds().isLeftEnd) this.destroy();
                 this._changeCoordX(CACTUS_SPEED_RATIO[this.difficulty]);
             }

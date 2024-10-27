@@ -3,13 +3,14 @@ import { Player } from '../game-objects/player';
 import { BehaviorSubject, debounceTime, filter, fromEvent, Subscription, takeUntil, takeWhile, tap, throttleTime } from 'rxjs';
 import { PlayerAction, PlayerKeyboardAction } from '../abstract/game-objects-types';
 import { wait } from 'src/app/utils/wait';
+import { DinoGameService } from './dino-game.service';
 
 type KeyCodes = {
     [key in PlayerKeyboardAction]: string;
 };
 
 @Injectable()
-export class DinoGameControlsService {
+export class DinoGameObservers {
     private readonly _keyCodes$ = new BehaviorSubject<KeyCodes>({
         jump: 'w',
         crawl: 's',
@@ -63,6 +64,14 @@ export class DinoGameControlsService {
         this.subs.push(sub);
     }
 
+    public listenVisibilityChange(pause: () => void, play: () => Promise<void>): void {
+        fromEvent(document, 'visibilitychange').subscribe(async () => {
+            console.log('document.hidden', document.hidden);
+            if (document.hidden) pause();
+            else await play();
+        });
+    }
+
     public clearListeners(): void {
         this.subs.forEach((sub) => sub.unsubscribe());
     }
@@ -85,9 +94,8 @@ export class DinoGameControlsService {
     private async jump(player: Player): Promise<void> {
         this.updateCurrActions('jump');
         await player.doAction('jump');
-        await wait(200);
+        await wait(400);
         this.updateCurrActions('inactiveRun');
-        await player.doAction('inactiveRun');
     }
 
     private async crawl(player: Player): Promise<void> {
