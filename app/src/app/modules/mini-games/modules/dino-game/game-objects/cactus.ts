@@ -5,6 +5,7 @@ import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-obje
 import { Difficulty } from '../models/animation-types';
 import { CACTUS_SPEED_RATIO } from '../constants/speeds';
 import { wait } from 'src/app/utils/wait';
+import { DinoGameState } from '../models/common';
 
 export class Cactus extends BaseGameObject implements MobileObject<CactusAction> {
     protected get defaultImgSrc(): string {
@@ -14,14 +15,17 @@ export class Cactus extends BaseGameObject implements MobileObject<CactusAction>
     protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
 
     private get difficulty(): Difficulty {
-        return this.difficulty$.value;
+        return this._gameState$.value.difficulty;
+    }
+
+    private get isPlaying(): boolean {
+        return this._gameState$.value.isPlaying;
     }
 
     constructor(
         params: BaseGameObjectParams,
         containerInfo: GameContainerInfo,
-        private readonly difficulty$: BehaviorSubject<Difficulty>,
-        private readonly _isPlayingGame: BehaviorSubject<boolean>
+        private readonly _gameState$: BehaviorSubject<DinoGameState>
     ) {
         const rootNode = document.getElementById(containerInfo.id)!;
         super(params, containerInfo, rootNode);
@@ -39,7 +43,7 @@ export class Cactus extends BaseGameObject implements MobileObject<CactusAction>
 
     public move(_action: CactusAction): void {
         (async () => {
-            while (!this.isDestroyed && this._isPlayingGame.value) {
+            while (!this.isDestroyed && this.isPlaying) {
                 await wait(30);
                 if (this.checkEnds().isLeftEnd) this.destroy();
                 this._changeCoordX(CACTUS_SPEED_RATIO[this.difficulty]);

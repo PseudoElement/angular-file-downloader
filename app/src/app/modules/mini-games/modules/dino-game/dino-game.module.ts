@@ -6,10 +6,11 @@ import { DinoGameService } from './services/dino-game.service';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { DinoGameObservers } from './services/dino-game-observers.service';
 import { DinoGameContainerService } from './services/dino-game-container.service';
+import { DinoGameStateService } from './services/dino-game-state.service';
 
 @NgModule({
     declarations: [DinosaurGameComponent, DinoGameBackgroundComponent],
     imports: [CommonModule, SharedModule],
-    providers: [DinoGameService, DinoGameObservers, DinoGameContainerService]
+    providers: [DinoGameService, DinoGameObservers, DinoGameContainerService, DinoGameStateService]
 })
 export class DinoGameModule {}

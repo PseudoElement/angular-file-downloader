@@ -6,6 +6,7 @@ import { wait } from 'src/app/utils/wait';
 import { Difficulty, PlayerAnimation } from '../models/animation-types';
 import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
 import { ANIMATION_PER_ACTION } from '../constants/animation-ticks';
+import { DinoGameState } from '../models/common';
 
 export class Player extends BaseGameObject {
     protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
@@ -25,7 +26,11 @@ export class Player extends BaseGameObject {
         return '../../../../../../assets/dino-game/png/Idle (1).png';
     }
 
-    constructor(params: BaseGameObjectParams, containerInfo: GameContainerInfo, private readonly difficulty$: BehaviorSubject<Difficulty>) {
+    constructor(
+        params: BaseGameObjectParams,
+        containerInfo: GameContainerInfo,
+        private readonly gameState$: BehaviorSubject<DinoGameState>
+    ) {
         const rootNode = document.getElementById(containerInfo.id)!;
         super(params, containerInfo, rootNode);
 
@@ -46,7 +51,7 @@ export class Player extends BaseGameObject {
         const notShowAnimation = this.currAnimation === ANIMATION_PER_ACTION[action] && this.currAnimation === 'move';
         this.currAnimation = ANIMATION_PER_ACTION[action];
 
-        if (!notShowAnimation) await this.animations[this.currAnimation].call(this);
+        if (!notShowAnimation) this.animations[this.currAnimation].call(this).then();
 
         if (action === 'moveRight') this.moveRightSlow();
         if (action === 'moveLeft') this.moveLeftSlow();
@@ -98,17 +103,19 @@ export class Player extends BaseGameObject {
         this._changeCoordY(true);
     }
 
-    private _changeCoordX(deltaX: number): void {
+    private async _changeCoordX(deltaX: number): Promise<void> {
         this.el.style.left = `${this.el.offsetLeft + deltaX}px`;
+
+        await wait(100);
         this._coords$.next({
             ...this._coords$.value,
             leftX: this.el.offsetLeft + deltaX,
             rightX: this.el.offsetLeft + this.el.offsetWidth + deltaX,
-            visibleRightX: this.el.offsetLeft - this.el.offsetWidth * 0.5 + deltaX
+            visibleRightX: this.el.offsetLeft + this.el.offsetWidth + deltaX - this.el.offsetWidth * 0.5
         });
     }
 
-    private _changeCoordY(isReset: boolean, deltaY: number = 0): void {
+    private async _changeCoordY(isReset: boolean, deltaY: number = 0): Promise<void> {
         let topY: number;
         let bottomY: number;
         let visibleTopY: number;
@@ -124,6 +131,7 @@ export class Player extends BaseGameObject {
             bottomY = this.el.offsetTop + this.el.offsetHeight;
         }
 
+        await wait(300);
         this._coords$.next({
             ...this._coords$.value,
             topY,
@@ -147,13 +155,13 @@ export class Player extends BaseGameObject {
     private moveRightSlow(): void {
         if (this.checkEnds().isRightEnd) return;
         this.el.style.transition = `all 50ms`;
-        this._changeCoordX(60);
+        this._changeCoordX(60).then();
     }
 
     private moveLeftSlow(): void {
         if (this.checkEnds().isLeftEnd) return;
         this.el.style.transition = `all 50ms`;
-        this._changeCoordX(-120);
+        this._changeCoordX(-120).then();
     }
 
     private async die(): Promise<void> {}

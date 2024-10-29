@@ -72,8 +72,8 @@ export abstract class BaseGameObject {
     protected checkEnds(): ContainerEnds {
         const elAbsCoords = this.getAbsoluteCoords();
         const ends = {
-            isLeftEnd: elAbsCoords.left <= this.absContainerCoords.left + 50,
-            isRightEnd: elAbsCoords.right >= this.absContainerCoords.right - 50,
+            isLeftEnd: elAbsCoords.left <= this.absContainerCoords.left + 20,
+            isRightEnd: elAbsCoords.right >= this.absContainerCoords.right - 20,
             isTopEnd: elAbsCoords.top <= this.absContainerCoords.top + 10,
             isBottomEnd: elAbsCoords.bottom >= this.absContainerCoords.bottom - 10
         } as ContainerEnds;
