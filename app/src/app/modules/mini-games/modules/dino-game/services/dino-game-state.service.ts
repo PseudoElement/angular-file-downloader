@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { DinoGameState } from '../models/common';
+import { DelayMs, DinoGameState } from '../models/common';
 import { Difficulty } from '../models/animation-types';
 import { BaseGameObject } from '../abstract/base-game-object';
 import { Player } from '../game-objects/player';
@@ -27,7 +27,7 @@ export class DinoGameStateService {
         return this.gameState$.value.difficulty;
     }
 
-    public get time(): number {
+    public get time(): DelayMs {
         return this.gameState$.value.time;
     }
 
@@ -43,6 +43,10 @@ export class DinoGameStateService {
         return this.gameState$.value.gameId;
     }
 
+    public get isPlaying(): boolean {
+        return this.gameState$.value.isPlaying;
+    }
+
     constructor() {}
 
     public changeGameState(state: Partial<DinoGameState>): void {
@@ -53,17 +57,12 @@ export class DinoGameStateService {
         const newState = {
             ...this.gameState$.value,
             ...(state.difficulty && { difficulty: state.difficulty }),
-            ...(state.isPlaying && { isPlaying: state.isPlaying }),
+            ...('isPlaying' in state && { isPlaying: state.isPlaying }),
             ...(state.time && { time: state.time }),
             ...(state.gameId && { gameId: state.gameId })
         } as DinoGameState;
 
         this.gameState$.next(newState);
-    }
-
-    public raiseDifficulty(): void {
-        if (this.difficulty + 1 > 6) return;
-        this.changeGameState({ difficulty: (this.difficulty + 1) as Difficulty });
     }
 
     public setPlayer(player: Player | null): void {

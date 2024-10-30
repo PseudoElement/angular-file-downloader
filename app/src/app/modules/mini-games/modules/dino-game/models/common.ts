@@ -1,5 +1,7 @@
 import { Difficulty } from './animation-types';
 
+export type DelayMs = number;
+
 export interface ContainerEnds {
     isLeftEnd: boolean;
     isRightEnd: boolean;

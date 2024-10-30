@@ -1,7 +1,7 @@
 import { Difficulty } from '../models/animation-types';
 
 export const CACTUS_SPEED_RATIO: Record<Difficulty, number> = {
-    '1': -20,
+    '1': -30,
     '2': -22,
     '3': -24,
     '4': -26,

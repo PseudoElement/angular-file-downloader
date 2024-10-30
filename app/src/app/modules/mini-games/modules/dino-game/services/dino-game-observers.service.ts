@@ -31,12 +31,12 @@ type KeyCodes = {
 
 @Injectable()
 export class DinoGameObservers {
-    private readonly _keyCodes$ = new BehaviorSubject<KeyCodes>({
+    private readonly _keyBindings$ = new BehaviorSubject<KeyCodes>({
         jump: 'w',
         crawl: 's',
         moveRight: 'd',
         moveLeft: 'a',
-        inactive: 'Escape'
+        pause_unpause: 'Escape'
     });
 
     private readonly _currActions$ = new BehaviorSubject<Set<PlayerAction>>(new Set(['inactive']));
@@ -48,7 +48,7 @@ export class DinoGameObservers {
     private readonly subs: Subscription[] = [];
 
     private get keyCodes(): KeyCodes {
-        return this._keyCodes$.value;
+        return this._keyBindings$.value;
     }
 
     private get player(): Player {
@@ -57,17 +57,29 @@ export class DinoGameObservers {
 
     constructor(private readonly gameStateSrv: DinoGameStateService) {}
 
-    public listenKeyEvents(): void {
-        const sub = fromEvent(window, 'keydown')
+    public listenKeyEvents(pause: () => void, play: () => void): void {
+        fromEvent(window, 'keydown')
             .pipe(
+                //@ts-ignore
                 throttleTime(100),
-                filter((e: Event) => Object.values(this.keyCodes).includes((e as KeyboardEvent).key)),
-                filter(() => !this.currActions.has('jump'))
+                filter((e: KeyboardEvent) => Object.values(this.keyCodes).includes(e.key)),
+                filter(() => !this.currActions.has('jump')),
+                filter(
+                    (e: KeyboardEvent) =>
+                        this.gameStateSrv.isPlaying || (!this.gameStateSrv.isPlaying && e.key === this.keyCodes.pause_unpause)
+                )
             )
             .subscribe(async (e) => {
                 const keyboardEvent = e as KeyboardEvent;
-                if (keyboardEvent.key === this.keyCodes.inactive) {
-                    await this.inactive();
+
+                if (keyboardEvent.key === this.keyCodes.pause_unpause) {
+                    if (this.gameStateSrv.isPlaying) {
+                        this.inactive();
+                        pause();
+                    } else {
+                        this.active();
+                        play();
+                    }
                 }
                 if (keyboardEvent.key === this.keyCodes.jump) {
                     if (this.currActions.has('crawl')) {
@@ -87,7 +99,6 @@ export class DinoGameObservers {
                     await this.moveRight();
                 }
             });
-        this.subs.push(sub);
     }
 
     public listenVisibilityChange(pause: () => void, play: () => void): void {
@@ -101,17 +112,17 @@ export class DinoGameObservers {
     }
 
     public listenGameObjectsCoords(): void {
-        const sub = interval(1000)
-            .pipe(
-                switchMap(() => forkJoin([this.gameStateSrv.player$.pipe(first()), this.gameStateSrv.gameObjects$.pipe(first())])),
-                skipWhile(() => !this.player),
-                switchMap(([player, objects]) =>
-                    forkJoin([firstValueFrom(player!.getCoords$()), ...objects.map((o) => firstValueFrom(o.getCoords$()))])
-                )
-            )
-            .subscribe(([player]) => console.log(player));
-
-        this.subs.push(sub);
+        // const sub = interval(1000)
+        //     .pipe(
+        //         switchMap(() => forkJoin([this.gameStateSrv.player$.pipe(first()), this.gameStateSrv.gameObjects$.pipe(first())])),
+        //         skipWhile(() => !this.player),
+        //         switchMap(([player, objects]) =>
+        //             forkJoin([firstValueFrom(player!.getCoords$()), ...objects.map((o) => firstValueFrom(o.getCoords$()))])
+        //         )
+        //     )
+        //     .subscribe();
+        // this.subs.push(sub);
+        this.player.getCoords$().subscribe((c) => console.log(`top = ${c.topY}, bottom = ${c.bottomY}, visible = ${c.visibleTopY}`));
     }
 
     public clearListeners(): void {
@@ -136,32 +147,36 @@ export class DinoGameObservers {
     private async jump(): Promise<void> {
         this.updateCurrActions('jump');
         await this.player.doAction('jump');
-        await wait(400);
         this.updateCurrActions('inactiveRun');
     }
 
-    private async crawl(): Promise<void> {
+    private crawl(): void {
         this.updateCurrActions('crawl');
         this.player.doAction('crawl');
     }
 
-    private async uncrawl(): Promise<void> {
+    private uncrawl(): void {
         this.updateCurrActions('uncrawl');
         this.player.doAction('uncrawl');
     }
 
-    private async moveLeft(): Promise<void> {
+    private moveLeft(): void {
         this.updateCurrActions('moveLeft');
         this.player.doAction('moveLeft');
     }
 
-    private async moveRight(): Promise<void> {
+    private moveRight(): void {
         this.updateCurrActions('moveRight');
         this.player.doAction('moveRight');
     }
 
-    private async inactive(): Promise<void> {
+    private inactive(): void {
         this.updateCurrActions('inactive');
         this.player.doAction('inactive');
+    }
+
+    private active(): void {
+        this.updateCurrActions('inactiveRun');
+        this.player.doAction('inactiveRun');
     }
 }

@@ -8,6 +8,6 @@ import { FlappyBirdGameModule } from './modules/flappy-bird-game/flappy-bird-gam
 
 @NgModule({
     declarations: [UnknownRouteComponent],
-    imports: [CommonModule, GamesDownloaderRoutingModule, SharedModule, DinoGameModule, FlappyBirdGameModule]
+    imports: [CommonModule, GamesDownloaderRoutingModule, SharedModule, FlappyBirdGameModule, DinoGameModule]
 })
 export class MiniGamesModule {}

@@ -1,0 +1,5 @@
+<div *ngLet="buttons$ | async as buttons" class="game-menu">
+    <div class="game-menu__buttons">
+        <app-game-menu-button *ngFor="let btn of buttons" [text]="btn.text" (click)="handleClick(btn.type)"></app-game-menu-button>
+    </div>
+</div>

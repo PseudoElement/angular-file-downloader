@@ -10,6 +10,7 @@ import { BaseGameObject } from '../abstract/base-game-object';
 import { CactusAction, isMobileObject } from '../abstract/game-objects-types';
 import { DinoGameState } from '../models/common';
 import { DinoGameStateService } from './dino-game-state.service';
+import { DIFFICULTY_CONFIG } from '../constants/main-config';
 
 @Injectable()
 export class DinoGameService {
@@ -31,7 +32,7 @@ export class DinoGameService {
 
         this.dinoGameObservers.listenVisibilityChange(this.pauseGame.bind(this), this.unpauseGame.bind(this));
         this.dinoGameObservers.listenGameObjectsCoords();
-        this.dinoGameObservers.listenKeyEvents();
+        this.dinoGameObservers.listenKeyEvents(this.pauseGame.bind(this), this.unpauseGame.bind(this));
 
         this.gameStateSrv.player!.doAction('inactiveRun');
         this.runScene();
@@ -43,11 +44,8 @@ export class DinoGameService {
         this.gameStateSrv.changeGameState({ isPlaying: false, gameId: null });
     }
 
-    public async unpauseGame(): Promise<void> {
+    public unpauseGame(): void {
         this.gameStateSrv.changeGameState({ isPlaying: true });
-        this.dinoGameObservers.listenKeyEvents();
-        this.dinoGameObservers.listenGameObjectsCoords();
-
         this.gameStateSrv.player!.doAction('inactiveRun');
         this.gameStateSrv.gameObjects.forEach((obj) => {
             if (isMobileObject<CactusAction>(obj)) {
@@ -60,18 +58,20 @@ export class DinoGameService {
 
     public endGame(): void {
         this.dinoGameObservers.clearListeners();
-        this.gameStateSrv.changeGameState({ difficulty: 1, isPlaying: false });
+        this.gameStateSrv.changeGameState({ difficulty: 1, isPlaying: false, gameId: null });
         this.gameStateSrv.setPlayer(null);
     }
 
     private runScene(): void {
-        const delay = 3_000;
+        const { nextRoundWhen, spawnDelay } = DIFFICULTY_CONFIG[this.gameStateSrv.difficulty];
 
         const gameId = setInterval(() => {
+            if (this.gameStateSrv.time > nextRoundWhen) this.raiseDifficulty();
+
             this.spawnCactus();
             this.gameStateSrv.deleteDestroyedObjects();
-            this.gameStateSrv.changeGameState({ time: this.gameStateSrv.time + delay });
-        }, delay);
+            this.gameStateSrv.changeGameState({ time: this.gameStateSrv.time + spawnDelay });
+        }, spawnDelay);
 
         this.gameStateSrv.changeGameState({ gameId });
     }
@@ -95,5 +95,10 @@ export class DinoGameService {
         );
 
         this.gameStateSrv.addGameObject(cactus);
+    }
+
+    private raiseDifficulty(): void {
+        this.gameStateSrv.changeGameState({ difficulty: (this.gameStateSrv.difficulty + 1) as Difficulty, gameId: null });
+        this.runScene();
     }
 }

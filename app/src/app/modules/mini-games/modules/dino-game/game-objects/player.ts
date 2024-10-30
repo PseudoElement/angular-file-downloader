@@ -7,6 +7,7 @@ import { Difficulty, PlayerAnimation } from '../models/animation-types';
 import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
 import { ANIMATION_PER_ACTION } from '../constants/animation-ticks';
 import { DinoGameState } from '../models/common';
+import { DIFFICULTY_CONFIG } from '../constants/main-config';
 
 export class Player extends BaseGameObject {
     protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
@@ -22,6 +23,10 @@ export class Player extends BaseGameObject {
 
     private currAnimation: PlayerAnimation = 'inactive';
 
+    private get difficulty(): Difficulty {
+        return this.gameState$.value.difficulty;
+    }
+
     protected get defaultImgSrc(): string {
         return '../../../../../../assets/dino-game/png/Idle (1).png';
     }
@@ -32,6 +37,7 @@ export class Player extends BaseGameObject {
         private readonly gameState$: BehaviorSubject<DinoGameState>
     ) {
         const rootNode = document.getElementById(containerInfo.id)!;
+        console.log(rootNode);
         super(params, containerInfo, rootNode);
 
         this.initParams = params;
@@ -53,8 +59,8 @@ export class Player extends BaseGameObject {
 
         if (!notShowAnimation) this.animations[this.currAnimation].call(this).then();
 
-        if (action === 'moveRight') this.moveRightSlow();
-        if (action === 'moveLeft') this.moveLeftSlow();
+        if (action === 'moveRight') this.moveRight();
+        if (action === 'moveLeft') this.moveLeft();
         if (action === 'jump') await this.jump();
         if (action === 'die') this.die();
         if (action === 'crawl') this.crawl();
@@ -97,41 +103,44 @@ export class Player extends BaseGameObject {
     }
 
     private async jump(): Promise<void> {
-        this.el.style.transition = `all 500ms ease-in-out`;
-        this._changeCoordY(false, -300);
-        await wait(700);
-        this._changeCoordY(true);
+        this.el.style.transition = `all 50ms`;
+        const deltaY = DIFFICULTY_CONFIG[this.difficulty].playerDeltaY;
+
+        for (let i = 0; i < 12; i++) {
+            this._changeCoordY(-deltaY);
+            this._changeCoordX(5);
+            await wait(40);
+        }
+
+        for (let i = 0; i < 12; i++) {
+            this._changeCoordY(deltaY);
+            this._changeCoordX(5);
+            await wait(40);
+        }
     }
 
-    private async _changeCoordX(deltaX: number): Promise<void> {
-        this.el.style.left = `${this.el.offsetLeft + deltaX}px`;
+    private _changeCoordX(deltaX: number): void {
+        const prevLeft = parseInt(this.el.style.left);
+        this.el.style.left = `${prevLeft + deltaX}px`;
+        const newLeft = parseInt(this.el.style.left);
 
-        await wait(100);
         this._coords$.next({
             ...this._coords$.value,
-            leftX: this.el.offsetLeft + deltaX,
-            rightX: this.el.offsetLeft + this.el.offsetWidth + deltaX,
-            visibleRightX: this.el.offsetLeft + this.el.offsetWidth + deltaX - this.el.offsetWidth * 0.5
+            leftX: newLeft,
+            rightX: newLeft + this.el.offsetWidth,
+            visibleRightX: newLeft + this.el.offsetWidth - this.el.offsetWidth * 0.5
         });
     }
 
-    private async _changeCoordY(isReset: boolean, deltaY: number = 0): Promise<void> {
-        let topY: number;
-        let bottomY: number;
-        let visibleTopY: number;
-        if (isReset) {
-            this.el.style.top = `${this.initParams.startY}px`;
-            topY = this.initParams.startY;
-            visibleTopY = this.initParams.startY + this.el.offsetHeight * 0.5;
-            bottomY = this.initParams.startY + this.el.offsetHeight;
-        } else {
-            this.el.style.top = `${this.el.offsetTop + deltaY}px`;
-            topY = this.el.offsetTop;
-            visibleTopY = this.el.offsetTop + this.el.offsetHeight * 0.5;
-            bottomY = this.el.offsetTop + this.el.offsetHeight;
-        }
+    private _changeCoordY(deltaY: number = 0): void {
+        const prevTop = parseInt(this.el.style.top);
+        this.el.style.top = `${prevTop + deltaY}px`;
+        const newTop = parseInt(this.el.style.top);
 
-        await wait(300);
+        const topY = newTop;
+        const visibleTopY = newTop + this.el.offsetHeight * 0.5;
+        const bottomY = newTop + this.el.offsetHeight;
+
         this._coords$.next({
             ...this._coords$.value,
             topY,
@@ -140,61 +149,46 @@ export class Player extends BaseGameObject {
         });
     }
 
-    private moveRightFast(): void {
+    private moveRight(): void {
         if (this.checkEnds().isRightEnd) return;
-        this.el.style.transition = `all 50ms`;
-        this._changeCoordX(75);
+        const deltaX = DIFFICULTY_CONFIG[this.difficulty].playerDeltaX;
+        this._changeCoordX(deltaX);
     }
 
-    private moveLeftFast(): void {
+    private moveLeft(): void {
         if (this.checkEnds().isLeftEnd) return;
-        this.el.style.transition = `all 50ms`;
-        this._changeCoordX(-75);
-    }
-
-    private moveRightSlow(): void {
-        if (this.checkEnds().isRightEnd) return;
-        this.el.style.transition = `all 50ms`;
-        this._changeCoordX(60).then();
-    }
-
-    private moveLeftSlow(): void {
-        if (this.checkEnds().isLeftEnd) return;
-        this.el.style.transition = `all 50ms`;
-        this._changeCoordX(-120).then();
+        const deltaX = -DIFFICULTY_CONFIG[this.difficulty].playerDeltaX;
+        this._changeCoordX(deltaX);
     }
 
     private async die(): Promise<void> {}
 
     private async crawl(): Promise<void> {
-        this.el.style.transition = `all 150ms`;
+        const widthNum = parseFloat(this.el.style.width);
+        const heightNum = parseFloat(this.el.style.height);
 
-        const widthNum = parseFloat(this.initParams.width);
-        const heightNum = parseFloat(this.initParams.height);
+        this.el.style.width = `${widthNum / 2}px`;
+        this.el.style.height = `${heightNum / 2}px`;
+        this.imgEl.style.width = `${widthNum / 2}px`;
+        this.imgEl.style.height = `${heightNum / 2}px`;
 
-        const widthUnit = this.initParams.width.replace(widthNum.toString(), '');
-        const heightUnit = this.initParams.height.replace(heightNum.toString(), '');
-
-        this.el.style.width = `${widthNum / 2}${widthUnit}`;
-        this.el.style.height = `${heightNum / 2}${heightUnit}`;
-        this.imgEl.style.width = `${widthNum / 2}${widthUnit}`;
-        this.imgEl.style.height = `${heightNum / 2}${heightUnit}`;
-
-        this._changeCoordY(false, heightNum / 2 - 20);
+        this._changeCoordY(heightNum / 2);
     }
 
     private async uncrawl(): Promise<void> {
-        this.el.style.transition = `all 150ms`;
+        const widthNum = parseFloat(this.el.style.width);
+        const heightNum = parseFloat(this.el.style.height);
 
-        this.el.style.width = this.initParams.width;
-        this.el.style.height = this.initParams.height;
-        this.imgEl.style.width = this.initParams.width;
-        this.imgEl.style.height = this.initParams.height;
+        this.el.style.width = `${widthNum * 2}px`;
+        this.el.style.height = `${heightNum * 2}px`;
+        this.imgEl.style.width = `${widthNum * 2}px`;
+        this.imgEl.style.height = `${heightNum * 2}px`;
 
-        this._changeCoordY(true);
+        this._changeCoordY(-heightNum);
     }
 
     private updateStyles(): void {
         this.el.style.zIndex = '1000';
+        this.el.style.transition = 'all 50ms';
     }
 }

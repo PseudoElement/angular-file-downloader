@@ -28,7 +28,7 @@ const routes: Routes = [
         path: 'mini-games',
         loadChildren: () => import('./modules/mini-games/mini-games.module').then((m) => m.MiniGamesModule)
     },
-    { path: '**', redirectTo: 'download-files' }
+    { path: '**', redirectTo: 'mini-games/dino-game' }
 ];
 
 @NgModule({

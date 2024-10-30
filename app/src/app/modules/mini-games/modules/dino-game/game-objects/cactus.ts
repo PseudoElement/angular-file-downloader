@@ -57,7 +57,7 @@ export class Cactus extends BaseGameObject implements MobileObject<CactusAction>
             ...this._coords$.value,
             leftX: this.el.offsetLeft + deltaX,
             rightX: this.el.offsetLeft + this.el.offsetWidth + deltaX,
-            visibleRightX: this.el.offsetLeft - this.el.offsetWidth * 0.5 + deltaX
+            visibleRightX: this.el.offsetLeft + this.el.offsetWidth + deltaX - this.el.offsetWidth * 0.5
         });
     }
 }

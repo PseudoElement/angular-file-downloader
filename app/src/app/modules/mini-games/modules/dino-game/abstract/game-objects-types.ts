@@ -6,7 +6,7 @@ export type PlayerAction = 'jump' | 'moveRight' | 'moveLeft' | 'crawl' | 'uncraw
 
 export type CactusAction = 'moveLeft';
 
-export type PlayerKeyboardAction = Extract<PlayerAction, 'jump' | 'moveRight' | 'moveLeft' | 'crawl' | 'inactive'>;
+export type PlayerKeyboardAction = 'jump' | 'moveRight' | 'moveLeft' | 'crawl' | 'pause_unpause';
 
 export interface ActiveObject<T> {
     doAction(action: T): void;

@@ -24,6 +24,8 @@ import { ShortifyTextPipe } from './pipes/shortify-text.pipe';
 import { DatePickerComponent } from './components/date-picker/date-picker.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { GameMenuComponent } from './components/game-menu/game-menu.component';
+import { GameMenuButtonComponent } from './components/game-menu-button/game-menu-button.component';
 
 @NgModule({
     exports: [
@@ -40,7 +42,9 @@ import { provideNativeDateAdapter } from '@angular/material/core';
         ModalComponent,
         ExternalAppInfoComponent,
         ShortifyTextPipe,
-        DatePickerComponent
+        DatePickerComponent,
+        GameMenuComponent,
+        GameMenuButtonComponent
     ],
     declarations: [
         InputComponent,
@@ -57,7 +61,9 @@ import { provideNativeDateAdapter } from '@angular/material/core';
         ModalComponent,
         ExternalAppInfoComponent,
         ShortifyTextPipe,
-        DatePickerComponent
+        DatePickerComponent,
+        GameMenuComponent,
+        GameMenuButtonComponent
     ],
     imports: [
         CommonModule,
