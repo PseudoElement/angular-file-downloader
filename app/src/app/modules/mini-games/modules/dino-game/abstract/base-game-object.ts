@@ -3,21 +3,23 @@ import { AbsObjectCoords, GameContainerInfo, RelObjectCoords } from '../../../mo
 import { ContainerEnds } from '../models/common';
 
 export interface BaseGameObjectParams {
-    startX: number;
-    startY: number;
+    left: string;
+    top: string;
     width: string;
     height: string;
     imgSrc?: string;
 }
 
-export abstract class BaseGameObject {
+export type ImageType = HTMLImageElement | HTMLCanvasElement;
+
+export abstract class BaseGameObject<T extends ImageType = ImageType> {
     protected abstract _coords$: BehaviorSubject<RelObjectCoords>;
 
     protected abstract get defaultImgSrc(): string;
 
     protected el!: HTMLDivElement;
 
-    protected imgEl!: HTMLImageElement;
+    protected imgEl!: T;
 
     public isDestroyed: boolean = false;
 
@@ -43,26 +45,30 @@ export abstract class BaseGameObject {
         this.isDestroyed = true;
     }
 
+    public abstract needDestroy(): boolean;
+
     private create(): void {
         this.el = document.createElement('div')!;
-        this.imgEl = document.createElement('img');
-
+        this.imgEl = this.createImg(this.params);
         this.setDefaultStyles();
+
         this.el.append(this.imgEl);
         this.rootNode.append(this.el);
     }
 
+    protected abstract createImg(params: BaseGameObjectParams): T;
+
     private setDefaultStyles(): void {
         this.el.style.position = 'absolute';
-        this.el.style.top = `${this.params.startY}px`;
-        this.el.style.left = `${this.params.startX}px`;
+        this.el.style.top = this.params.top;
+        this.el.style.left = this.params.left;
         this.el.style.transition = 'all 100ms';
         this.el.style.width = this.params.width;
         this.el.style.height = this.params.height;
 
-        this.imgEl.style.width = this.params.width;
-        this.imgEl.style.height = this.params.height;
-        this.changeImg(this.params.imgSrc || this.defaultImgSrc);
+        // this.imgEl.style.width = this.params.width;
+        // this.imgEl.style.height = this.params.height;
+        // this.changeImg(this.params.imgSrc || this.defaultImgSrc);
     }
 
     protected changeImg(imgSrc: string): void {

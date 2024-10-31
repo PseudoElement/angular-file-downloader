@@ -12,6 +12,7 @@ export interface ContainerEnds {
 export interface DinoGameState {
     time: number;
     difficulty: Difficulty;
+    isStarted: boolean;
     isPlaying: boolean;
     isKilled: boolean;
     gameId: NodeJS.Timeout | null;

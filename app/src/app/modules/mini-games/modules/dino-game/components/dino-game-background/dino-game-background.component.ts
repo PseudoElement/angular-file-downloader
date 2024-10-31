@@ -14,7 +14,7 @@ export class DinoGameBackgroundComponent implements OnDestroy {
     constructor(private readonly dinoGameSrv: DinoGameService, private readonly gameStateSrv: DinoGameStateService) {}
 
     ngOnDestroy(): void {
-        this.dinoGameSrv.endGame();
+        this.dinoGameSrv.pauseGame();
     }
 
     public readonly bgAnimation$ = this.dinoGameSrv.bgAnimationStyle$;
@@ -24,13 +24,11 @@ export class DinoGameBackgroundComponent implements OnDestroy {
             if (state.isPlaying) {
                 return 'hidden';
             } else {
-                console.log(state.time > 0);
-                if (state.time > 0) return 'pause';
+                if (state.isStarted && !state.isKilled) return 'pause';
                 if (state.isKilled) return 'restart';
                 return 'start';
             }
-        }),
-        tap(console.log)
+        })
     );
 
     public handleMenuBtnClick(btnType: MenuButtonType): void {
@@ -38,6 +36,10 @@ export class DinoGameBackgroundComponent implements OnDestroy {
             this.dinoGameSrv.unpauseGame();
         } else if (btnType === 'start') {
             this.dinoGameSrv.startGame();
+        } else if (btnType === 'restart') {
+            this.dinoGameSrv.restartGame();
+        } else if (btnType === 'end') {
+            this.dinoGameSrv.endGame();
         }
     }
 }

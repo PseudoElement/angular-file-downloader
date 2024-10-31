@@ -1,28 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Player } from '../game-objects/player';
-import {
-    BehaviorSubject,
-    combineLatest,
-    combineLatestWith,
-    debounceTime,
-    filter,
-    first,
-    firstValueFrom,
-    forkJoin,
-    fromEvent,
-    interval,
-    skipWhile,
-    Subscription,
-    switchMap,
-    takeUntil,
-    takeWhile,
-    tap,
-    throttleTime
-} from 'rxjs';
-import { PlayerAction, PlayerKeyboardAction } from '../abstract/game-objects-types';
-import { wait } from 'src/app/utils/wait';
-import { DinoGameService } from './dino-game.service';
-import { BaseGameObject } from '../abstract/base-game-object';
+import { BehaviorSubject, filter, fromEvent, Subscription, throttleTime } from 'rxjs';
+import { PlayerKeyboardAction } from '../abstract/game-objects-types';
 import { DinoGameStateService } from './dino-game-state.service';
 
 type KeyCodes = {
@@ -39,12 +18,6 @@ export class DinoGameObservers {
         pause_unpause: 'Escape'
     });
 
-    private readonly _currActions$ = new BehaviorSubject<Set<PlayerAction>>(new Set(['inactive']));
-
-    private get currActions(): Set<PlayerAction> {
-        return this._currActions$.value;
-    }
-
     private readonly subs: Subscription[] = [];
 
     private get keyCodes(): KeyCodes {
@@ -55,15 +28,16 @@ export class DinoGameObservers {
         return this.gameStateSrv.player!;
     }
 
+    private isCrawling = false;
+
     constructor(private readonly gameStateSrv: DinoGameStateService) {}
 
     public listenKeyEvents(pause: () => void, play: () => void): void {
-        fromEvent(window, 'keydown')
+        const sub = fromEvent(window, 'keydown')
             .pipe(
                 //@ts-ignore
-                throttleTime(100),
+                throttleTime(50),
                 filter((e: KeyboardEvent) => Object.values(this.keyCodes).includes(e.key)),
-                filter(() => !this.currActions.has('jump')),
                 filter(
                     (e: KeyboardEvent) =>
                         this.gameStateSrv.isPlaying || (!this.gameStateSrv.isPlaying && e.key === this.keyCodes.pause_unpause)
@@ -82,31 +56,31 @@ export class DinoGameObservers {
                     }
                 }
                 if (keyboardEvent.key === this.keyCodes.jump) {
-                    if (this.currActions.has('crawl')) {
-                        await this.uncrawl();
+                    if (this.isCrawling) {
+                        this.uncrawl();
                     } else {
-                        await this.jump();
+                        this.jump();
                     }
                 }
                 if (keyboardEvent.key === this.keyCodes.crawl) {
-                    if (this.currActions.has('crawl')) return;
-                    await this.crawl();
+                    if (this.isCrawling) return;
+                    this.crawl();
                 }
                 if (keyboardEvent.key === this.keyCodes.moveLeft) {
-                    await this.moveLeft();
+                    this.moveLeft();
                 }
                 if (keyboardEvent.key === this.keyCodes.moveRight) {
-                    await this.moveRight();
+                    this.moveRight();
                 }
             });
+
+        this.subs.push(sub);
     }
 
-    public listenVisibilityChange(pause: () => void, play: () => void): void {
+    public listenVisibilityChange(pause: () => void): void {
         fromEvent(document, 'visibilitychange').subscribe(() => {
             if (document.hidden) {
-                pause();
-            } else {
-                play();
+                // pause();
             }
         });
     }
@@ -122,61 +96,40 @@ export class DinoGameObservers {
         //     )
         //     .subscribe();
         // this.subs.push(sub);
-        this.player.getCoords$().subscribe((c) => console.log(`top = ${c.topY}, bottom = ${c.bottomY}, visible = ${c.visibleTopY}`));
+        // this.player.getCoords$().subscribe((c) => console.log(`top = ${c.topY}, bottom = ${c.bottomY}, visible = ${c.visibleTopY}`));
     }
 
     public clearListeners(): void {
         this.subs.forEach((sub) => sub.unsubscribe());
     }
 
-    private updateCurrActions(action: PlayerAction): void {
-        if (action === 'inactiveRun' || action === 'inactive') {
-            this.currActions.clear();
-            this.currActions.add(action);
-        } else if (action === 'jump' && this.currActions.has('crawl')) {
-            this.currActions.delete('crawl');
-        } else if (action === 'uncrawl') {
-            this.currActions.delete('crawl');
-        } else {
-            this.currActions.add(action);
-        }
-
-        this._currActions$.next(this.currActions);
-    }
-
-    private async jump(): Promise<void> {
-        this.updateCurrActions('jump');
-        await this.player.doAction('jump');
-        this.updateCurrActions('inactiveRun');
+    private jump(): void {
+        this.player.doAction('jump');
     }
 
     private crawl(): void {
-        this.updateCurrActions('crawl');
+        this.isCrawling = true;
         this.player.doAction('crawl');
     }
 
     private uncrawl(): void {
-        this.updateCurrActions('uncrawl');
+        this.isCrawling = false;
         this.player.doAction('uncrawl');
     }
 
     private moveLeft(): void {
-        this.updateCurrActions('moveLeft');
         this.player.doAction('moveLeft');
     }
 
     private moveRight(): void {
-        this.updateCurrActions('moveRight');
         this.player.doAction('moveRight');
     }
 
     private inactive(): void {
-        this.updateCurrActions('inactive');
         this.player.doAction('inactive');
     }
 
     private active(): void {
-        this.updateCurrActions('inactiveRun');
         this.player.doAction('inactiveRun');
     }
 }

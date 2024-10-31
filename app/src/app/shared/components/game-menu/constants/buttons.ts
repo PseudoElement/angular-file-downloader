@@ -4,7 +4,7 @@ export interface MenuButton {
 }
 
 export type MenuState = 'start' | 'pause' | 'restart' | 'hidden';
-export type MenuButtonType = 'start' | 'continue' | 'controls';
+export type MenuButtonType = 'start' | 'continue' | 'controls' | 'restart' | 'end';
 
 export const MENU_BUTTONS: Record<Exclude<MenuState, 'hidden'>, MenuButton[]> = {
     start: [
@@ -17,6 +17,8 @@ export const MENU_BUTTONS: Record<Exclude<MenuState, 'hidden'>, MenuButton[]> = 
     ] as const,
     pause: [
         { type: 'continue', text: 'Continue' },
-        { type: 'controls', text: 'Controls' }
+        { type: 'restart', text: 'Restart' },
+        { type: 'controls', text: 'Controls' },
+        { type: 'end', text: 'Exit' }
     ] as const
 } as const;

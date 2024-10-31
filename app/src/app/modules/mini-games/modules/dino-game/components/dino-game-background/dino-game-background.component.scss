@@ -1,13 +1,13 @@
 :host {
     .dino-game-container {
         position: relative;
-        overflow: hidden;
-        height: 600px;
+        overflow-x: hidden;
+        height: 90vh;
     }
 
     .dino-game-bg {
-        background: url('../../../../../../../assets/games/desert-background.png') repeat-x;
-        background-size: 600px 700px;
+        background: url('../../../../../../../assets/backgrounds/beach.jpg') repeat-x;
+        background-size: 800px 100%;
         width: 12000px;
     }
 
@@ -16,35 +16,35 @@
         // 342.857 / 1000 = 0.342857px in 1 ms
         // 3600 / 0.342857 = 10500ms is tick for changing animation type after sliding 6 images(600px(width) * 6)
 
-        animation: slide 35s linear infinite;
+        animation: slide 45s linear infinite;
     }
 
     .active-difficulty-2 {
         // 12_000px / 30_000ms = 0.4px in ms
         // 3600 / 0.4 = 9_000ms
-        animation: slide 30s linear infinite;
+        animation: slide 40s linear infinite;
     }
 
     .active-difficulty-3 {
         // 12_000px / 25_000ms = 0.48px in ms
         // 3600 / 0.48 = 7500ms
-        animation: slide 25s linear infinite;
+        animation: slide 37s linear infinite;
     }
 
     .active-difficulty-4 {
         // 12_000px / 20_000ms = 0.6px in ms
         // 7200 / 0.6 = 12_000ms
-        animation: slide 20s linear infinite;
+        animation: slide 35s linear infinite;
     }
 
     .active-difficulty-5 {
         // 12_000px / 15_000 = 0.8px in ms
         // 7200 / 0.8 = 9_000ms
-        animation: slide 15s linear infinite;
+        animation: slide 30s linear infinite;
     }
 
     .active-difficulty-6 {
-        animation: slide 12s linear infinite;
+        animation: slide 25s linear infinite;
     }
 
     .inactive {
@@ -56,7 +56,7 @@
             transform: translateX(0);
         }
         100% {
-            transform: translateX(-10200px);
+            transform: translateX(-10400px);
         }
     }
 }

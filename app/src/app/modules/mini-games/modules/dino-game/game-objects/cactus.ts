@@ -3,11 +3,10 @@ import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-
 import { CactusAction, MobileObject } from '../abstract/game-objects-types';
 import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
 import { Difficulty } from '../models/animation-types';
-import { CACTUS_SPEED_RATIO } from '../constants/speeds';
-import { wait } from 'src/app/utils/wait';
 import { DinoGameState } from '../models/common';
+import { DIFFICULTY_CONFIG } from '../constants/main-config';
 
-export class Cactus extends BaseGameObject implements MobileObject<CactusAction> {
+export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileObject<CactusAction> {
     protected get defaultImgSrc(): string {
         return '../../../../../../assets/dino-game/svg/cactus.svg';
     }
@@ -30,34 +29,58 @@ export class Cactus extends BaseGameObject implements MobileObject<CactusAction>
         const rootNode = document.getElementById(containerInfo.id)!;
         super(params, containerInfo, rootNode);
 
+        const left = parseFloat(this.el.style.left);
+        const top = parseFloat(this.el.style.top);
+
         this._coords$ = new BehaviorSubject<RelObjectCoords>({
-            leftX: params.startX,
-            topY: params.startY,
-            rightX: params.startX + this.el.offsetWidth,
-            bottomY: params.startY + this.el.offsetHeight,
-            visibleTopY: params.startY - this.el.offsetHeight * 0.5,
-            visibleRightX: params.startX + this.el.offsetWidth * 0.5
+            leftX: left,
+            topY: top,
+            rightX: left + this.el.offsetWidth,
+            bottomY: top + this.el.offsetHeight,
+            visibleTopY: top + this.el.offsetHeight - this.el.offsetHeight * 0.5,
+            visibleRightX: left + this.el.offsetWidth - this.el.offsetWidth * 0.5
         });
+
         this.move('moveLeft');
     }
 
+    protected createImg(params: BaseGameObjectParams): HTMLImageElement {
+        const img = document.createElement('img');
+        img.style.width = params.width;
+        img.style.height = params.height;
+        img.src = params.imgSrc || this.defaultImgSrc;
+
+        return img;
+    }
+
     public move(_action: CactusAction): void {
-        (async () => {
-            while (!this.isDestroyed && this.isPlaying) {
-                await wait(30);
-                if (this.checkEnds().isLeftEnd) this.destroy();
-                this._changeCoordX(CACTUS_SPEED_RATIO[this.difficulty]);
-            }
-        })();
+        const callback = (_timestamp: number) => {
+            if (this.isDestroyed || !this.isPlaying) return;
+
+            this._changeCoordX(DIFFICULTY_CONFIG[this.difficulty].cactusSpeed);
+
+            setTimeout(() => {
+                window.requestAnimationFrame(callback);
+            }, 50);
+        };
+
+        window.requestAnimationFrame(callback);
+    }
+
+    public needDestroy(): boolean {
+        return this.checkEnds().isLeftEnd;
     }
 
     private _changeCoordX(deltaX: number): void {
-        this.el.style.left = `${this.el.offsetLeft + deltaX}px`;
+        const prevLeft = parseInt(this.el.style.left);
+        this.el.style.left = `${prevLeft + deltaX}px`;
+        const newLeft = parseInt(this.el.style.left);
+
         this._coords$.next({
             ...this._coords$.value,
-            leftX: this.el.offsetLeft + deltaX,
-            rightX: this.el.offsetLeft + this.el.offsetWidth + deltaX,
-            visibleRightX: this.el.offsetLeft + this.el.offsetWidth + deltaX - this.el.offsetWidth * 0.5
+            leftX: newLeft,
+            rightX: newLeft + this.el.offsetWidth,
+            visibleRightX: newLeft + this.el.offsetWidth - this.el.offsetWidth * 0.5
         });
     }
 }

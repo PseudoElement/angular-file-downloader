@@ -9,15 +9,13 @@ import { ANIMATION_PER_ACTION } from '../constants/animation-ticks';
 import { DinoGameState } from '../models/common';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
 
-export class Player extends BaseGameObject {
+export class Player extends BaseGameObject<HTMLImageElement> {
     protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
 
-    public readonly animations: Record<PlayerAnimation, () => Promise<void>> = {
+    public readonly animations: Record<PlayerAnimation, () => void> = {
         inactive: this.animateInactive,
         move: this.animateMove
     };
-
-    private readonly initParams: BaseGameObjectParams;
 
     public currAction: PlayerAction = 'inactive';
 
@@ -31,25 +29,41 @@ export class Player extends BaseGameObject {
         return '../../../../../../assets/dino-game/png/Idle (1).png';
     }
 
+    private isJumping = false;
+
     constructor(
         params: BaseGameObjectParams,
         containerInfo: GameContainerInfo,
         private readonly gameState$: BehaviorSubject<DinoGameState>
     ) {
         const rootNode = document.getElementById(containerInfo.id)!;
-        console.log(rootNode);
         super(params, containerInfo, rootNode);
 
-        this.initParams = params;
+        const left = parseFloat(this.el.style.left);
+        const top = parseFloat(this.el.style.top);
+
         this._coords$ = new BehaviorSubject<RelObjectCoords>({
-            leftX: params.startX,
-            topY: params.startY,
-            rightX: params.startX + this.el.offsetWidth,
-            bottomY: params.startY + this.el.offsetHeight,
-            visibleTopY: params.startY - this.el.offsetHeight * 0.5,
-            visibleRightX: params.startX + this.el.offsetWidth * 0.5
+            leftX: left,
+            topY: top,
+            rightX: top + this.el.offsetWidth,
+            bottomY: top + this.el.offsetHeight,
+            visibleTopY: top + this.el.offsetHeight - this.el.offsetHeight * 0.5,
+            visibleRightX: left + this.el.offsetWidth - this.el.offsetWidth * 0.5
         });
         this.updateStyles();
+    }
+
+    protected createImg(params: BaseGameObjectParams): HTMLImageElement {
+        const img = document.createElement('img');
+        img.style.width = params.width;
+        img.style.height = params.height;
+        img.src = params.imgSrc || this.defaultImgSrc;
+
+        return img;
+    }
+
+    public needDestroy(): boolean {
+        return false;
     }
 
     public async doAction(action: PlayerAction): Promise<void> {
@@ -57,17 +71,17 @@ export class Player extends BaseGameObject {
         const notShowAnimation = this.currAnimation === ANIMATION_PER_ACTION[action] && this.currAnimation === 'move';
         this.currAnimation = ANIMATION_PER_ACTION[action];
 
-        if (!notShowAnimation) this.animations[this.currAnimation].call(this).then();
+        if (!notShowAnimation) this.animations[this.currAnimation].call(this);
 
         if (action === 'moveRight') this.moveRight();
         if (action === 'moveLeft') this.moveLeft();
-        if (action === 'jump') await this.jump();
+        if (action === 'jump') this.jump();
         if (action === 'die') this.die();
         if (action === 'crawl') this.crawl();
         if (action === 'uncrawl') this.uncrawl();
     }
 
-    private async animateMove(): Promise<void> {
+    private animateMove(): void {
         const imgsFast = [
             '../../../../../../assets/dino-game/png/Run (1).png',
             '../../../../../../assets/dino-game/png/Run (2).png',
@@ -89,34 +103,57 @@ export class Player extends BaseGameObject {
         ] as const;
 
         const imgs = true ? imgsSlow : imgsFast;
+        let idx = 0;
 
-        while (this.currAnimation === 'move') {
-            for (const img of imgs) {
+        const callback = (_timestamp: number) => {
+            if (this.currAnimation !== 'move') return;
+
+            setTimeout(() => {
+                const img = imgs[idx];
                 this.changeImg(img);
-                await wait(100);
-            }
-        }
+
+                if (idx < imgs.length - 1) idx++;
+                else idx = 0;
+
+                window.requestAnimationFrame(callback);
+            }, 70);
+        };
+
+        window.requestAnimationFrame(callback);
     }
 
-    private async animateInactive(): Promise<void> {
-        await this.changeImg('../../../../../../assets/dino-game/png/Idle (1).png');
+    private animateInactive(): void {
+        this.changeImg('../../../../../../assets/dino-game/png/Idle (1).png');
     }
 
-    private async jump(): Promise<void> {
-        this.el.style.transition = `all 50ms`;
+    private jump(): void {
+        if (this.isJumping) return;
+
+        this.isJumping = true;
         const deltaY = DIFFICULTY_CONFIG[this.difficulty].playerDeltaY;
+        let idx = 0;
 
-        for (let i = 0; i < 12; i++) {
-            this._changeCoordY(-deltaY);
-            this._changeCoordX(5);
-            await wait(40);
-        }
+        const callback = () => {
+            if (idx >= 24) {
+                this.isJumping = false;
+                return;
+            }
 
-        for (let i = 0; i < 12; i++) {
-            this._changeCoordY(deltaY);
-            this._changeCoordX(5);
-            await wait(40);
-        }
+            if (idx < 12) {
+                this._changeCoordY(-deltaY);
+                this._changeCoordX(5);
+            } else {
+                this._changeCoordY(deltaY);
+                this._changeCoordX(5);
+            }
+
+            idx++;
+            setTimeout(() => {
+                window.requestAnimationFrame(callback);
+            }, 30);
+        };
+
+        window.requestAnimationFrame(callback);
     }
 
     private _changeCoordX(deltaX: number): void {
@@ -152,13 +189,13 @@ export class Player extends BaseGameObject {
     private moveRight(): void {
         if (this.checkEnds().isRightEnd) return;
         const deltaX = DIFFICULTY_CONFIG[this.difficulty].playerDeltaX;
-        this._changeCoordX(deltaX);
+        window.requestAnimationFrame(() => this._changeCoordX(deltaX));
     }
 
     private moveLeft(): void {
         if (this.checkEnds().isLeftEnd) return;
         const deltaX = -DIFFICULTY_CONFIG[this.difficulty].playerDeltaX;
-        this._changeCoordX(deltaX);
+        window.requestAnimationFrame(() => this._changeCoordX(deltaX));
     }
 
     private async die(): Promise<void> {}

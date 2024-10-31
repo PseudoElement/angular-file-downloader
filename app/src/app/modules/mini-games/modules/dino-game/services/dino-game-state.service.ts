@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { DelayMs, DinoGameState } from '../models/common';
 import { Difficulty } from '../models/animation-types';
-import { BaseGameObject } from '../abstract/base-game-object';
+import { BaseGameObject, ImageType } from '../abstract/base-game-object';
 import { Player } from '../game-objects/player';
 
 @Injectable()
@@ -12,6 +12,7 @@ export class DinoGameStateService {
         difficulty: 1,
         isPlaying: false,
         isKilled: false,
+        isStarted: false,
         gameId: null
     });
 
@@ -57,6 +58,7 @@ export class DinoGameStateService {
         const newState = {
             ...this.gameState$.value,
             ...(state.difficulty && { difficulty: state.difficulty }),
+            ...('isStarted' in state && { isStarted: state.isStarted }),
             ...('isPlaying' in state && { isPlaying: state.isPlaying }),
             ...(state.time && { time: state.time }),
             ...(state.gameId && { gameId: state.gameId })
@@ -74,8 +76,16 @@ export class DinoGameStateService {
         this._gameObjects$.next(this.gameObjects);
     }
 
-    public deleteDestroyedObjects(): void {
-        const filtered = this.gameObjects.filter((obj) => !obj.isDestroyed);
-        this._gameObjects$.next(filtered);
+    public deleteGameObjects(all: boolean): void {
+        if (all) {
+            this.gameObjects.forEach((obj) => obj.destroy());
+            this._gameObjects$.next([]);
+        } else {
+            this.gameObjects.forEach((obj) => {
+                if (obj.needDestroy()) obj.destroy();
+            });
+            const notDestroyed = this.gameObjects.filter((obj) => !obj.isDestroyed);
+            this._gameObjects$.next(notDestroyed);
+        }
     }
 }
