@@ -65,10 +65,6 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
         this.el.style.transition = 'all 100ms';
         this.el.style.width = this.params.width;
         this.el.style.height = this.params.height;
-
-        // this.imgEl.style.width = this.params.width;
-        // this.imgEl.style.height = this.params.height;
-        // this.changeImg(this.params.imgSrc || this.defaultImgSrc);
     }
 
     protected changeImg(imgSrc: string): void {
@@ -85,6 +81,32 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
         } as ContainerEnds;
 
         return ends;
+    }
+
+    protected _changeCoordX(deltaX: number): void {
+        const prevLeft = parseInt(this.el.style.left);
+        this.el.style.left = `${prevLeft + deltaX}px`;
+        const newLeft = parseInt(this.el.style.left);
+
+        this._coords$.next({
+            ...this._coords$.value,
+            leftX: newLeft,
+            rightX: newLeft + this.el.offsetWidth,
+            visibleRightX: newLeft + this.el.offsetWidth
+        });
+    }
+
+    protected _changeCoordY(deltaY: number = 0): void {
+        const prevTop = parseInt(this.el.style.top);
+        this.el.style.top = `${prevTop + deltaY}px`;
+        const newTop = parseInt(this.el.style.top);
+
+        this._coords$.next({
+            ...this._coords$.value,
+            topY: newTop,
+            bottomY: newTop + this.el.offsetHeight,
+            visibleTopY: newTop
+        });
     }
 
     private getAbsoluteCoords(): AbsObjectCoords {

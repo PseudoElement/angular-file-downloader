@@ -70,17 +70,4 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
     public needDestroy(): boolean {
         return this.checkEnds().isLeftEnd;
     }
-
-    private _changeCoordX(deltaX: number): void {
-        const prevLeft = parseInt(this.el.style.left);
-        this.el.style.left = `${prevLeft + deltaX}px`;
-        const newLeft = parseInt(this.el.style.left);
-
-        this._coords$.next({
-            ...this._coords$.value,
-            leftX: newLeft,
-            rightX: newLeft + this.el.offsetWidth,
-            visibleRightX: newLeft + this.el.offsetWidth - this.el.offsetWidth * 0.5
-        });
-    }
 }

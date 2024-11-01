@@ -80,7 +80,7 @@ export class DinoGameService {
     private runScene(): void {
         const { nextRoundWhen, spawnDelay } = DIFFICULTY_CONFIG[this.gameStateSrv.difficulty];
         const gameId = setInterval(() => {
-            // if (this.gameStateSrv.time > nextRoundWhen) this.raiseDifficulty();
+            if (this.gameStateSrv.time > nextRoundWhen) this.raiseDifficulty();
 
             this.spawnBird();
             this.spawnCactus();
@@ -93,8 +93,12 @@ export class DinoGameService {
     }
 
     private spawnPlayer(): void {
+        const container = document.getElementById(DYNO_CONTAINER_ID)!;
+        const containerHeight = container.offsetHeight;
+        const top = Math.floor(containerHeight * 0.68);
+
         const player = new Player(
-            { height: '150px', width: '200px', left: `60px`, top: '600px' },
+            { height: '150px', width: '200px', left: `60px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
             this.gameState$
         );
@@ -103,9 +107,13 @@ export class DinoGameService {
     }
 
     private spawnCactus(): void {
-        const containerWidth = document.getElementById(DYNO_CONTAINER_ID)!.offsetWidth;
+        const container = document.getElementById(DYNO_CONTAINER_ID)!;
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+        const top = Math.floor(containerHeight * 0.68);
+
         const cactus = new Cactus(
-            { height: '160px', width: '160px', left: `${containerWidth - 100}px`, top: '68%' },
+            { height: '160px', width: '160px', left: `${containerWidth - 50}px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
             this.gameState$
         );
@@ -114,9 +122,17 @@ export class DinoGameService {
     }
 
     private spawnBird(): void {
-        const containerWidth = document.getElementById(DYNO_CONTAINER_ID)!.offsetWidth;
+        const container = document.getElementById(DYNO_CONTAINER_ID)!;
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+
+        const minPercent = 0.2;
+        const maxPercent = 0.55;
+        const randomPercent = minPercent + Number((Math.random() * (maxPercent - minPercent)).toFixed(2));
+        const top = Math.floor(containerHeight * randomPercent);
+
         const bird = new Bird(
-            { height: '75px', width: '100px', left: `${containerWidth - 200}px`, top: '350px' },
+            { height: '75px', width: '100px', left: `${containerWidth}px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
             this.gameState$
         );

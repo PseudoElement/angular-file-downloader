@@ -156,7 +156,7 @@ export class Player extends BaseGameObject<HTMLImageElement> {
         window.requestAnimationFrame(callback);
     }
 
-    private _changeCoordX(deltaX: number): void {
+    protected override _changeCoordX(deltaX: number): void {
         const prevLeft = parseInt(this.el.style.left);
         this.el.style.left = `${prevLeft + deltaX}px`;
         const newLeft = parseInt(this.el.style.left);
@@ -169,7 +169,7 @@ export class Player extends BaseGameObject<HTMLImageElement> {
         });
     }
 
-    private _changeCoordY(deltaY: number = 0): void {
+    protected override _changeCoordY(deltaY: number = 0): void {
         const prevTop = parseInt(this.el.style.top);
         this.el.style.top = `${prevTop + deltaY}px`;
         const newTop = parseInt(this.el.style.top);

@@ -127,32 +127,6 @@ export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObj
         return canvas;
     }
 
-    private _changeCoordX(deltaX: number): void {
-        const prevLeft = parseInt(this.el.style.left);
-        this.el.style.left = `${prevLeft + deltaX}px`;
-        const newLeft = parseInt(this.el.style.left);
-
-        this._coords$.next({
-            ...this._coords$.value,
-            leftX: newLeft,
-            rightX: newLeft + this.el.offsetWidth,
-            visibleRightX: newLeft + this.el.offsetWidth
-        });
-    }
-
-    private _changeCoordY(deltaY: number = 0): void {
-        const prevTop = parseInt(this.el.style.top);
-        this.el.style.top = `${prevTop + deltaY}px`;
-        const newTop = parseInt(this.el.style.top);
-
-        this._coords$.next({
-            ...this._coords$.value,
-            topY: newTop,
-            bottomY: newTop + this.el.offsetHeight,
-            visibleTopY: newTop
-        });
-    }
-
     private loadSpriteImage(params: BaseGameObjectParams): void {
         const img = new Image();
         img.src = this.defaultImgSrc;
