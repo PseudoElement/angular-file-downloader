@@ -56,6 +56,10 @@ export class DinoGameStateService {
         return this.gameStateSubj$.value.isPlaying;
     }
 
+    public get isKilled(): boolean {
+        return this.gameStateSubj$.value.isKilled;
+    }
+
     constructor() {}
 
     public changeGameState(state: Partial<DinoGameState>): void {

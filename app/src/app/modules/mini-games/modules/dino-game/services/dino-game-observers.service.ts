@@ -58,7 +58,8 @@ export class DinoGameObservers {
                 filter((e: KeyboardEvent) => Object.values(this.keyCodes).includes(e.key)),
                 filter(
                     (e: KeyboardEvent) =>
-                        this.gameStateSrv.isPlaying || (!this.gameStateSrv.isPlaying && e.key === this.keyCodes.pause_unpause)
+                        this.gameStateSrv.isPlaying ||
+                        (!this.gameStateSrv.isPlaying && !this.gameStateSrv.isKilled && e.key === this.keyCodes.pause_unpause)
                 )
             )
             .subscribe(async (e) => {
