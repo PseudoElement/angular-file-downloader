@@ -1,0 +1,9 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    div {
+        font-size: 36px;
+        font-size: bold;
+        color: white;
+    }
+}

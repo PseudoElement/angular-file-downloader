@@ -14,7 +14,7 @@ export class DinoGameBackgroundComponent implements OnDestroy {
     constructor(private readonly dinoGameSrv: DinoGameService, private readonly gameStateSrv: DinoGameStateService) {}
 
     ngOnDestroy(): void {
-        this.dinoGameSrv.pauseGame();
+        this.dinoGameSrv.endGame();
     }
 
     public readonly bgAnimation$ = this.dinoGameSrv.bgAnimationStyle$;
@@ -30,6 +30,8 @@ export class DinoGameBackgroundComponent implements OnDestroy {
             }
         })
     );
+
+    public readonly timeMs$ = this.gameStateSrv.gameState$.pipe(map((state) => state.time));
 
     public handleMenuBtnClick(btnType: MenuButtonType): void {
         if (btnType === 'continue') {

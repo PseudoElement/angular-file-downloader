@@ -12,7 +12,7 @@ export const MENU_BUTTONS: Record<Exclude<MenuState, 'hidden'>, MenuButton[]> = 
         { type: 'controls', text: 'Controls' }
     ] as const,
     restart: [
-        { type: 'start', text: 'Restart' },
+        { type: 'restart', text: 'Restart' },
         { type: 'controls', text: 'Controls' }
     ] as const,
     pause: [

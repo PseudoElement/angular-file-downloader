@@ -1,4 +1,4 @@
-import { PlayerAction } from '../abstract/game-objects-types';
+import { PlayerAction } from '../models/game-objects-types';
 import { Difficulty, PlayerAnimation } from '../models/animation-types';
 
 type TimeMs = number;
@@ -23,7 +23,7 @@ export const ANIMATION_TICKS: Record<Difficulty, TimeMs> = {
 
 export const ANIMATION_PER_ACTION: Record<PlayerAction, PlayerAnimation> = {
     inactive: 'inactive',
-    die: 'inactive',
+    die: 'die',
     inactiveRun: 'move',
     crawl: 'move',
     uncrawl: 'move',

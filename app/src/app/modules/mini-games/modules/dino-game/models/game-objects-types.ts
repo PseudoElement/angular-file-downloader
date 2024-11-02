@@ -1,4 +1,4 @@
-import { BaseGameObject, ImageType } from './base-game-object';
+import { BaseGameObject } from '../abstract/base-game-object';
 
 export type ActionType = 'moveLeftSlow' | 'moveRightSlow' | 'moveLeftFast' | 'moveRightFast' | 'moveUp' | 'moveDown' | 'inactive' | 'die';
 

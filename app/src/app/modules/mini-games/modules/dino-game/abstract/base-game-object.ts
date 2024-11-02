@@ -1,6 +1,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AbsObjectCoords, GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
 import { ContainerEnds } from '../models/common';
+import { GameObjectType } from '../constants/game-objects';
 
 export interface BaseGameObjectParams {
     left: string;
@@ -13,6 +14,8 @@ export interface BaseGameObjectParams {
 export type ImageType = HTMLImageElement | HTMLCanvasElement;
 
 export abstract class BaseGameObject<T extends ImageType = ImageType> {
+    public abstract type: GameObjectType;
+
     protected abstract _coords$: BehaviorSubject<RelObjectCoords>;
 
     protected abstract get defaultImgSrc(): string;
@@ -65,6 +68,7 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
         this.el.style.transition = 'all 100ms';
         this.el.style.width = this.params.width;
         this.el.style.height = this.params.height;
+        // this.el.style.border = '2px solid blue';
     }
 
     protected changeImg(imgSrc: string): void {
@@ -104,8 +108,7 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
         this._coords$.next({
             ...this._coords$.value,
             topY: newTop,
-            bottomY: newTop + this.el.offsetHeight,
-            visibleTopY: newTop
+            bottomY: newTop + this.el.offsetHeight
         });
     }
 

@@ -1,12 +1,15 @@
 import { BehaviorSubject } from 'rxjs';
 import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
-import { CactusAction, MobileObject } from '../abstract/game-objects-types';
+import { CactusAction, MobileObject } from '../models/game-objects-types';
 import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
 import { Difficulty } from '../models/animation-types';
 import { DinoGameState } from '../models/common';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
+import { GAME_OBJECTS } from '../constants/game-objects';
 
 export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileObject<CactusAction> {
+    public type = GAME_OBJECTS.CACTUS;
+
     protected get defaultImgSrc(): string {
         return '../../../../../../assets/dino-game/svg/cactus.svg';
     }
@@ -37,8 +40,7 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
             topY: top,
             rightX: left + this.el.offsetWidth,
             bottomY: top + this.el.offsetHeight,
-            visibleTopY: top + this.el.offsetHeight - this.el.offsetHeight * 0.5,
-            visibleRightX: left + this.el.offsetWidth - this.el.offsetWidth * 0.5
+            visibleRightX: left + this.el.offsetWidth
         });
 
         this.move('moveLeft');

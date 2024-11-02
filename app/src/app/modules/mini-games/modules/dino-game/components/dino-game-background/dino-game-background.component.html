@@ -1,8 +1,9 @@
-<ng-container *ngLet="{ menuState: menuState$ | async, animationStyle: bgAnimation$ | async } as state">
+<ng-container *ngLet="{ menuState: menuState$ | async, animationStyle: bgAnimation$ | async, timeMs: timeMs$ | async } as state">
     <div class="dino-game-container" id="dino-game-container">
         <div class="dino-game-bg" [ngClass]="[state.animationStyle]">
             <ng-content></ng-content>
         </div>
+        <app-timer [ms]="state.timeMs"></app-timer>
         <app-game-menu
             *ngIf="state.menuState !== 'hidden'"
             [state]="state.menuState"

@@ -6,7 +6,7 @@ import { DinoGameObservers } from './dino-game-observers.service';
 import { DYNO_CONTAINER_ID } from '../constants/common-consts';
 import { DinoGameContainerService } from './dino-game-container.service';
 import { Cactus } from '../game-objects/cactus';
-import { BirdAction, CactusAction, isAnimatedObject, isMobileObject } from '../abstract/game-objects-types';
+import { BirdAction, CactusAction, isAnimatedObject, isMobileObject } from '../models/game-objects-types';
 import { DinoGameStateService } from './dino-game-state.service';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
 import { Bird } from '../game-objects/bird';
@@ -30,7 +30,7 @@ export class DinoGameService {
         this.gameStateSrv.changeGameState({ isPlaying: true, isStarted: true, difficulty: 1 });
 
         this.dinoGameObservers.listenVisibilityChange(this.pauseGame.bind(this));
-        this.dinoGameObservers.listenGameObjectsCoords();
+        this.dinoGameObservers.listenGameObjectsCoords(this.pauseGame.bind(this));
         this.dinoGameObservers.listenKeyEvents(this.pauseGame.bind(this), this.unpauseGame.bind(this));
 
         this.gameStateSrv.player!.doAction('inactiveRun');
@@ -41,7 +41,7 @@ export class DinoGameService {
         this.endGame();
         this.spawnPlayer();
 
-        this.dinoGameObservers.listenGameObjectsCoords();
+        this.dinoGameObservers.listenGameObjectsCoords(this.pauseGame.bind(this));
         this.dinoGameObservers.listenKeyEvents(this.pauseGame.bind(this), this.unpauseGame.bind(this));
 
         this.gameStateSrv.changeGameState({ isPlaying: true, isStarted: true, difficulty: 1 });
@@ -71,23 +71,34 @@ export class DinoGameService {
 
     public endGame(): void {
         this.dinoGameObservers.clearListeners();
+        this.dinoGameObservers.setIsCrawling(false);
         this.gameStateSrv.deleteGameObjects(true);
         this.gameStateSrv.player?.destroy();
-        this.gameStateSrv.changeGameState({ difficulty: 1, isPlaying: false, isStarted: false, gameId: null });
+        this.gameStateSrv.changeGameState({ difficulty: 1, time: 0, isPlaying: false, isStarted: false, isKilled: false, gameId: null });
         this.gameStateSrv.setPlayer(null);
     }
 
     private runScene(): void {
         const { nextRoundWhen, spawnDelay } = DIFFICULTY_CONFIG[this.gameStateSrv.difficulty];
+
+        let ms = 0;
+        const stepMs = 1_000;
+
         const gameId = setInterval(() => {
             if (this.gameStateSrv.time > nextRoundWhen) this.raiseDifficulty();
+            if (ms % spawnDelay === 0) {
+                const random = Math.random();
+                if (this.gameStateSrv.difficulty > 4 && random > 0.5) {
+                    this.spawnBird();
+                } else {
+                    this.spawnCactus();
+                }
+            }
 
-            this.spawnBird();
-            this.spawnCactus();
-
+            ms += stepMs;
             this.gameStateSrv.deleteGameObjects(false);
-            this.gameStateSrv.changeGameState({ time: this.gameStateSrv.time + spawnDelay });
-        }, spawnDelay);
+            this.gameStateSrv.changeGameState({ time: this.gameStateSrv.time + stepMs });
+        }, stepMs);
 
         this.gameStateSrv.changeGameState({ gameId });
     }

@@ -24,7 +24,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         cactusSpeed: -32,
         playerDeltaX: 50,
         playerDeltaY: 30,
-        spawnDelay: 2_900,
+        spawnDelay: 3_000,
         nextRoundWhen: 20_000
     },
     '3': {
@@ -32,7 +32,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         cactusSpeed: -34,
         playerDeltaX: 55,
         playerDeltaY: 30,
-        spawnDelay: 2_800,
+        spawnDelay: 2_000,
         nextRoundWhen: 30_000
     },
     '4': {
@@ -40,7 +40,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         cactusSpeed: -36,
         playerDeltaX: 55,
         playerDeltaY: 30,
-        spawnDelay: 2_750,
+        spawnDelay: 2_000,
         nextRoundWhen: 40_000
     },
     '5': {
@@ -48,7 +48,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         cactusSpeed: -38,
         playerDeltaX: 60,
         playerDeltaY: 30,
-        spawnDelay: 2_700,
+        spawnDelay: 2_000,
         nextRoundWhen: 50_000
     },
     '6': {
@@ -56,7 +56,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         cactusSpeed: -50,
         playerDeltaX: 60,
         playerDeltaY: 30,
-        spawnDelay: 1_900,
+        spawnDelay: 2_000,
         nextRoundWhen: Infinity
     }
 } as const;

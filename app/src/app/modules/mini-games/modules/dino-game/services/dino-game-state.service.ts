@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { DelayMs, DinoGameState } from '../models/common';
 import { Difficulty } from '../models/animation-types';
-import { BaseGameObject, ImageType } from '../abstract/base-game-object';
+import { BaseGameObject } from '../abstract/base-game-object';
 import { Player } from '../game-objects/player';
+import { isNil } from '../../../utils/is-nil';
 
 @Injectable()
 export class DinoGameStateService {
@@ -60,7 +61,8 @@ export class DinoGameStateService {
             ...(state.difficulty && { difficulty: state.difficulty }),
             ...('isStarted' in state && { isStarted: state.isStarted }),
             ...('isPlaying' in state && { isPlaying: state.isPlaying }),
-            ...(state.time && { time: state.time }),
+            ...('isKilled' in state && { isKilled: state.isKilled }),
+            ...(!isNil(state.time) && { time: state.time }),
             ...(state.gameId && { gameId: state.gameId })
         } as DinoGameState;
 

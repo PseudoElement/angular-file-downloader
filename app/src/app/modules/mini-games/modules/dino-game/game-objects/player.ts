@@ -1,23 +1,19 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { PlayerAction } from '../abstract/game-objects-types';
+import { BehaviorSubject } from 'rxjs';
+import { AnimatedObject, PlayerAction } from '../models/game-objects-types';
 import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
-import { DYNO_CONTAINER_ID } from '../constants/common-consts';
-import { wait } from 'src/app/utils/wait';
 import { Difficulty, PlayerAnimation } from '../models/animation-types';
 import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
 import { ANIMATION_PER_ACTION } from '../constants/animation-ticks';
 import { DinoGameState } from '../models/common';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
+import { GAME_OBJECTS } from '../constants/game-objects';
 
-export class Player extends BaseGameObject<HTMLImageElement> {
+export class Player extends BaseGameObject<HTMLImageElement> implements AnimatedObject<PlayerAnimation> {
+    public override type = GAME_OBJECTS.PLAYER;
+
     protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
 
-    public readonly animations: Record<PlayerAnimation, () => void> = {
-        inactive: this.animateInactive,
-        move: this.animateMove
-    };
-
-    public currAction: PlayerAction = 'inactive';
+    private readonly visibleXRatio = 0.55;
 
     private currAnimation: PlayerAnimation = 'inactive';
 
@@ -30,6 +26,8 @@ export class Player extends BaseGameObject<HTMLImageElement> {
     }
 
     private isJumping = false;
+
+    private isKilled = false;
 
     constructor(
         params: BaseGameObjectParams,
@@ -47,10 +45,15 @@ export class Player extends BaseGameObject<HTMLImageElement> {
             topY: top,
             rightX: top + this.el.offsetWidth,
             bottomY: top + this.el.offsetHeight,
-            visibleTopY: top + this.el.offsetHeight - this.el.offsetHeight * 0.5,
-            visibleRightX: left + this.el.offsetWidth - this.el.offsetWidth * 0.5
+            visibleRightX: left + this.el.offsetWidth - this.el.offsetWidth * this.visibleXRatio
         });
         this.updateStyles();
+    }
+
+    public animate(animation: PlayerAnimation): void {
+        if (animation === 'move') this.animateMove();
+        else if (animation === 'die') this.animateDie();
+        else this.animateInactive();
     }
 
     protected createImg(params: BaseGameObjectParams): HTMLImageElement {
@@ -67,11 +70,10 @@ export class Player extends BaseGameObject<HTMLImageElement> {
     }
 
     public async doAction(action: PlayerAction): Promise<void> {
-        this.currAction = action;
         const notShowAnimation = this.currAnimation === ANIMATION_PER_ACTION[action] && this.currAnimation === 'move';
         this.currAnimation = ANIMATION_PER_ACTION[action];
 
-        if (!notShowAnimation) this.animations[this.currAnimation].call(this);
+        if (!notShowAnimation) this.animate(this.currAnimation);
 
         if (action === 'moveRight') this.moveRight();
         if (action === 'moveLeft') this.moveLeft();
@@ -126,6 +128,19 @@ export class Player extends BaseGameObject<HTMLImageElement> {
         this.changeImg('../../../../../../assets/dino-game/png/Idle (1).png');
     }
 
+    private animateDie(): void {
+        let idx = 1;
+        const callback = () => {
+            if (idx > 8) return;
+            this.changeImg(`../../../../../../assets/dino-game/png/Dead (${idx}).png`);
+            idx++;
+
+            setTimeout(() => window.requestAnimationFrame(callback), 50);
+        };
+
+        window.requestAnimationFrame(callback);
+    }
+
     private jump(): void {
         if (this.isJumping) return;
 
@@ -165,7 +180,7 @@ export class Player extends BaseGameObject<HTMLImageElement> {
             ...this._coords$.value,
             leftX: newLeft,
             rightX: newLeft + this.el.offsetWidth,
-            visibleRightX: newLeft + this.el.offsetWidth - this.el.offsetWidth * 0.5
+            visibleRightX: newLeft + this.el.offsetWidth - this.el.offsetWidth * this.visibleXRatio
         });
     }
 
@@ -175,14 +190,12 @@ export class Player extends BaseGameObject<HTMLImageElement> {
         const newTop = parseInt(this.el.style.top);
 
         const topY = newTop;
-        const visibleTopY = newTop + this.el.offsetHeight * 0.5;
         const bottomY = newTop + this.el.offsetHeight;
 
         this._coords$.next({
             ...this._coords$.value,
             topY,
-            bottomY,
-            visibleTopY
+            bottomY
         });
     }
 

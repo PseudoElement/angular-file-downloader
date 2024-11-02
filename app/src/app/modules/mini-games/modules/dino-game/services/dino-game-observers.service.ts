@@ -1,12 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Player } from '../game-objects/player';
-import { BehaviorSubject, filter, fromEvent, Subscription, throttleTime } from 'rxjs';
-import { PlayerKeyboardAction } from '../abstract/game-objects-types';
+import {
+    BehaviorSubject,
+    combineLatest,
+    combineLatestWith,
+    filter,
+    fromEvent,
+    map,
+    Subscription,
+    switchMap,
+    takeWhile,
+    throttleTime
+} from 'rxjs';
+import { PlayerKeyboardAction } from '../models/game-objects-types';
 import { DinoGameStateService } from './dino-game-state.service';
+import { RelObjectCoords } from '../../../models/game-object-types';
+import { GameObjectType } from '../constants/game-objects';
 
 type KeyCodes = {
     [key in PlayerKeyboardAction]: string;
 };
+
+interface CollisionData {
+    coords: RelObjectCoords;
+    type: GameObjectType;
+}
 
 @Injectable()
 export class DinoGameObservers {
@@ -80,27 +98,59 @@ export class DinoGameObservers {
     public listenVisibilityChange(pause: () => void): void {
         fromEvent(document, 'visibilitychange').subscribe(() => {
             if (document.hidden) {
-                // pause();
+                pause();
             }
         });
     }
 
-    public listenGameObjectsCoords(): void {
-        // const sub = interval(1000)
-        //     .pipe(
-        //         switchMap(() => forkJoin([this.gameStateSrv.player$.pipe(first()), this.gameStateSrv.gameObjects$.pipe(first())])),
-        //         skipWhile(() => !this.player),
-        //         switchMap(([player, objects]) =>
-        //             forkJoin([firstValueFrom(player!.getCoords$()), ...objects.map((o) => firstValueFrom(o.getCoords$()))])
-        //         )
-        //     )
-        //     .subscribe();
-        // this.subs.push(sub);
-        // this.player.getCoords$().subscribe((c) => console.log(`top = ${c.topY}, bottom = ${c.bottomY}, visible = ${c.visibleTopY}`));
+    public listenGameObjectsCoords(pause: () => void): void {
+        const sub = this.gameStateSrv.player$
+            .pipe(
+                combineLatestWith(this.gameStateSrv.gameObjects$),
+                switchMap(([player, objects]) =>
+                    combineLatest([
+                        player!.getCoords$().pipe(map((coords) => ({ coords, type: player!.type }))),
+                        ...objects.map((o) =>
+                            o.getCoords$().pipe(
+                                map((coords) => ({ coords, type: o.type })),
+                                takeWhile(() => !o.isDestroyed)
+                            )
+                        )
+                    ])
+                ),
+                throttleTime(100)
+            )
+            .subscribe(([player, ...objects]) => {
+                if (this.checkPlayerDied(player, objects)) {
+                    this.gameStateSrv.changeGameState({ isKilled: true, isPlaying: false });
+                    this.player.animate('die');
+                    pause();
+                }
+            });
+
+        this.subs.push(sub);
+    }
+
+    public setIsCrawling(bool: boolean): void {
+        this.isCrawling = bool;
     }
 
     public clearListeners(): void {
         this.subs.forEach((sub) => sub.unsubscribe());
+    }
+
+    private checkPlayerDied(player: CollisionData, objects: CollisionData[]): boolean {
+        for (const gameObject of objects) {
+            const isKilled =
+                player.coords.leftX < gameObject.coords.rightX &&
+                player.coords.visibleRightX > gameObject.coords.leftX &&
+                player.coords.topY < gameObject.coords.bottomY &&
+                player.coords.bottomY > gameObject.coords.topY;
+
+            if (isKilled) return true;
+        }
+
+        return false;
     }
 
     private jump(): void {
@@ -108,12 +158,12 @@ export class DinoGameObservers {
     }
 
     private crawl(): void {
-        this.isCrawling = true;
+        this.setIsCrawling(true);
         this.player.doAction('crawl');
     }
 
     private uncrawl(): void {
-        this.isCrawling = false;
+        this.setIsCrawling(false);
         this.player.doAction('uncrawl');
     }
 

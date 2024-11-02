@@ -26,6 +26,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { GameMenuComponent } from './components/game-menu/game-menu.component';
 import { GameMenuButtonComponent } from './components/game-menu-button/game-menu-button.component';
+import { FormatMillisecsPipe } from './pipes/format-timestamp.pipe';
+import { TimerComponent } from './components/timer/timer.component';
 
 @NgModule({
     exports: [
@@ -44,7 +46,9 @@ import { GameMenuButtonComponent } from './components/game-menu-button/game-menu
         ShortifyTextPipe,
         DatePickerComponent,
         GameMenuComponent,
-        GameMenuButtonComponent
+        GameMenuButtonComponent,
+        FormatMillisecsPipe,
+        TimerComponent
     ],
     declarations: [
         InputComponent,
@@ -63,7 +67,9 @@ import { GameMenuButtonComponent } from './components/game-menu-button/game-menu
         ShortifyTextPipe,
         DatePickerComponent,
         GameMenuComponent,
-        GameMenuButtonComponent
+        GameMenuButtonComponent,
+        FormatMillisecsPipe,
+        TimerComponent
     ],
     imports: [
         CommonModule,

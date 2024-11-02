@@ -1,13 +1,18 @@
 import { BehaviorSubject } from 'rxjs';
 import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
-import { AnimatedObject, BirdAction, MobileObject } from '../abstract/game-objects-types';
+import { AnimatedObject, BirdAction, MobileObject } from '../models/game-objects-types';
 import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
 import { DinoGameState } from '../models/common';
 import { BirdAnimation, Difficulty } from '../models/animation-types';
 import { SpriteSheetConf } from '../models/spritesheet-types';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
+import { GAME_OBJECTS } from '../constants/game-objects';
 
 export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObject<BirdAction>, AnimatedObject<BirdAnimation> {
+    public type = GAME_OBJECTS.BIRD;
+
+    protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
+
     private spritesheet!: HTMLImageElement;
 
     private ctx!: CanvasRenderingContext2D;
@@ -21,8 +26,6 @@ export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObj
         offsetLeft: 0,
         offsetTop: 200
     };
-
-    protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
 
     protected get defaultImgSrc(): string {
         return '../../../../../../assets/dino-game/bird/FlyingGameCharacter.png';
@@ -52,7 +55,6 @@ export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObj
             topY: top,
             rightX: left + this.el.offsetWidth,
             bottomY: top + this.el.offsetHeight,
-            visibleTopY: top + this.el.offsetHeight,
             visibleRightX: left + this.el.offsetWidth
         });
 

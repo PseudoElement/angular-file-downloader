@@ -6,7 +6,6 @@ export interface RelObjectCoords {
     topY: number;
     bottomY: number;
     visibleRightX: number;
-    visibleTopY: number;
 }
 
 export interface GameContainerInfo {
