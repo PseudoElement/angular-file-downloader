@@ -94,13 +94,13 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
             '../../../../../../assets/dino-game/png/Run (8).png'
         ] as const;
         const imgsSlow = [
-            '../../../../../../assets/dino-game/png/Walk (1).png',
-            '../../../../../../assets/dino-game/png/Walk (2).png',
-            '../../../../../../assets/dino-game/png/Walk (3).png',
-            '../../../../../../assets/dino-game/png/Walk (5).png',
-            '../../../../../../assets/dino-game/png/Walk (7).png',
-            '../../../../../../assets/dino-game/png/Walk (8).png',
-            '../../../../../../assets/dino-game/png/Walk (10).png'
+            '../../../../../../assets/dino-game/png/Walk_1.png',
+            '../../../../../../assets/dino-game/png/Walk_2.png',
+            '../../../../../../assets/dino-game/png/Walk_3.png',
+            '../../../../../../assets/dino-game/png/Walk_5.png',
+            '../../../../../../assets/dino-game/png/Walk_7.png',
+            '../../../../../../assets/dino-game/png/Walk_8.png',
+            '../../../../../../assets/dino-game/png/Walk_10.png'
         ] as const;
 
         const imgs = true ? imgsSlow : imgsFast;
@@ -131,7 +131,7 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
         let idx = 1;
         const callback = () => {
             if (idx > 8) return;
-            this.changeImg(`../../../../../../assets/dino-game/png/Dead (${idx}).png`);
+            this.changeImg(`../../../../../../assets/dino-game/png/Dead_${idx}.png`);
             idx++;
 
             setTimeout(() => window.requestAnimationFrame(callback), 50);
