@@ -1,11 +1,10 @@
 import { BehaviorSubject } from 'rxjs';
 
 export interface RelObjectCoords {
-    leftX: number;
-    rightX: number;
-    topY: number;
-    bottomY: number;
-    visibleRightX: number;
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
 }
 
 export interface GameContainerInfo {

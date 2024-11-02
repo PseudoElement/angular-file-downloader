@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'alfa-slab-one';
+    src: url('./fonts/Alfa_Slab_One/AlfaSlabOne-Regular.ttf');
+}
+
+@mixin ff-alfa($fs: 32px) {
+    font-family: 'alfa-slab-one';
+    font-size: $fs;
+    font-weight: normal;
+    font-style: normal;
+}

@@ -15,6 +15,8 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
 
     private readonly visibleXRatio = 0.55;
 
+    private readonly visibleYRatio = 0.1;
+
     private currAnimation: PlayerAnimation = 'inactive';
 
     private get difficulty(): Difficulty {
@@ -26,8 +28,6 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
     }
 
     private isJumping = false;
-
-    private isKilled = false;
 
     constructor(
         params: BaseGameObjectParams,
@@ -41,11 +41,10 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
         const top = parseFloat(this.el.style.top);
 
         this._coords$ = new BehaviorSubject<RelObjectCoords>({
-            leftX: left,
-            topY: top,
-            rightX: top + this.el.offsetWidth,
-            bottomY: top + this.el.offsetHeight,
-            visibleRightX: left + this.el.offsetWidth - this.el.offsetWidth * this.visibleXRatio
+            left: left,
+            top: top + this.el.offsetHeight * this.visibleYRatio,
+            right: left + this.el.offsetWidth - this.el.offsetWidth * this.visibleXRatio,
+            bottom: top + this.el.offsetHeight - this.el.offsetHeight * this.visibleYRatio
         });
         this.updateStyles();
     }
@@ -178,9 +177,8 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
 
         this._coords$.next({
             ...this._coords$.value,
-            leftX: newLeft,
-            rightX: newLeft + this.el.offsetWidth,
-            visibleRightX: newLeft + this.el.offsetWidth - this.el.offsetWidth * this.visibleXRatio
+            left: newLeft,
+            right: newLeft + this.el.offsetWidth - this.el.offsetWidth * this.visibleXRatio
         });
     }
 
@@ -189,13 +187,13 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
         this.el.style.top = `${prevTop + deltaY}px`;
         const newTop = parseInt(this.el.style.top);
 
-        const topY = newTop;
-        const bottomY = newTop + this.el.offsetHeight;
+        const top = newTop;
+        const bottom = newTop + this.el.offsetHeight;
 
         this._coords$.next({
             ...this._coords$.value,
-            topY,
-            bottomY
+            top: top + this.el.offsetHeight * this.visibleYRatio,
+            bottom: top + this.el.offsetHeight - this.el.offsetHeight * this.visibleYRatio
         });
     }
 

@@ -1,3 +1,5 @@
+@use 'src/styles.scss' as *;
+
 :host {
     .dino-game-container {
         position: relative;
@@ -60,9 +62,12 @@
         }
     }
 
-    app-timer {
+    .dino-game-info {
+        @include flex-column(flex-start, flex-start);
+
         position: absolute;
         top: 10px;
         left: 10px;
+        gap: 8px;
     }
 }

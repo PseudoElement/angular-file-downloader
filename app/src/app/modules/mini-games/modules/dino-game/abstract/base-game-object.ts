@@ -94,9 +94,8 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
 
         this._coords$.next({
             ...this._coords$.value,
-            leftX: newLeft,
-            rightX: newLeft + this.el.offsetWidth,
-            visibleRightX: newLeft + this.el.offsetWidth
+            left: newLeft,
+            right: newLeft + this.el.offsetWidth
         });
     }
 
@@ -107,8 +106,8 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
 
         this._coords$.next({
             ...this._coords$.value,
-            topY: newTop,
-            bottomY: newTop + this.el.offsetHeight
+            top: newTop,
+            bottom: newTop + this.el.offsetHeight
         });
     }
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, shareReplay } from 'rxjs';
 import { DelayMs, DinoGameState } from '../models/common';
 import { Difficulty } from '../models/animation-types';
 import { BaseGameObject } from '../abstract/base-game-object';
@@ -8,14 +8,17 @@ import { isNil } from '../../../utils/is-nil';
 
 @Injectable()
 export class DinoGameStateService {
-    public readonly gameState$ = new BehaviorSubject<DinoGameState>({
+    public readonly gameStateSubj$ = new BehaviorSubject<DinoGameState>({
         time: 0,
         difficulty: 1,
+        score: 0,
         isPlaying: false,
         isKilled: false,
         isStarted: false,
         gameId: null
     });
+
+    public readonly gameState$ = this.gameStateSubj$.pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
     private readonly _player$ = new BehaviorSubject<Player | null>(null);
 
@@ -26,11 +29,15 @@ export class DinoGameStateService {
     public readonly gameObjects$ = this._gameObjects$.asObservable();
 
     public get difficulty(): Difficulty {
-        return this.gameState$.value.difficulty;
+        return this.gameStateSubj$.value.difficulty;
     }
 
     public get time(): DelayMs {
-        return this.gameState$.value.time;
+        return this.gameStateSubj$.value.time;
+    }
+
+    public get score(): DelayMs {
+        return this.gameStateSubj$.value.score;
     }
 
     public get player(): Player | null {
@@ -42,11 +49,11 @@ export class DinoGameStateService {
     }
 
     public get gameId(): NodeJS.Timeout | null {
-        return this.gameState$.value.gameId;
+        return this.gameStateSubj$.value.gameId;
     }
 
     public get isPlaying(): boolean {
-        return this.gameState$.value.isPlaying;
+        return this.gameStateSubj$.value.isPlaying;
     }
 
     constructor() {}
@@ -57,16 +64,17 @@ export class DinoGameStateService {
         }
 
         const newState = {
-            ...this.gameState$.value,
-            ...(state.difficulty && { difficulty: state.difficulty }),
+            ...this.gameStateSubj$.value,
             ...('isStarted' in state && { isStarted: state.isStarted }),
             ...('isPlaying' in state && { isPlaying: state.isPlaying }),
             ...('isKilled' in state && { isKilled: state.isKilled }),
+            ...(!isNil(state.difficulty) && { difficulty: state.difficulty }),
             ...(!isNil(state.time) && { time: state.time }),
+            ...(!isNil(state.score) && { score: state.score }),
             ...(state.gameId && { gameId: state.gameId })
         } as DinoGameState;
 
-        this.gameState$.next(newState);
+        this.gameStateSubj$.next(newState);
     }
 
     public setPlayer(player: Player | null): void {
@@ -87,7 +95,10 @@ export class DinoGameStateService {
                 if (obj.needDestroy()) obj.destroy();
             });
             const notDestroyed = this.gameObjects.filter((obj) => !obj.isDestroyed);
+            const passedObjects = this.gameObjects.length - notDestroyed.length;
+
             this._gameObjects$.next(notDestroyed);
+            this.changeGameState({ score: this.score + passedObjects });
         }
     }
 }

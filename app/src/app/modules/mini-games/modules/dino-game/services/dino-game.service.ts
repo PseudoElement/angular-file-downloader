@@ -13,11 +13,7 @@ import { Bird } from '../game-objects/bird';
 
 @Injectable()
 export class DinoGameService {
-    private readonly gameState$ = this.gameStateSrv.gameState$;
-
-    public readonly bgAnimationStyle$ = this.gameState$.pipe(
-        map((state) => (!state.isPlaying ? 'inactive' : `active-difficulty-${state.difficulty}`))
-    );
+    private readonly gameStateSubj$ = this.gameStateSrv.gameStateSubj$;
 
     constructor(
         private readonly dinoGameObservers: DinoGameObservers,
@@ -74,21 +70,29 @@ export class DinoGameService {
         this.dinoGameObservers.setIsCrawling(false);
         this.gameStateSrv.deleteGameObjects(true);
         this.gameStateSrv.player?.destroy();
-        this.gameStateSrv.changeGameState({ difficulty: 1, time: 0, isPlaying: false, isStarted: false, isKilled: false, gameId: null });
+        this.gameStateSrv.changeGameState({
+            difficulty: 1,
+            time: 0,
+            score: 0,
+            isPlaying: false,
+            isStarted: false,
+            isKilled: false,
+            gameId: null
+        });
         this.gameStateSrv.setPlayer(null);
     }
 
     private runScene(): void {
-        const { nextRoundWhen, spawnDelay } = DIFFICULTY_CONFIG[this.gameStateSrv.difficulty];
-
         let ms = 0;
-        const stepMs = 1_000;
+        const stepMs = 500;
 
         const gameId = setInterval(() => {
+            const { nextRoundWhen, spawnDelay } = DIFFICULTY_CONFIG[this.gameStateSrv.difficulty];
+
             if (this.gameStateSrv.time > nextRoundWhen) this.raiseDifficulty();
             if (ms % spawnDelay === 0) {
                 const random = Math.random();
-                if (this.gameStateSrv.difficulty > 4 && random > 0.5) {
+                if (this.gameStateSrv.difficulty > 3 && random > 0.5) {
                     this.spawnBird();
                 } else {
                     this.spawnCactus();
@@ -111,7 +115,7 @@ export class DinoGameService {
         const player = new Player(
             { height: '150px', width: '200px', left: `60px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
-            this.gameState$
+            this.gameStateSubj$
         );
 
         this.gameStateSrv.setPlayer(player);
@@ -126,7 +130,7 @@ export class DinoGameService {
         const cactus = new Cactus(
             { height: '160px', width: '160px', left: `${containerWidth - 50}px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
-            this.gameState$
+            this.gameStateSubj$
         );
 
         this.gameStateSrv.addGameObject(cactus);
@@ -137,21 +141,21 @@ export class DinoGameService {
         const containerWidth = container.offsetWidth;
         const containerHeight = container.offsetHeight;
 
-        const minPercent = 0.2;
-        const maxPercent = 0.55;
+        const minPercent = 0.3;
+        const maxPercent = 0.65;
         const randomPercent = minPercent + Number((Math.random() * (maxPercent - minPercent)).toFixed(2));
         const top = Math.floor(containerHeight * randomPercent);
 
         const bird = new Bird(
             { height: '75px', width: '100px', left: `${containerWidth}px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
-            this.gameState$
+            this.gameStateSubj$
         );
         this.gameStateSrv.addGameObject(bird);
     }
 
     private raiseDifficulty(): void {
-        this.gameStateSrv.changeGameState({ difficulty: (this.gameStateSrv.difficulty + 1) as Difficulty, gameId: null });
-        this.runScene();
+        this.gameStateSrv.changeGameState({ difficulty: (this.gameStateSrv.difficulty + 1) as Difficulty });
+        // this.runScene();
     }
 }

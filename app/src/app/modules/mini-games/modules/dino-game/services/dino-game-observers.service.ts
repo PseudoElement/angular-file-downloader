@@ -118,7 +118,7 @@ export class DinoGameObservers {
                         )
                     ])
                 ),
-                throttleTime(100)
+                throttleTime(50)
             )
             .subscribe(([player, ...objects]) => {
                 if (this.checkPlayerDied(player, objects)) {
@@ -142,10 +142,10 @@ export class DinoGameObservers {
     private checkPlayerDied(player: CollisionData, objects: CollisionData[]): boolean {
         for (const gameObject of objects) {
             const isKilled =
-                player.coords.leftX < gameObject.coords.rightX &&
-                player.coords.visibleRightX > gameObject.coords.leftX &&
-                player.coords.topY < gameObject.coords.bottomY &&
-                player.coords.bottomY > gameObject.coords.topY;
+                player.coords.left < gameObject.coords.right &&
+                player.coords.right > gameObject.coords.left &&
+                player.coords.top < gameObject.coords.bottom &&
+                player.coords.bottom > gameObject.coords.top;
 
             if (isKilled) return true;
         }

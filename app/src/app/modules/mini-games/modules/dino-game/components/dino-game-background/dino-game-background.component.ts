@@ -17,7 +17,9 @@ export class DinoGameBackgroundComponent implements OnDestroy {
         this.dinoGameSrv.endGame();
     }
 
-    public readonly bgAnimation$ = this.dinoGameSrv.bgAnimationStyle$;
+    public readonly bgAnimation$ = this.gameStateSrv.gameState$.pipe(
+        map((state) => (!state.isPlaying ? 'inactive' : `active-difficulty-${state.difficulty}`))
+    );
 
     public readonly menuState$: Observable<MenuState> = this.gameStateSrv.gameState$.pipe(
         map((state) => {
@@ -32,6 +34,10 @@ export class DinoGameBackgroundComponent implements OnDestroy {
     );
 
     public readonly timeMs$ = this.gameStateSrv.gameState$.pipe(map((state) => state.time));
+
+    public readonly difficulty$ = this.gameStateSrv.gameState$.pipe(map((state) => state.difficulty));
+
+    public readonly score$ = this.gameStateSrv.gameState$.pipe(map((state) => state.score));
 
     public handleMenuBtnClick(btnType: MenuButtonType): void {
         if (btnType === 'continue') {

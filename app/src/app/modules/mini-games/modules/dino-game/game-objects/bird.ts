@@ -51,11 +51,10 @@ export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObj
         const top = parseFloat(this.el.style.top);
 
         this._coords$ = new BehaviorSubject<RelObjectCoords>({
-            leftX: left,
-            topY: top,
-            rightX: left + this.el.offsetWidth,
-            bottomY: top + this.el.offsetHeight,
-            visibleRightX: left + this.el.offsetWidth
+            left: left,
+            top: top,
+            right: left + this.el.offsetWidth,
+            bottom: top + this.el.offsetHeight
         });
 
         this.animate('fly');

@@ -16,7 +16,7 @@ const routes: Routes = [
         loadChildren: () => import('./modules/tutorial/tutorial.module').then((m) => m.TutorialModule)
     },
     {
-        canMatch: [matcherGuard],
+        // canMatch: [matcherGuard],
         path: 'license',
         loadChildren: () => import('./modules/license/license.module').then((m) => m.LicenseModule)
     },

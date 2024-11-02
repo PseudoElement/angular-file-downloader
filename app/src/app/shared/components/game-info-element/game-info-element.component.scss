@@ -1,9 +1,8 @@
 @use 'src/styles.scss' as *;
 
 :host {
-    .timer {
+    .game-info-element {
         @include ff-alfa();
-        font-size: bold;
-        color: greenyellow;
+        color: yellow;
     }
 }

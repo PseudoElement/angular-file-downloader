@@ -12,6 +12,7 @@ export interface ContainerEnds {
 export interface DinoGameState {
     time: number;
     difficulty: Difficulty;
+    score: number;
     isStarted: boolean;
     isPlaying: boolean;
     isKilled: boolean;

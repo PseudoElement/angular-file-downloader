@@ -8,6 +8,19 @@ import { DIFFICULTY_CONFIG } from '../constants/main-config';
 import { GAME_OBJECTS } from '../constants/game-objects';
 
 export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileObject<CactusAction> {
+    private showCollision(): void {
+        const coll = document.createElement('div');
+        coll.style.border = '2px solid blue';
+        coll.style.position = 'absolute';
+        coll.style.top = `${parseInt(this.el.style.top + this.el.offsetHeight * 0.15)}px`;
+        coll.style.bottom = `${parseInt(this.el.style.bottom)}px`;
+
+        coll.style.width = `${Math.abs(parseInt(this.el.style.left) - parseInt(this.el.style.right))}px`;
+        coll.style.height = `${Math.abs(parseInt(this.el.style.height) - this.el.offsetHeight * 0.1)}px`;
+
+        this.el.append(coll);
+    }
+
     public type = GAME_OBJECTS.CACTUS;
 
     protected get defaultImgSrc(): string {
@@ -36,23 +49,13 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
         const top = parseFloat(this.el.style.top);
 
         this._coords$ = new BehaviorSubject<RelObjectCoords>({
-            leftX: left,
-            topY: top,
-            rightX: left + this.el.offsetWidth,
-            bottomY: top + this.el.offsetHeight,
-            visibleRightX: left + this.el.offsetWidth
+            left: left,
+            top: top,
+            right: left + this.el.offsetWidth,
+            bottom: top + this.el.offsetHeight
         });
 
         this.move('moveLeft');
-    }
-
-    protected createImg(params: BaseGameObjectParams): HTMLImageElement {
-        const img = document.createElement('img');
-        img.style.width = params.width;
-        img.style.height = params.height;
-        img.src = params.imgSrc || this.defaultImgSrc;
-
-        return img;
     }
 
     public move(_action: CactusAction): void {
@@ -71,5 +74,38 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
 
     public needDestroy(): boolean {
         return this.checkEnds().isLeftEnd;
+    }
+
+    protected override _changeCoordX(deltaX: number): void {
+        const prevLeft = parseInt(this.el.style.left);
+        this.el.style.left = `${prevLeft + deltaX}px`;
+        const newLeft = parseInt(this.el.style.left);
+
+        this._coords$.next({
+            ...this._coords$.value,
+            left: newLeft + this.el.offsetWidth * 0.15,
+            right: newLeft + this.el.offsetWidth - this.el.offsetWidth * 0.15
+        });
+    }
+
+    protected override _changeCoordY(deltaY: number = 0): void {
+        const prevTop = parseInt(this.el.style.top);
+        this.el.style.top = `${prevTop + deltaY}px`;
+        const newTop = parseInt(this.el.style.top);
+
+        this._coords$.next({
+            ...this._coords$.value,
+            top: newTop + this.el.offsetHeight * 0.15,
+            bottom: newTop + this.el.offsetHeight
+        });
+    }
+
+    protected createImg(params: BaseGameObjectParams): HTMLImageElement {
+        const img = document.createElement('img');
+        img.style.width = params.width;
+        img.style.height = params.height;
+        img.src = params.imgSrc || this.defaultImgSrc;
+
+        return img;
     }
 }
