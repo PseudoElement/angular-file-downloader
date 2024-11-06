@@ -6,6 +6,7 @@ import { Difficulty } from '../models/animation-types';
 import { DinoGameState } from '../models/common';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
 import { GAME_OBJECTS } from '../constants/game-objects';
+import { ImagesForGameObject } from '../models/spritesheet-types';
 
 export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileObject<CactusAction> {
     private showCollision(): void {
@@ -23,8 +24,8 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
 
     public type = GAME_OBJECTS.CACTUS;
 
-    protected get defaultImgSrc(): string {
-        return '../../../../../../assets/dino-game/svg/cactus.svg';
+    protected get images(): ImagesForGameObject {
+        return { inactive: ['../../../../../../assets/dino-game/svg/cactus.svg'] };
     }
 
     protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
@@ -104,7 +105,7 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
         const img = document.createElement('img');
         img.style.width = params.width;
         img.style.height = params.height;
-        img.src = params.imgSrc || this.defaultImgSrc;
+        img.src = params.imgSrc || this.images.inactive![0];
 
         return img;
     }

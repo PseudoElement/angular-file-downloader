@@ -1,15 +1,55 @@
 import { BehaviorSubject } from 'rxjs';
 import { AnimatedObject, PlayerAction } from '../models/game-objects-types';
-import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
+import { BaseGameObjectParams } from '../abstract/base-game-object';
 import { Difficulty, PlayerAnimation } from '../models/animation-types';
 import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
 import { ANIMATION_PER_ACTION } from '../constants/animation-ticks';
 import { DinoGameState } from '../models/common';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
 import { GAME_OBJECTS } from '../constants/game-objects';
+import { GameObjectSpritesheetConfigs, ImagesForGameObject, SpriteSheetConfig } from '../models/spritesheet-types';
+import { CanvasGameObject } from '../abstract/canvas-game-object';
 
-export class Player extends BaseGameObject<HTMLImageElement> implements AnimatedObject<PlayerAnimation> {
-    public override type = GAME_OBJECTS.PLAYER;
+export class Player extends CanvasGameObject implements AnimatedObject<PlayerAnimation> {
+    protected getSpriteConfig(): GameObjectSpritesheetConfigs {
+        return {
+            moving: {
+                columns: 3,
+                rows: 4,
+                count: 10,
+                offsetLeft: 0,
+                offsetTop: 0,
+                imgHeight: 370.25,
+                imgWidth: 533.33,
+                canvasHeight: parseInt(this.params.height),
+                canvasWidth: parseInt(this.params.width)
+            },
+            inactive: {
+                columns: 1,
+                rows: 1,
+                count: 1,
+                offsetLeft: 0,
+                offsetTop: 0,
+                imgHeight: 472,
+                imgWidth: 680,
+                canvasHeight: parseInt(this.params.height),
+                canvasWidth: parseInt(this.params.width)
+            },
+            die: {
+                columns: 1,
+                rows: 1,
+                count: 1,
+                offsetLeft: 0,
+                offsetTop: 0,
+                imgHeight: 472,
+                imgWidth: 680,
+                canvasHeight: parseInt(this.params.height),
+                canvasWidth: parseInt(this.params.width)
+            }
+        };
+    }
+
+    public type = GAME_OBJECTS.PLAYER;
 
     protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
 
@@ -23,8 +63,20 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
         return this.gameState$.value.difficulty;
     }
 
-    protected get defaultImgSrc(): string {
-        return '../../../../../../assets/dino-game/png/Idle (1).png';
+    protected get images(): ImagesForGameObject {
+        return {
+            inactive: ['../../../../../../assets/dino-game/png/Idle (1).png'],
+            die: [
+                '../../../../../../assets/dino-game/png/Dead_1.png',
+                '../../../../../../assets/dino-game/png/Dead_2.png',
+                '../../../../../../assets/dino-game/png/Dead_3.png',
+                '../../../../../../assets/dino-game/png/Dead_4.png',
+                '../../../../../../assets/dino-game/png/Dead_5.png',
+                '../../../../../../assets/dino-game/png/Dead_6.png'
+            ],
+            jump: [],
+            moving: ['../../../../../../assets/dino-game/player/dino-walk-sprite.png']
+        };
     }
 
     private isJumping = false;
@@ -47,21 +99,16 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
             bottom: top + this.el.offsetHeight - this.el.offsetHeight * this.visibleYRatio
         });
         this.updateStyles();
+
+        this.loadSpriteImage('inactive', 0);
     }
+
+    protected setCanvasStyles(): void {}
 
     public animate(animation: PlayerAnimation): void {
         if (animation === 'move') this.animateMove();
         else if (animation === 'die') this.animateDie();
         else this.animateInactive();
-    }
-
-    protected createImg(params: BaseGameObjectParams): HTMLImageElement {
-        const img = document.createElement('img');
-        img.style.width = params.width;
-        img.style.height = params.height;
-        img.src = params.imgSrc || this.defaultImgSrc;
-
-        return img;
     }
 
     public needDestroy(): boolean {
@@ -83,38 +130,17 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
     }
 
     private animateMove(): void {
-        const imgsFast = [
-            '../../../../../../assets/dino-game/png/Run (1).png',
-            '../../../../../../assets/dino-game/png/Run (2).png',
-            '../../../../../../assets/dino-game/png/Run (3).png',
-            '../../../../../../assets/dino-game/png/Run (4).png',
-            '../../../../../../assets/dino-game/png/Run (5).png',
-            '../../../../../../assets/dino-game/png/Run (6).png',
-            '../../../../../../assets/dino-game/png/Run (7).png',
-            '../../../../../../assets/dino-game/png/Run (8).png'
-        ] as const;
-        const imgsSlow = [
-            '../../../../../../assets/dino-game/png/Walk_1.png',
-            '../../../../../../assets/dino-game/png/Walk_2.png',
-            '../../../../../../assets/dino-game/png/Walk_3.png',
-            '../../../../../../assets/dino-game/png/Walk_5.png',
-            '../../../../../../assets/dino-game/png/Walk_7.png',
-            '../../../../../../assets/dino-game/png/Walk_8.png',
-            '../../../../../../assets/dino-game/png/Walk_10.png'
-        ] as const;
-
-        const imgs = true ? imgsSlow : imgsFast;
-        let idx = 0;
+        let idx = 1;
+        this.loadSpriteImage('moving', 0);
 
         const callback = (_timestamp: number) => {
             if (this.currAnimation !== 'move') return;
 
             setTimeout(() => {
-                const img = imgs[idx];
-                this.changeImg(img);
+                this.draw('moving', idx);
 
-                if (idx < imgs.length - 1) idx++;
-                else idx = 0;
+                if (idx < this.getSpriteConfig().moving!.count) idx++;
+                else idx = 1;
 
                 window.requestAnimationFrame(callback);
             }, 70);
@@ -124,14 +150,19 @@ export class Player extends BaseGameObject<HTMLImageElement> implements Animated
     }
 
     private animateInactive(): void {
-        this.changeImg('../../../../../../assets/dino-game/png/Idle (1).png');
+        const drawCallback = this.draw.bind(this, 'inactive', 1);
+        this.loadSpriteImage('inactive', 0, drawCallback);
     }
 
     private animateDie(): void {
-        let idx = 1;
+        let idx = 0;
+        const dieImgs = this.images.die!;
+
         const callback = () => {
-            if (idx > 8) return;
-            this.changeImg(`../../../../../../assets/dino-game/png/Dead_${idx}.png`);
+            if (idx >= dieImgs.length) return;
+
+            const drawCallback = this.draw.bind(this, 'die', 1);
+            this.loadSpriteImage('die', idx, drawCallback);
             idx++;
 
             setTimeout(() => window.requestAnimationFrame(callback), 50);

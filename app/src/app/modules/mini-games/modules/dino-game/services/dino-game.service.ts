@@ -92,7 +92,7 @@ export class DinoGameService {
             if (this.gameStateSrv.time > nextRoundWhen) this.raiseDifficulty();
             if (ms % spawnDelay === 0) {
                 const random = Math.random();
-                if (this.gameStateSrv.difficulty > 3 && random > 0.5) {
+                if (random > 0.5) {
                     this.spawnBird();
                 } else {
                     this.spawnCactus();
@@ -110,10 +110,10 @@ export class DinoGameService {
     private spawnPlayer(): void {
         const container = document.getElementById(DYNO_CONTAINER_ID)!;
         const containerHeight = container.offsetHeight;
-        const top = Math.floor(containerHeight * 0.68);
+        const top = Math.floor(containerHeight * 0.7);
 
         const player = new Player(
-            { height: '150px', width: '200px', left: `60px`, top: `${top}px` },
+            { height: '120px', width: '160px', left: `60px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
             this.gameStateSubj$
         );

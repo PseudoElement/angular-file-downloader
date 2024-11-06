@@ -2,6 +2,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { AbsObjectCoords, GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
 import { ContainerEnds } from '../models/common';
 import { GameObjectType } from '../constants/game-objects';
+import { ImagesForGameObject } from '../models/spritesheet-types';
 
 export interface BaseGameObjectParams {
     left: string;
@@ -18,7 +19,7 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
 
     protected abstract _coords$: BehaviorSubject<RelObjectCoords>;
 
-    protected abstract get defaultImgSrc(): string;
+    protected abstract images: ImagesForGameObject;
 
     protected el!: HTMLDivElement;
 
@@ -31,7 +32,7 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
     }
 
     constructor(
-        private readonly params: BaseGameObjectParams,
+        protected readonly params: BaseGameObjectParams,
         private readonly containerInfo: GameContainerInfo,
         private readonly rootNode: HTMLElement
     ) {

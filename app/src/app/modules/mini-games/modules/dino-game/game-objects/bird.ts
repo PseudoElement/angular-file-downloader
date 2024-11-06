@@ -4,31 +4,34 @@ import { AnimatedObject, BirdAction, MobileObject } from '../models/game-objects
 import { BaseGameObject, BaseGameObjectParams } from '../abstract/base-game-object';
 import { DinoGameState } from '../models/common';
 import { BirdAnimation, Difficulty } from '../models/animation-types';
-import { SpriteSheetConf } from '../models/spritesheet-types';
+import { GameObjectSpritesheetConfigs, ImagesForGameObject, SpriteSheetConfig } from '../models/spritesheet-types';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
 import { GAME_OBJECTS } from '../constants/game-objects';
+import { CanvasGameObject } from '../abstract/canvas-game-object';
 
-export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObject<BirdAction>, AnimatedObject<BirdAnimation> {
+export class Bird extends CanvasGameObject implements MobileObject<BirdAction>, AnimatedObject<BirdAnimation> {
     public type = GAME_OBJECTS.BIRD;
 
     protected readonly _coords$: BehaviorSubject<RelObjectCoords>;
 
-    private spritesheet!: HTMLImageElement;
+    protected getSpriteConfig(): GameObjectSpritesheetConfigs {
+        return {
+            moving: {
+                columns: 4,
+                rows: 2,
+                count: 8,
+                imgHeight: 100,
+                imgWidth: 150,
+                offsetLeft: 0,
+                offsetTop: 200,
+                canvasHeight: parseInt(this.params.height),
+                canvasWidth: parseInt(this.params.width)
+            }
+        };
+    }
 
-    private ctx!: CanvasRenderingContext2D;
-
-    protected config: SpriteSheetConf = {
-        columns: 4,
-        rows: 2,
-        count: 8,
-        imgHeight: 100,
-        imgWidth: 150,
-        offsetLeft: 0,
-        offsetTop: 200
-    };
-
-    protected get defaultImgSrc(): string {
-        return '../../../../../../assets/dino-game/bird/FlyingGameCharacter.png';
+    protected get images(): ImagesForGameObject {
+        return { moving: ['../../../../../../assets/dino-game/bird/FlyingGameCharacter.png'] };
     }
 
     private get isPlaying(): boolean {
@@ -47,8 +50,8 @@ export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObj
         const rootNode = document.getElementById(containerInfo.id)!;
         super(params, containerInfo, rootNode);
 
-        const left = parseFloat(this.el.style.left);
-        const top = parseFloat(this.el.style.top);
+        const left = parseInt(this.el.style.left);
+        const top = parseInt(this.el.style.top);
 
         this._coords$ = new BehaviorSubject<RelObjectCoords>({
             left: left,
@@ -57,18 +60,20 @@ export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObj
             bottom: top + this.el.offsetHeight
         });
 
+        this.loadSpriteImage('moving', 0);
         this.animate('fly');
         this.move('moveLeft');
     }
 
     public animate(_animation: BirdAnimation): void {
         let frameNum = 1;
+        const moveConfig = this.getSpriteConfig().moving!;
 
         const callback = () => {
             if (this.isDestroyed || !this.isPlaying) return;
-            this.draw(frameNum);
+            this.draw('moving', frameNum);
 
-            if (frameNum < this.config.count) frameNum++;
+            if (frameNum < moveConfig.count) frameNum++;
             else frameNum = 1;
 
             setTimeout(() => {
@@ -77,17 +82,6 @@ export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObj
         };
 
         window.requestAnimationFrame(callback);
-    }
-
-    private draw(frameNum: number): void {
-        const columnNum = frameNum % this.config.columns === 0 ? this.config.columns : frameNum % this.config.columns; // from 1
-        const rowNum = Math.ceil(frameNum / this.config.columns); // from 1
-
-        const offsetLeft = this.config.offsetLeft + (columnNum - 1) * this.config.imgWidth;
-        const offsetTop = this.config.offsetTop + (rowNum - 1) * this.config.imgHeight;
-
-        this.ctx.clearRect(0, 0, 100, 75);
-        this.ctx.drawImage(this.spritesheet, offsetLeft, offsetTop, this.config.imgWidth, this.config.imgHeight, 0, 0, 100, 75);
     }
 
     public override needDestroy(): boolean {
@@ -113,48 +107,7 @@ export class Bird extends BaseGameObject<HTMLCanvasElement> implements MobileObj
         window.requestAnimationFrame(callback);
     }
 
-    protected createImg(params: BaseGameObjectParams): HTMLCanvasElement {
-        const canvas = document.createElement('canvas');
-        this.ctx = canvas.getContext('2d')!;
-
-        const width = parseInt(params.width);
-        const height = parseInt(params.height);
-
-        canvas.width = width;
-        canvas.height = height;
-        canvas.style.transform = `rotateY(180deg)`;
-        this.loadSpriteImage(params);
-
-        return canvas;
-    }
-
-    private loadSpriteImage(params: BaseGameObjectParams): void {
-        const img = new Image();
-        img.src = this.defaultImgSrc;
-        this.spritesheet = img;
-
-        img.onload = () => {
-            const offsetLeft = this.config.offsetLeft; // offset from left end to start sprite by X in png
-            const offsetTop = this.config.offsetTop; // offset from top end to start sprite by Y in png
-            const birdWidth = this.config.imgWidth; // width of bird in png
-            const birdHeight = this.config.imgHeight; // height of bird in png
-            const offsetLeftInCanvas = 0; // offset from left to draw in canvas
-            const offsetTopInCanvas = 0; // offset from top to draw in canvas
-            const canvasWidth = 100;
-            const canvasHeight = 75;
-
-            // Draw the first sprite at (0, 300) on the sprite sheet
-            this.ctx.drawImage(
-                this.spritesheet,
-                offsetLeft,
-                offsetTop,
-                birdWidth,
-                birdHeight,
-                offsetLeftInCanvas,
-                offsetTopInCanvas,
-                canvasWidth,
-                canvasHeight
-            );
-        };
+    protected setCanvasStyles(canvas: HTMLCanvasElement): void {
+        canvas.style.transform = 'rotateY(180deg)';
     }
 }

@@ -62,12 +62,12 @@ export class DinoGameObservers {
                         (!this.gameStateSrv.isPlaying && !this.gameStateSrv.isKilled && e.key === this.keyCodes.pause_unpause)
                 )
             )
-            .subscribe(async (e) => {
+            .subscribe((e) => {
                 const keyboardEvent = e as KeyboardEvent;
 
                 if (keyboardEvent.key === this.keyCodes.pause_unpause) {
                     if (this.gameStateSrv.isPlaying) {
-                        this.inactive();
+                        // this.inactive();
                         pause();
                     } else {
                         this.active();
