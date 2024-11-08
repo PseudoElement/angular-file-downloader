@@ -24,7 +24,7 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
 
     public type = GAME_OBJECTS.CACTUS;
 
-    protected get images(): ImagesForGameObject {
+    protected get imagesSrcs(): ImagesForGameObject {
         return { inactive: ['../../../../../../assets/dino-game/svg/cactus.svg'] };
     }
 
@@ -59,7 +59,7 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
         this.move('moveLeft');
     }
 
-    public move(_action: CactusAction): void {
+    public move(_action: CactusAction = 'moveLeft'): void {
         const callback = (_timestamp: number) => {
             if (this.isDestroyed || !this.isPlaying) return;
 
@@ -105,7 +105,7 @@ export class Cactus extends BaseGameObject<HTMLImageElement> implements MobileOb
         const img = document.createElement('img');
         img.style.width = params.width;
         img.style.height = params.height;
-        img.src = params.imgSrc || this.images.inactive![0];
+        img.src = params.imgSrc || this.imagesSrcs.inactive![0];
 
         return img;
     }

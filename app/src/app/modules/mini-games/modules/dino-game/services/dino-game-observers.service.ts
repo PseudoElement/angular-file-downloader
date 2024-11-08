@@ -12,18 +12,22 @@ import {
     takeWhile,
     throttleTime
 } from 'rxjs';
-import { PlayerKeyboardAction } from '../models/game-objects-types';
+import { assertObjectFarmable, isFarmableObject, PlayerKeyboardAction } from '../models/game-objects-types';
 import { DinoGameStateService } from './dino-game-state.service';
 import { RelObjectCoords } from '../../../models/game-object-types';
 import { GameObjectType } from '../constants/game-objects';
+import { BaseGameObject } from '../abstract/base-game-object';
 
 type KeyCodes = {
     [key in PlayerKeyboardAction]: string;
 };
 
-interface CollisionData {
+interface PlayerCollisionData {
     coords: RelObjectCoords;
-    type: GameObjectType;
+}
+
+interface CollisionData extends PlayerCollisionData {
+    object: BaseGameObject;
 }
 
 @Injectable()
@@ -110,10 +114,10 @@ export class DinoGameObservers {
                 combineLatestWith(this.gameStateSrv.gameObjects$),
                 switchMap(([player, objects]) =>
                     combineLatest([
-                        player!.getCoords$().pipe(map((coords) => ({ coords, type: player!.type }))),
+                        player!.getCoords$().pipe(map((coords) => ({ coords }))),
                         ...objects.map((o) =>
                             o.getCoords$().pipe(
-                                map((coords) => ({ coords, type: o.type })),
+                                map((coords) => ({ coords, object: o })),
                                 takeWhile(() => !o.isDestroyed)
                             )
                         )
@@ -122,7 +126,13 @@ export class DinoGameObservers {
                 throttleTime(50)
             )
             .subscribe(([player, ...objects]) => {
-                if (this.checkPlayerDied(player, objects)) {
+                const touched = this.checkPlayerTouchObject(player, objects);
+                if (!touched) return;
+
+                if (isFarmableObject(touched.object)) {
+                    this.player.farm(touched.object);
+                    this.gameStateSrv.deleteGameObjects(false);
+                } else {
                     this.gameStateSrv.changeGameState({ isKilled: true, isPlaying: false });
                     this.player.animate('die');
                     pause();
@@ -140,18 +150,18 @@ export class DinoGameObservers {
         this.subs.forEach((sub) => sub.unsubscribe());
     }
 
-    private checkPlayerDied(player: CollisionData, objects: CollisionData[]): boolean {
+    private checkPlayerTouchObject(player: PlayerCollisionData, objects: CollisionData[]): CollisionData | null {
         for (const gameObject of objects) {
-            const isKilled =
+            const isTouched =
                 player.coords.left < gameObject.coords.right &&
                 player.coords.right > gameObject.coords.left &&
                 player.coords.top < gameObject.coords.bottom &&
                 player.coords.bottom > gameObject.coords.top;
 
-            if (isKilled) return true;
+            if (isTouched) return gameObject;
         }
 
-        return false;
+        return null;
     }
 
     private jump(): void {

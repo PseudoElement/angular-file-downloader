@@ -1,5 +1,5 @@
 import { BehaviorSubject } from 'rxjs';
-import { AnimatedObject, PlayerAction } from '../models/game-objects-types';
+import { AnimatedObject, Farmable, PlayerAction } from '../models/game-objects-types';
 import { BaseGameObjectParams } from '../abstract/base-game-object';
 import { Difficulty, PlayerAnimation } from '../models/animation-types';
 import { GameContainerInfo, RelObjectCoords } from '../../../models/game-object-types';
@@ -7,13 +7,13 @@ import { ANIMATION_PER_ACTION } from '../constants/animation-ticks';
 import { DinoGameState } from '../models/common';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
 import { GAME_OBJECTS } from '../constants/game-objects';
-import { GameObjectSpritesheetConfigs, ImagesForGameObject, SpriteSheetConfig } from '../models/spritesheet-types';
+import { GameObjectSpritesheetConfigs, ImagesForGameObject } from '../models/spritesheet-types';
 import { CanvasGameObject } from '../abstract/canvas-game-object';
 
 export class Player extends CanvasGameObject implements AnimatedObject<PlayerAnimation> {
     protected getSpriteConfig(): GameObjectSpritesheetConfigs {
         return {
-            moving: {
+            move: {
                 columns: 3,
                 rows: 4,
                 count: 10,
@@ -63,7 +63,7 @@ export class Player extends CanvasGameObject implements AnimatedObject<PlayerAni
         return this.gameState$.value.difficulty;
     }
 
-    protected get images(): ImagesForGameObject {
+    protected get imagesSrcs(): ImagesForGameObject {
         return {
             inactive: ['../../../../../../assets/dino-game/png/Idle (1).png'],
             die: [
@@ -75,7 +75,7 @@ export class Player extends CanvasGameObject implements AnimatedObject<PlayerAni
                 '../../../../../../assets/dino-game/png/Dead_6.png'
             ],
             jump: [],
-            moving: ['../../../../../../assets/dino-game/player/dino-walk-sprite.png']
+            move: ['../../../../../../assets/dino-game/player/dino-walk-sprite.png']
         };
     }
 
@@ -84,7 +84,8 @@ export class Player extends CanvasGameObject implements AnimatedObject<PlayerAni
     constructor(
         params: BaseGameObjectParams,
         containerInfo: GameContainerInfo,
-        private readonly gameState$: BehaviorSubject<DinoGameState>
+        private readonly gameState$: BehaviorSubject<DinoGameState>,
+        private readonly changeGameState: (state: Partial<DinoGameState>) => void
     ) {
         const rootNode = document.getElementById(containerInfo.id)!;
         super(params, containerInfo, rootNode);
@@ -98,12 +99,19 @@ export class Player extends CanvasGameObject implements AnimatedObject<PlayerAni
             right: left + this.el.offsetWidth - this.el.offsetWidth * this.visibleXRatio,
             bottom: top + this.el.offsetHeight - this.el.offsetHeight * this.visibleYRatio
         });
-        this.updateStyles();
 
-        this.loadSpriteImage('inactive', 0);
+        this.updateStyles();
+        this.loadSprites();
     }
 
     protected setCanvasStyles(): void {}
+
+    public farm(farmableObj: Farmable): void {
+        console.log('FARM');
+        const newScore = this.gameState$.value.score + farmableObj.price;
+        this.changeGameState({ score: newScore });
+        farmableObj.beGrabbed();
+    }
 
     public animate(animation: PlayerAnimation): void {
         if (animation === 'move') this.animateMove();
@@ -124,22 +132,20 @@ export class Player extends CanvasGameObject implements AnimatedObject<PlayerAni
         if (action === 'moveRight') this.moveRight();
         if (action === 'moveLeft') this.moveLeft();
         if (action === 'jump') this.jump();
-        if (action === 'die') this.die();
         if (action === 'crawl') this.crawl();
         if (action === 'uncrawl') this.uncrawl();
     }
 
     private animateMove(): void {
         let idx = 1;
-        this.loadSpriteImage('moving', 0);
 
         const callback = (_timestamp: number) => {
             if (this.currAnimation !== 'move') return;
 
             setTimeout(() => {
-                this.draw('moving', idx);
+                this.draw('move', idx);
 
-                if (idx < this.getSpriteConfig().moving!.count) idx++;
+                if (idx < this.getSpriteConfig().move!.count) idx++;
                 else idx = 1;
 
                 window.requestAnimationFrame(callback);
@@ -150,19 +156,17 @@ export class Player extends CanvasGameObject implements AnimatedObject<PlayerAni
     }
 
     private animateInactive(): void {
-        const drawCallback = this.draw.bind(this, 'inactive', 1);
-        this.loadSpriteImage('inactive', 0, drawCallback);
+        this.draw('inactive', 1);
     }
 
     private animateDie(): void {
         let idx = 0;
-        const dieImgs = this.images.die!;
+        const dieImgs = this.imagesSrcs.die!;
 
         const callback = () => {
             if (idx >= dieImgs.length) return;
 
-            const drawCallback = this.draw.bind(this, 'die', 1);
-            this.loadSpriteImage('die', idx, drawCallback);
+            this.draw('die', 1, idx);
             idx++;
 
             setTimeout(() => window.requestAnimationFrame(callback), 50);
@@ -239,8 +243,6 @@ export class Player extends CanvasGameObject implements AnimatedObject<PlayerAni
         const deltaX = -DIFFICULTY_CONFIG[this.difficulty].playerDeltaX;
         window.requestAnimationFrame(() => this._changeCoordX(deltaX));
     }
-
-    private async die(): Promise<void> {}
 
     private async crawl(): Promise<void> {
         const widthNum = parseFloat(this.el.style.width);

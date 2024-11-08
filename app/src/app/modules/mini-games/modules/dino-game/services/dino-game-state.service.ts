@@ -5,6 +5,7 @@ import { Difficulty } from '../models/animation-types';
 import { BaseGameObject } from '../abstract/base-game-object';
 import { Player } from '../game-objects/player';
 import { isNil } from '../../../utils/is-nil';
+import { isFarmableObject } from '../models/game-objects-types';
 
 @Injectable()
 export class DinoGameStateService {
@@ -60,7 +61,9 @@ export class DinoGameStateService {
         return this.gameStateSubj$.value.isKilled;
     }
 
-    constructor() {}
+    constructor() {
+        this.gameObjects$.subscribe(console.log);
+    }
 
     public changeGameState(state: Partial<DinoGameState>): void {
         if ('gameId' in state && state.gameId === null) {
@@ -98,11 +101,13 @@ export class DinoGameStateService {
             this.gameObjects.forEach((obj) => {
                 if (obj.needDestroy()) obj.destroy();
             });
+
             const notDestroyed = this.gameObjects.filter((obj) => !obj.isDestroyed);
-            const passedObjects = this.gameObjects.length - notDestroyed.length;
+            const passedFarmable = this.gameObjects.filter((obj) => obj.isDestroyed && isFarmableObject(obj));
+            const reward = this.gameObjects.length - notDestroyed.length - passedFarmable.length;
 
             this._gameObjects$.next(notDestroyed);
-            this.changeGameState({ score: this.score + passedObjects });
+            this.changeGameState({ score: this.score + reward });
         }
     }
 }

@@ -8,6 +8,7 @@ interface DinoGameData {
     playerDeltaY: number;
     spawnDelay: DelayMs;
     nextRoundWhen: DelayMs;
+    coinDelay: DelayMs;
 }
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
@@ -17,7 +18,8 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 50,
         playerDeltaY: 30,
         spawnDelay: 3_000,
-        nextRoundWhen: 10_000
+        nextRoundWhen: 10_000,
+        coinDelay: 3_000
     },
     '2': {
         birdSpeed: -25,
@@ -25,7 +27,8 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 50,
         playerDeltaY: 30,
         spawnDelay: 3_000,
-        nextRoundWhen: 20_000
+        nextRoundWhen: 20_000,
+        coinDelay: 3_000
     },
     '3': {
         birdSpeed: -30,
@@ -33,7 +36,8 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 55,
         playerDeltaY: 30,
         spawnDelay: 2_500,
-        nextRoundWhen: 30_000
+        nextRoundWhen: 30_000,
+        coinDelay: 3_000
     },
     '4': {
         birdSpeed: -35,
@@ -41,7 +45,8 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 55,
         playerDeltaY: 30,
         spawnDelay: 2_500,
-        nextRoundWhen: 40_000
+        nextRoundWhen: 40_000,
+        coinDelay: 3_000
     },
     '5': {
         birdSpeed: -40,
@@ -49,7 +54,8 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 60,
         playerDeltaY: 30,
         spawnDelay: 2_000,
-        nextRoundWhen: 50_000
+        nextRoundWhen: 50_000,
+        coinDelay: 3_000
     },
     '6': {
         birdSpeed: -45,
@@ -57,6 +63,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 60,
         playerDeltaY: 30,
         spawnDelay: 1_500,
-        nextRoundWhen: Infinity
+        nextRoundWhen: Infinity,
+        coinDelay: 3_000
     }
 } as const;

@@ -1,4 +1,4 @@
-export type SpriteAnimation = 'inactive' | 'moving' | 'die' | 'jump';
+export type SpriteAnimation = 'inactive' | 'move' | 'die' | 'jump';
 
 export type GameObjectSpritesheetConfigs = {
     [key in SpriteAnimation]?: SpriteSheetConfig;
@@ -17,8 +17,9 @@ export interface SpriteSheetConfig {
 }
 
 export type ImagesForGameObject = {
-    inactive?: string[];
-    moving?: string[];
-    die?: string[];
-    jump?: string[];
+    [key in SpriteAnimation]?: string[];
+};
+
+export type LoadedImagesForGameObject = {
+    [key in SpriteAnimation]?: HTMLImageElement[];
 };

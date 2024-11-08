@@ -16,7 +16,7 @@ export class Bird extends CanvasGameObject implements MobileObject<BirdAction>, 
 
     protected getSpriteConfig(): GameObjectSpritesheetConfigs {
         return {
-            moving: {
+            move: {
                 columns: 4,
                 rows: 2,
                 count: 8,
@@ -30,8 +30,8 @@ export class Bird extends CanvasGameObject implements MobileObject<BirdAction>, 
         };
     }
 
-    protected get images(): ImagesForGameObject {
-        return { moving: ['../../../../../../assets/dino-game/bird/FlyingGameCharacter.png'] };
+    protected get imagesSrcs(): ImagesForGameObject {
+        return { move: ['../../../../../../assets/dino-game/bird/FlyingGameCharacter.png'] };
     }
 
     private get isPlaying(): boolean {
@@ -60,18 +60,18 @@ export class Bird extends CanvasGameObject implements MobileObject<BirdAction>, 
             bottom: top + this.el.offsetHeight
         });
 
-        this.loadSpriteImage('moving', 0);
+        this.loadSprites();
         this.animate('fly');
         this.move('moveLeft');
     }
 
-    public animate(_animation: BirdAnimation): void {
+    public animate(_animation: BirdAnimation = 'fly'): void {
         let frameNum = 1;
-        const moveConfig = this.getSpriteConfig().moving!;
+        const moveConfig = this.getSpriteConfig().move!;
 
         const callback = () => {
             if (this.isDestroyed || !this.isPlaying) return;
-            this.draw('moving', frameNum);
+            this.draw('move', frameNum);
 
             if (frameNum < moveConfig.count) frameNum++;
             else frameNum = 1;
@@ -88,7 +88,7 @@ export class Bird extends CanvasGameObject implements MobileObject<BirdAction>, 
         return this.checkEnds().isLeftEnd;
     }
 
-    public move(_action: BirdAction): void {
+    public move(_action: BirdAction = 'moveLeft'): void {
         let idx = 0;
         const callback = (_timestamp: number) => {
             if (this.isDestroyed || !this.isPlaying) return;

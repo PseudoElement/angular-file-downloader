@@ -19,7 +19,7 @@ export abstract class BaseGameObject<T extends ImageType = ImageType> {
 
     protected abstract _coords$: BehaviorSubject<RelObjectCoords>;
 
-    protected abstract images: ImagesForGameObject;
+    protected abstract imagesSrcs: ImagesForGameObject;
 
     protected el!: HTMLDivElement;
 

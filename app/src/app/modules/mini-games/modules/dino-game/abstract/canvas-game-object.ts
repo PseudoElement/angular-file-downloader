@@ -1,14 +1,15 @@
-import { GameObjectSpritesheetConfigs, SpriteAnimation } from '../models/spritesheet-types';
+import { GameObjectSpritesheetConfigs, ImagesForGameObject, LoadedImagesForGameObject, SpriteAnimation } from '../models/spritesheet-types';
 import { BaseGameObject, BaseGameObjectParams } from './base-game-object';
 
 export abstract class CanvasGameObject extends BaseGameObject<HTMLCanvasElement> {
-    protected spritesheet!: HTMLImageElement;
+    private spritesheets: LoadedImagesForGameObject = {
+        die: [],
+        inactive: [],
+        jump: [],
+        move: []
+    };
 
     private ctx!: CanvasRenderingContext2D;
-
-    protected getCtx(): CanvasRenderingContext2D {
-        return this.ctx;
-    }
 
     protected abstract getSpriteConfig(): GameObjectSpritesheetConfigs;
 
@@ -27,23 +28,33 @@ export abstract class CanvasGameObject extends BaseGameObject<HTMLCanvasElement>
         return canvas;
     }
 
-    protected draw(spriteName: SpriteAnimation, frameNum: number): void {
-        const sprite = this.getSpriteConfig()[spriteName]!;
-        const columnNum = frameNum % sprite.columns === 0 ? sprite.columns : frameNum % sprite.columns; // from 1
-        const rowNum = Math.ceil(frameNum / sprite.columns); // from 1
+    /**
+     *
+     * @param spriteAnimation move
+     * @param frameNum from 1 to last count of image in sprite.
+     *  If for some animation on each step used different image (e.g. spriteIdx = 0) then frameNum should be 0.
+     * @param spriteIdx index of image in imagesSrcs. Set to 0 by default,
+     *  no need to cahnge if animation sprite list(move, jump, inactive, die) contains only 1 image
+     */
+    protected draw(spriteAnimation: SpriteAnimation, frameNum: number, spriteIdx: number = 0): void {
+        const spriteImg = this.spritesheets[spriteAnimation]![spriteIdx];
+        const spriteConfig = this.getSpriteConfig()[spriteAnimation]!;
 
-        const offsetLeft = sprite.offsetLeft + (columnNum - 1) * sprite.imgWidth; // offset from left end to start sprite by X in png
-        const offsetTop = sprite.offsetTop + (rowNum - 1) * sprite.imgHeight; // offset from top end to start sprite by Y in png
-        const birdWidth = sprite.imgWidth; // width of bird in png
-        const birdHeight = sprite.imgHeight; // height of bird in png
+        const columnNum = frameNum % spriteConfig.columns === 0 ? spriteConfig.columns : frameNum % spriteConfig.columns; // from 1
+        const rowNum = Math.ceil(frameNum / spriteConfig.columns); // from 1
+
+        const offsetLeft = spriteConfig.offsetLeft + (columnNum - 1) * spriteConfig.imgWidth; // offset from left end to start sprite by X in png
+        const offsetTop = spriteConfig.offsetTop + (rowNum - 1) * spriteConfig.imgHeight; // offset from top end to start sprite by Y in png
+        const birdWidth = spriteConfig.imgWidth; // width of bird in png
+        const birdHeight = spriteConfig.imgHeight; // height of bird in png
         const offsetLeftInCanvas = 0; // offset from left to draw in canvas
         const offsetTopInCanvas = 0; // offset from top to draw in canvas
-        const canvasWidth = sprite.canvasWidth;
-        const canvasHeight = sprite.canvasHeight;
+        const canvasWidth = spriteConfig.canvasWidth;
+        const canvasHeight = spriteConfig.canvasHeight;
 
         this.ctx.clearRect(offsetLeftInCanvas, offsetTopInCanvas, canvasWidth, canvasHeight);
         this.ctx.drawImage(
-            this.spritesheet,
+            spriteImg,
             offsetLeft,
             offsetTop,
             birdWidth,
@@ -55,28 +66,18 @@ export abstract class CanvasGameObject extends BaseGameObject<HTMLCanvasElement>
         );
     }
 
-    /**
-     *
-     * @param spriteName key in images object to get images src
-     * @param idx image's id in array
-     * @param drawCallback Used if need to immediately draw after setting another img
-     */
-    protected loadSpriteImage(spriteName: SpriteAnimation, idx: number, drawCallback?: () => void): void {
-        if (!this.images[spriteName]) throw new Error(`No sprites images for ${spriteName}`);
+    protected loadSprites(): void {
+        for (const key in this.imagesSrcs) {
+            const spriteAnimation = key as SpriteAnimation;
+            const animationImages = this.imagesSrcs[spriteAnimation];
+            if (!animationImages || !animationImages.length) continue;
 
-        const img = new Image();
-        img.src = this.images[spriteName][idx];
-        this.spritesheet = img;
-
-        img.onload = () => {
-            if (typeof drawCallback === 'function') {
-                drawCallback();
-            } else {
-                // ON FIRST LOAD IMAGE
-                const frameNum = idx + 1;
-                this.draw(spriteName, frameNum);
+            for (const imgSrc of animationImages) {
+                const img = new Image();
+                img.src = imgSrc;
+                this.spritesheets[spriteAnimation]!.push(img);
             }
-        };
+        }
     }
 
     protected abstract setCanvasStyles(canvas: HTMLCanvasElement): void;
