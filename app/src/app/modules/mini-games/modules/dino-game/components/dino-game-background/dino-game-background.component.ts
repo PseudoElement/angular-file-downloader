@@ -21,6 +21,8 @@ export class DinoGameBackgroundComponent implements OnDestroy {
         map((state) => (!state.isPlaying ? 'inactive' : `active-difficulty-${state.difficulty}`))
     );
 
+    public readonly bestResults$ = this.gameStateSrv.bestResults$;
+
     public readonly menuState$: Observable<MenuState> = this.gameStateSrv.gameState$.pipe(
         map((state) => {
             if (state.isPlaying) {

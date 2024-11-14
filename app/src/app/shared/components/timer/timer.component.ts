@@ -8,4 +8,6 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 })
 export class TimerComponent {
     @Input({ required: true }) ms: number = 0;
+
+    @Input() name: string = '';
 }

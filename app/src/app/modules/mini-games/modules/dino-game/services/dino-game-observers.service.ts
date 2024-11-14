@@ -17,6 +17,7 @@ import { DinoGameStateService } from './dino-game-state.service';
 import { RelObjectCoords } from '../../../models/game-object-types';
 import { GameObjectType } from '../constants/game-objects';
 import { BaseGameObject } from '../abstract/base-game-object';
+import { LocalStorageService } from 'src/app/core/storage/local-storage.service';
 
 type KeyCodes = {
     [key in PlayerKeyboardAction]: string;
@@ -33,10 +34,10 @@ interface CollisionData extends PlayerCollisionData {
 @Injectable()
 export class DinoGameObservers {
     private readonly _keyBindings$ = new BehaviorSubject<KeyCodes>({
-        jump: 'w',
-        crawl: 's',
-        moveRight: 'd',
-        moveLeft: 'a',
+        jump: 'KeyW',
+        crawl: 'KeyS',
+        moveRight: 'KeyD',
+        moveLeft: 'KeyA',
         pause_unpause: 'Escape'
     });
 
@@ -52,47 +53,45 @@ export class DinoGameObservers {
 
     private isCrawling = false;
 
-    constructor(private readonly gameStateSrv: DinoGameStateService) {}
+    constructor(private readonly gameStateSrv: DinoGameStateService, private readonly localStorageSrv: LocalStorageService) {}
 
     public listenKeyEvents(pause: () => void, play: () => void): void {
         const sub = fromEvent(window, 'keydown')
             .pipe(
                 //@ts-ignore
                 throttleTime(50),
-                filter((e: KeyboardEvent) => Object.values(this.keyCodes).includes(e.key)),
+                filter((e: KeyboardEvent) => Object.values(this.keyCodes).includes(e.code)),
                 filter(
                     (e: KeyboardEvent) =>
-                        this.gameStateSrv.isPlaying ||
-                        (!this.gameStateSrv.isPlaying && !this.gameStateSrv.isKilled && e.key === this.keyCodes.pause_unpause)
+                        this.gameStateSrv.isPlaying || (!this.gameStateSrv.isKilled && e.code === this.keyCodes.pause_unpause)
                 )
             )
             .subscribe((e) => {
                 const keyboardEvent = e as KeyboardEvent;
 
-                if (keyboardEvent.key === this.keyCodes.pause_unpause) {
+                if (keyboardEvent.code === this.keyCodes.pause_unpause) {
                     if (this.gameStateSrv.isPlaying) {
-                        // this.inactive();
                         pause();
                     } else {
                         this.active();
                         play();
                     }
                 }
-                if (keyboardEvent.key === this.keyCodes.jump) {
+                if (keyboardEvent.code === this.keyCodes.jump) {
                     if (this.isCrawling) {
                         this.uncrawl();
                     } else {
                         this.jump();
                     }
                 }
-                if (keyboardEvent.key === this.keyCodes.crawl) {
+                if (keyboardEvent.code === this.keyCodes.crawl) {
                     if (this.isCrawling) return;
                     this.crawl();
                 }
-                if (keyboardEvent.key === this.keyCodes.moveLeft) {
+                if (keyboardEvent.code === this.keyCodes.moveLeft) {
                     this.moveLeft();
                 }
-                if (keyboardEvent.key === this.keyCodes.moveRight) {
+                if (keyboardEvent.code === this.keyCodes.moveRight) {
                     this.moveRight();
                 }
             });
@@ -135,6 +134,7 @@ export class DinoGameObservers {
                 } else {
                     this.gameStateSrv.changeGameState({ isKilled: true, isPlaying: false });
                     this.player.animate('die');
+                    this.updateGameResultsOnEnd();
                     pause();
                 }
             });
@@ -164,6 +164,19 @@ export class DinoGameObservers {
         return null;
     }
 
+    private updateGameResultsOnEnd(): void {
+        const bestScore = this.localStorageSrv.get('bestScore');
+        const bestTime = this.localStorageSrv.get('bestTime');
+
+        if (!bestScore || parseInt(bestScore) < this.gameStateSrv.score) {
+            this.localStorageSrv.set('bestScore', this.gameStateSrv.score);
+        }
+
+        if (!bestTime || parseInt(bestTime) < this.gameStateSrv.time) {
+            this.localStorageSrv.set('bestTime', this.gameStateSrv.time);
+        }
+    }
+
     private jump(): void {
         this.player.doAction('jump');
     }
@@ -184,10 +197,6 @@ export class DinoGameObservers {
 
     private moveRight(): void {
         this.player.doAction('moveRight');
-    }
-
-    private inactive(): void {
-        this.player.doAction('inactive');
     }
 
     private active(): void {

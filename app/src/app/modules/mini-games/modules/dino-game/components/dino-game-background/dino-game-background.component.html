@@ -4,7 +4,8 @@
         animationStyle: bgAnimation$ | async,
         timeMs: timeMs$ | async,
         difficulty: difficulty$ | async,
-        score: score$ | async
+        score: score$ | async,
+        bestResults: bestResults$ | async
     } as state"
 >
     <div class="dino-game-container" id="dino-game-container">
@@ -21,6 +22,7 @@
         <app-game-menu
             *ngIf="state.menuState !== 'hidden'"
             [state]="state.menuState"
+            [bestResults]="state.bestResults"
             (buttonClicked)="handleMenuBtnClick($event)"
         ></app-game-menu>
     </div>

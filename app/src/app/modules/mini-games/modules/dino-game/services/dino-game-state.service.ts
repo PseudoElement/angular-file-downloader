@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, shareReplay } from 'rxjs';
+import { BehaviorSubject, map, Observable, shareReplay } from 'rxjs';
 import { DelayMs, DinoGameState } from '../models/common';
 import { Difficulty } from '../models/animation-types';
 import { BaseGameObject } from '../abstract/base-game-object';
 import { Player } from '../game-objects/player';
 import { isNil } from '../../../utils/is-nil';
 import { isFarmableObject } from '../models/game-objects-types';
+import { LocalStorageService } from 'src/app/core/storage/local-storage.service';
+import { MenuBestResultsInfo } from 'src/app/shared/components/game-menu/models/models';
 
 @Injectable()
 export class DinoGameStateService {
@@ -18,6 +20,10 @@ export class DinoGameStateService {
         isStarted: false,
         gameId: null
     });
+
+    public readonly bestResults$: Observable<MenuBestResultsInfo> = this.localStorageSrv.storageState$.pipe(
+        map((state) => ({ bestScore: state.bestScore ?? undefined, bestTime: state.bestTime ?? undefined }))
+    );
 
     public readonly gameState$ = this.gameStateSubj$.pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
@@ -37,7 +43,7 @@ export class DinoGameStateService {
         return this.gameStateSubj$.value.time;
     }
 
-    public get score(): DelayMs {
+    public get score(): number {
         return this.gameStateSubj$.value.score;
     }
 
@@ -61,7 +67,7 @@ export class DinoGameStateService {
         return this.gameStateSubj$.value.isKilled;
     }
 
-    constructor() {
+    constructor(private readonly localStorageSrv: LocalStorageService) {
         this.gameObjects$.subscribe(console.log);
     }
 

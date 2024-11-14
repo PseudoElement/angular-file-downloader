@@ -1,4 +1,9 @@
 <div *ngLet="buttons$ | async as buttons" class="game-menu">
+    <div class="game-menu__best-results">
+        <app-timer *ngIf="bestResults.bestTime" [ms]="bestResults.bestTime" name="Your best time"></app-timer>
+        <app-game-info-element *ngIf="bestResults.bestScore" name="Your best score" [value]="bestResults.bestScore"></app-game-info-element>
+    </div>
+
     <div class="game-menu__buttons">
         <app-game-menu-button *ngFor="let btn of buttons" [text]="btn.text" (click)="handleClick(btn.type)"></app-game-menu-button>
     </div>

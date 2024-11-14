@@ -16,7 +16,6 @@ const routes: Routes = [
         loadChildren: () => import('./modules/tutorial/tutorial.module').then((m) => m.TutorialModule)
     },
     {
-        // canMatch: [matcherGuard],
         path: 'license',
         loadChildren: () => import('./modules/license/license.module').then((m) => m.LicenseModule)
     },
@@ -28,7 +27,7 @@ const routes: Routes = [
         path: 'mini-games',
         loadChildren: () => import('./modules/mini-games/mini-games.module').then((m) => m.MiniGamesModule)
     },
-    { path: '**', redirectTo: 'mini-games/dino-game' }
+    { path: '**', redirectTo: 'download-files' }
 ];
 
 @NgModule({

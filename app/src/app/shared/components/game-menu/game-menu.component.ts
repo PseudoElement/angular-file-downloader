@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MENU_BUTTONS, MenuButton, MenuButtonType, MenuState } from './constants/buttons';
+import { MenuBestResultsInfo } from './models/models';
 
 @Component({
     selector: 'app-game-menu',
@@ -10,6 +11,8 @@ import { MENU_BUTTONS, MenuButton, MenuButtonType, MenuState } from './constants
 })
 export class GameMenuComponent implements OnChanges {
     @Input() state: Exclude<MenuState, 'hidden'> = 'start';
+
+    @Input() bestResults: MenuBestResultsInfo = {};
 
     @Output() buttonClicked: EventEmitter<MenuButtonType> = new EventEmitter();
 

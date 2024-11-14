@@ -93,7 +93,7 @@ export class DinoGameService {
             if (this.gameStateSrv.time > nextRoundWhen) this.raiseDifficulty();
             if (ms % spawnDelay === 0) {
                 const random = Math.random();
-                if (random > 0.5) {
+                if (this.gameStateSrv.difficulty > 3 && random > 0.5) {
                     this.spawnBird();
                 } else {
                     this.spawnCactus();

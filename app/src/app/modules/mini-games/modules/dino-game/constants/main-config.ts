@@ -18,7 +18,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 50,
         playerDeltaY: 30,
         spawnDelay: 3_000,
-        nextRoundWhen: 10_000,
+        nextRoundWhen: 15_000,
         coinDelay: 3_000
     },
     '2': {
@@ -27,7 +27,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 50,
         playerDeltaY: 30,
         spawnDelay: 3_000,
-        nextRoundWhen: 20_000,
+        nextRoundWhen: 30_000,
         coinDelay: 3_000
     },
     '3': {
@@ -36,7 +36,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 55,
         playerDeltaY: 30,
         spawnDelay: 2_500,
-        nextRoundWhen: 30_000,
+        nextRoundWhen: 40_000,
         coinDelay: 3_000
     },
     '4': {
@@ -45,7 +45,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 55,
         playerDeltaY: 30,
         spawnDelay: 2_500,
-        nextRoundWhen: 40_000,
+        nextRoundWhen: 50_000,
         coinDelay: 3_000
     },
     '5': {
@@ -54,7 +54,7 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DinoGameData> = {
         playerDeltaX: 60,
         playerDeltaY: 30,
         spawnDelay: 2_000,
-        nextRoundWhen: 50_000,
+        nextRoundWhen: 60_000,
         coinDelay: 3_000
     },
     '6': {
