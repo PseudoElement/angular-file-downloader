@@ -41,6 +41,10 @@ export class DinoGameBackgroundComponent implements OnDestroy {
 
     public readonly score$ = this.gameStateSrv.gameState$.pipe(map((state) => state.score));
 
+    public pause(): void {
+        this.dinoGameSrv.pauseGame();
+    }
+
     public handleMenuBtnClick(btnType: MenuButtonType): void {
         if (btnType === 'continue') {
             this.dinoGameSrv.unpauseGame();
@@ -50,6 +54,7 @@ export class DinoGameBackgroundComponent implements OnDestroy {
             this.dinoGameSrv.restartGame();
         } else if (btnType === 'end') {
             this.dinoGameSrv.endGame();
+        } else if (btnType === 'controls') {
         }
     }
 }

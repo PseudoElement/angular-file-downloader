@@ -21,7 +21,7 @@ export class DownloadService {
 
     public async downloadTxtFile(form: FormGroup<FileBuilderForm>, isSqlFile: boolean): Promise<void> {
         if (form.invalid) {
-            await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+            await this.sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
                 title: 'Invalid values!',
                 text: 'Fill all inputs in form properly.',
                 isConfirmModal: false
@@ -32,7 +32,7 @@ export class DownloadService {
             return;
         }
         if (this.isDownloading) {
-            await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+            await this.sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
                 title: 'Already downloading!',
                 text: 'Wait till previous file will be downloaded.',
                 isConfirmModal: false
@@ -40,7 +40,7 @@ export class DownloadService {
             return;
         }
 
-        const ok = await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+        const ok = await this.sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
             text: 'Are you sure you want to download file?',
             isConfirmModal: true
         });

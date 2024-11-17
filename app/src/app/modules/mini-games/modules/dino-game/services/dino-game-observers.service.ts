@@ -1,27 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Player } from '../game-objects/player';
-import {
-    BehaviorSubject,
-    combineLatest,
-    combineLatestWith,
-    filter,
-    fromEvent,
-    map,
-    Subscription,
-    switchMap,
-    takeWhile,
-    throttleTime
-} from 'rxjs';
-import { assertObjectFarmable, isFarmableObject, PlayerKeyboardAction } from '../models/game-objects-types';
+import { combineLatest, combineLatestWith, filter, fromEvent, map, Subscription, switchMap, takeWhile, throttleTime } from 'rxjs';
+import { isFarmableObject } from '../models/game-objects-types';
 import { DinoGameStateService } from './dino-game-state.service';
 import { RelObjectCoords } from '../../../models/game-object-types';
-import { GameObjectType } from '../constants/game-objects';
 import { BaseGameObject } from '../abstract/base-game-object';
 import { LocalStorageService } from 'src/app/core/storage/local-storage.service';
-
-type KeyCodes = {
-    [key in PlayerKeyboardAction]: string;
-};
+import { DinoGameControlsService, KeysMap } from './dino-game-controls.service';
 
 interface PlayerCollisionData {
     coords: RelObjectCoords;
@@ -33,18 +18,10 @@ interface CollisionData extends PlayerCollisionData {
 
 @Injectable()
 export class DinoGameObservers {
-    private readonly _keyBindings$ = new BehaviorSubject<KeyCodes>({
-        jump: 'KeyW',
-        crawl: 'KeyS',
-        moveRight: 'KeyD',
-        moveLeft: 'KeyA',
-        pause_unpause: 'Escape'
-    });
-
     private readonly subs: Subscription[] = [];
 
-    private get keyCodes(): KeyCodes {
-        return this._keyBindings$.value;
+    private get keyCodes(): KeysMap {
+        return this.gameControlsSrv.keyBindings;
     }
 
     private get player(): Player {
@@ -53,7 +30,11 @@ export class DinoGameObservers {
 
     private isCrawling = false;
 
-    constructor(private readonly gameStateSrv: DinoGameStateService, private readonly localStorageSrv: LocalStorageService) {}
+    constructor(
+        private readonly gameStateSrv: DinoGameStateService,
+        private readonly localStorageSrv: LocalStorageService,
+        private readonly gameControlsSrv: DinoGameControlsService
+    ) {}
 
     public listenKeyEvents(pause: () => void, play: () => void): void {
         const sub = fromEvent(window, 'keydown')

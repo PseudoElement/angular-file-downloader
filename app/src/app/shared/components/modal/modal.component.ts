@@ -1,5 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { AbstractModalComp } from 'dynamic-rendering/lib/types/dynamic-comp-srv-types';
 
 @Component({
     selector: 'app-modal',
@@ -19,7 +20,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
         ])
     ]
 })
-export class ModalComponent {
+export class ModalComponent implements AbstractModalComp<boolean> {
     @Input({ required: true }) title: string = '';
 
     @Input({ required: true }) text: string = '';
@@ -30,19 +31,19 @@ export class ModalComponent {
 
     @Input() height: number = 300;
 
-    @Output() isConfirmed: EventEmitter<boolean> = new EventEmitter();
+    @Output() returnedValue: EventEmitter<boolean> = new EventEmitter();
 
     ngOnInit(): void {}
 
     public close: () => void = () => {};
 
     public accept(): void {
-        this.isConfirmed.emit(true);
+        this.returnedValue.emit(true);
         this.close();
     }
 
     public reject(): void {
-        this.isConfirmed.emit(false);
+        this.returnedValue.emit(false);
         this.close();
     }
 }

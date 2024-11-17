@@ -1,1 +1,9 @@
-<button>{{ text }}</button>
+<button [ngClass]="{ 'btn-with-icon': hasIcon }">
+    <span *ngIf="hasText">
+        {{ text }}
+    </span>
+
+    <span *ngIf="hasIcon" class="material-symbols-outlined icon">
+        {{ iconName }}
+    </span>
+</button>

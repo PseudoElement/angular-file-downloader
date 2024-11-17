@@ -21,7 +21,7 @@ export class GamesDownloadService {
     constructor(private readonly httpApi: HttpApiService, private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
 
     public async downloadGame(game: GameUiInfo, cdr: ChangeDetectorRef): Promise<void> {
-        const ok = await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+        const ok = await this.sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
             isConfirmModal: true,
             text: `Are you sure you want download ${game.title}?`,
             title: 'Notification',

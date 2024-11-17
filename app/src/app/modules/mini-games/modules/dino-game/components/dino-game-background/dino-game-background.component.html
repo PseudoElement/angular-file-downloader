@@ -19,6 +19,10 @@
             <app-game-info-element [name]="'Score'" [value]="state.score"></app-game-info-element>
         </div>
 
+        <div class="dino-game-menu-btn">
+            <app-game-menu-button [iconName]="'settings'" (click)="pause()"></app-game-menu-button>
+        </div>
+
         <app-game-menu
             *ngIf="state.menuState !== 'hidden'"
             [state]="state.menuState"

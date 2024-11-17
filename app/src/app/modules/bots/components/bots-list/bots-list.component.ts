@@ -16,7 +16,7 @@ export class BotsListComponent {
     constructor(private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
 
     public async onBotCardClick(bot: TelegramBotUiInfo): Promise<void> {
-        await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+        await this.sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
             isConfirmModal: false,
             title: bot.title,
             text: bot.description,

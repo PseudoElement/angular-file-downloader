@@ -8,7 +8,7 @@ export const matcherGuard: CanMatchFn = async (route, segments): Promise<boolean
     const router = inject(Router);
 
     if (window.location.pathname === '/tutorial') {
-        await sintolModalSrv.openConfirmModal(ModalComponent, {
+        await sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
             isConfirmModal: false,
             text: `You are not allowed visit "License" page from route /${route.path}`,
             title: 'Warning'
@@ -17,7 +17,7 @@ export const matcherGuard: CanMatchFn = async (route, segments): Promise<boolean
         return false;
     }
 
-    const ok = await sintolModalSrv.openConfirmModal(ModalComponent, {
+    const ok = await sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
         isConfirmModal: true,
         text: `Do youn want to visit /${route.path}?`,
         title: 'Notification'

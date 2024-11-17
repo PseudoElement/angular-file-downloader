@@ -2,6 +2,8 @@
 
 :host {
     button {
+        @include flex-row(center, center);
+
         font-size: $fs-large;
         font-weight: bold;
         font-family: monospace;
@@ -18,5 +20,14 @@
         &:hover {
             color: yellow;
         }
+
+        .icon {
+            font-size: 40px;
+        }
+    }
+
+    .btn-with-icon {
+        width: 100%;
+        padding: 10px 10px;
     }
 }

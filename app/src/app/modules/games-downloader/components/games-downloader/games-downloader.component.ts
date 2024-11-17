@@ -25,7 +25,7 @@ export class GamesDownloaderComponent {
     ) {}
 
     public async onGameCardClick(game: GameUiInfo): Promise<void> {
-        await this.sintolModalSrv.openConfirmModal(ModalComponent, {
+        await this.sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
             isConfirmModal: false,
             title: game.title,
             text: game.description,
