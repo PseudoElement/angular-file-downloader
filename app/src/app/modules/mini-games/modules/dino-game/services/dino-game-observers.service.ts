@@ -41,16 +41,18 @@ export class DinoGameObservers {
             .pipe(
                 //@ts-ignore
                 throttleTime(50),
-                filter((e: KeyboardEvent) => Object.values(this.keyCodes).includes(e.code)),
+                filter((e: KeyboardEvent) =>
+                    Object.values(this.keyCodes)
+                        .map((el) => el.value)
+                        .includes(e.code)
+                ),
                 filter(
                     (e: KeyboardEvent) =>
-                        this.gameStateSrv.isPlaying || (!this.gameStateSrv.isKilled && e.code === this.keyCodes.pause_unpause)
+                        this.gameStateSrv.isPlaying || (!this.gameStateSrv.isKilled && e.code === this.keyCodes.pause_unpause.value)
                 )
             )
-            .subscribe((e) => {
-                const keyboardEvent = e as KeyboardEvent;
-
-                if (keyboardEvent.code === this.keyCodes.pause_unpause) {
+            .subscribe((e: KeyboardEvent) => {
+                if (e.code === this.keyCodes.pause_unpause.value) {
                     if (this.gameStateSrv.isPlaying) {
                         pause();
                     } else {
@@ -58,21 +60,21 @@ export class DinoGameObservers {
                         play();
                     }
                 }
-                if (keyboardEvent.code === this.keyCodes.jump) {
+                if (e.code === this.keyCodes.jump.value) {
                     if (this.isCrawling) {
                         this.uncrawl();
                     } else {
                         this.jump();
                     }
                 }
-                if (keyboardEvent.code === this.keyCodes.crawl) {
+                if (e.code === this.keyCodes.crawl.value) {
                     if (this.isCrawling) return;
                     this.crawl();
                 }
-                if (keyboardEvent.code === this.keyCodes.moveLeft) {
+                if (e.code === this.keyCodes.moveLeft.value) {
                     this.moveLeft();
                 }
-                if (keyboardEvent.code === this.keyCodes.moveRight) {
+                if (e.code === this.keyCodes.moveRight.value) {
                     this.moveRight();
                 }
             });

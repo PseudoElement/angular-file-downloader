@@ -1,0 +1,73 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .modal-wrapper {
+        @include flex-row(center, center);
+
+        position: fixed;
+        z-index: 1000000000000000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .game-settings-modal {
+        @include flex-column(space-around, center);
+
+        width: 60%;
+
+        padding: 20px;
+        border-radius: 20px;
+        background: #7a7979;
+
+        &__title {
+        }
+
+        &__controls {
+            @include flex-column(start, start);
+            width: 100%;
+
+            &-title {
+                align-self: center;
+            }
+
+            &-body {
+                @include flex-column(start, start);
+                gap: 30px;
+            }
+        }
+
+        &__submit {
+            @include flex-row(center, center);
+            gap: 20px;
+        }
+    }
+
+    .key-control {
+        @include flex-row(start, center);
+
+        gap: 10px;
+        line-height: 10px;
+
+        &__name {
+        }
+
+        &__value {
+            cursor: pointer;
+
+            border-radius: 3px;
+            padding: 10px;
+            background: transparent;
+            text-align: center;
+            transition: all 0.2s;
+            user-select: none;
+
+            &-active {
+                background: #e3d432;
+            }
+        }
+    }
+}

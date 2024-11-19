@@ -1,0 +1,28 @@
+<div class="modal-wrapper" (click)="reset()">
+    <div class="game-settings-modal">
+        <h2 class="game-settings-modal__title">Game settings</h2>
+
+        <div class="game-settings-modal__controls">
+            <h3 class="game-settings-modal__controls-title">Controls</h3>
+            <div class="game-settings-modal__controls-body">
+                <ng-container *ngFor="let el of keysBindingsToArray">
+                    <ng-container *ngTemplateOutlet="keyControl; context: { name: el.key, friendlyValue: el.friendlyValue }"></ng-container>
+                </ng-container>
+            </div>
+        </div>
+
+        <div class="game-settings-modal__submit">
+            <app-game-menu-button [text]="'Save'" (click)="saveKeyBindings()"></app-game-menu-button>
+            <app-game-menu-button [text]="'Cancel'" (click)="cancel()"></app-game-menu-button>
+        </div>
+    </div>
+</div>
+
+<ng-template #keyControl let-name="name" let-friendlyValue="friendlyValue">
+    <div class="key-control">
+        <p class="key-control__name">{{ name | uppercase }}:&nbsp;</p>
+        <p class="key-control__value" [class.key-control__value-active]="activeKey === name" (click)="handleKeyValueClick($event, name)">
+            {{ friendlyValue }}
+        </p>
+    </div>
+</ng-template>

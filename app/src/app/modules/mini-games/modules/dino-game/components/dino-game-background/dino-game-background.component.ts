@@ -3,6 +3,9 @@ import { DinoGameService } from '../../services/dino-game.service';
 import { DinoGameStateService } from '../../services/dino-game-state.service';
 import { map, Observable, tap } from 'rxjs';
 import { MenuButtonType, MenuState } from 'src/app/shared/components/game-menu/constants/buttons';
+import { SintolLibDynamicComponentService } from 'dynamic-rendering';
+import { GameSettingsModalComponent } from 'src/app/shared/components/game-settings-modal/game-settings-modal.component';
+import { DinoGameControlsService, KeysMap } from '../../services/dino-game-controls.service';
 
 @Component({
     selector: 'app-dino-game-background',
@@ -11,7 +14,12 @@ import { MenuButtonType, MenuState } from 'src/app/shared/components/game-menu/c
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DinoGameBackgroundComponent implements OnDestroy {
-    constructor(private readonly dinoGameSrv: DinoGameService, private readonly gameStateSrv: DinoGameStateService) {}
+    constructor(
+        private readonly dinoGameSrv: DinoGameService,
+        private readonly gameStateSrv: DinoGameStateService,
+        private readonly gameControlsSrv: DinoGameControlsService,
+        private readonly sintolModalSrv: SintolLibDynamicComponentService
+    ) {}
 
     ngOnDestroy(): void {
         this.dinoGameSrv.endGame();
@@ -45,7 +53,7 @@ export class DinoGameBackgroundComponent implements OnDestroy {
         this.dinoGameSrv.pauseGame();
     }
 
-    public handleMenuBtnClick(btnType: MenuButtonType): void {
+    public async handleMenuBtnClick(btnType: MenuButtonType): Promise<void> {
         if (btnType === 'continue') {
             this.dinoGameSrv.unpauseGame();
         } else if (btnType === 'start') {
@@ -54,7 +62,12 @@ export class DinoGameBackgroundComponent implements OnDestroy {
             this.dinoGameSrv.restartGame();
         } else if (btnType === 'end') {
             this.dinoGameSrv.endGame();
-        } else if (btnType === 'controls') {
+        } else if (btnType === 'settings') {
+            const keyBindings = await this.sintolModalSrv.openConfirmModal<GameSettingsModalComponent, KeysMap>(
+                GameSettingsModalComponent,
+                { initialKeyBindings: this.gameControlsSrv.keyBindings }
+            );
+            this.gameControlsSrv.changeKeyBindings(keyBindings);
         }
     }
 }

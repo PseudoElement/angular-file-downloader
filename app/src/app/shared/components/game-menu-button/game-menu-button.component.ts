@@ -10,7 +10,7 @@ type IconName = 'settings' | '';
 export class GameMenuButtonComponent {
     @Input() text: string = '';
 
-    @Input({}) iconName: IconName = '';
+    @Input() iconName: IconName = '';
 
     public get hasText(): boolean {
         return !!this.text;

@@ -29,6 +29,7 @@ import { GameMenuButtonComponent } from './components/game-menu-button/game-menu
 import { FormatMillisecsPipe } from './pipes/format-timestamp.pipe';
 import { TimerComponent } from './components/timer/timer.component';
 import { GameInfoElementComponent } from './components/game-info-element/game-info-element.component';
+import { GameSettingsModalComponent } from './components/game-settings-modal/game-settings-modal.component';
 
 @NgModule({
     exports: [
@@ -50,7 +51,8 @@ import { GameInfoElementComponent } from './components/game-info-element/game-in
         GameMenuButtonComponent,
         FormatMillisecsPipe,
         TimerComponent,
-        GameInfoElementComponent
+        GameInfoElementComponent,
+        GameSettingsModalComponent
     ],
     declarations: [
         InputComponent,
@@ -72,7 +74,8 @@ import { GameInfoElementComponent } from './components/game-info-element/game-in
         GameMenuButtonComponent,
         FormatMillisecsPipe,
         TimerComponent,
-        GameInfoElementComponent
+        GameInfoElementComponent,
+        GameSettingsModalComponent
     ],
     imports: [
         CommonModule,
