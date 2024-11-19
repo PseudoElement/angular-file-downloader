@@ -67,9 +67,7 @@ export class DinoGameStateService {
         return this.gameStateSubj$.value.isKilled;
     }
 
-    constructor(private readonly localStorageSrv: LocalStorageService) {
-        this.gameObjects$.subscribe(console.log);
-    }
+    constructor(private readonly localStorageSrv: LocalStorageService) {}
 
     public changeGameState(state: Partial<DinoGameState>): void {
         if ('gameId' in state && state.gameId === null) {

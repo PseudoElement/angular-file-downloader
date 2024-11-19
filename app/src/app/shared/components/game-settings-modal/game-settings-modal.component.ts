@@ -1,8 +1,10 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { AbstractModalComp } from 'dynamic-rendering/lib/types/dynamic-comp-srv-types';
+import { CommonGameSettings } from 'src/app/modules/mini-games/models/common-settings-types';
 import { PlayerKeyboardAction } from 'src/app/modules/mini-games/modules/dino-game/models/game-objects-types';
-import { KeysMap } from 'src/app/modules/mini-games/modules/dino-game/services/dino-game-controls.service';
+import { KeysBindings } from 'src/app/modules/mini-games/modules/dino-game/models/key-bindings-types';
 import { clone } from 'src/app/utils/deep-clone';
 
 type KeysArray = Array<{
@@ -10,6 +12,11 @@ type KeysArray = Array<{
     value: string;
     friendlyValue: string;
 }>;
+
+export interface SettingsReturnedValue {
+    keyBindings: KeysBindings;
+    isMuted: boolean;
+}
 
 @Component({
     selector: 'app-game-controls-modal',
@@ -29,16 +36,20 @@ type KeysArray = Array<{
         ])
     ]
 })
-export class GameSettingsModalComponent implements AbstractModalComp<KeysMap>, OnInit {
-    @Input({ required: true }) initialKeyBindings: KeysMap = {} as KeysMap;
+export class GameSettingsModalComponent implements AbstractModalComp<SettingsReturnedValue>, OnInit {
+    @Input({ required: true }) initialKeyBindings: KeysBindings = {} as KeysBindings;
 
-    @Output() returnedValue: EventEmitter<KeysMap> = new EventEmitter<KeysMap>();
+    @Input({ required: true }) settings: CommonGameSettings = { isMuted: false };
+
+    @Output() returnedValue: EventEmitter<SettingsReturnedValue> = new EventEmitter<SettingsReturnedValue>();
 
     public close = () => {};
 
-    public newKeyBindings!: KeysMap;
+    public newKeyBindings!: KeysBindings;
 
     public activeKey: PlayerKeyboardAction | '' = '';
+
+    public isMutedCtrl = new FormControl<boolean>(false);
 
     public get keysBindingsToArray(): KeysArray {
         return Object.entries(this.newKeyBindings).map((el) => ({
@@ -55,8 +66,8 @@ export class GameSettingsModalComponent implements AbstractModalComp<KeysMap>, O
     }
 
     ngOnInit() {
-        console.log(this.initialKeyBindings);
         this.newKeyBindings = clone(this.initialKeyBindings);
+        this.isMutedCtrl.setValue(this.settings.isMuted);
     }
 
     public handleKeyValueClick(e: Event, key: PlayerKeyboardAction): void {
@@ -75,13 +86,13 @@ export class GameSettingsModalComponent implements AbstractModalComp<KeysMap>, O
 
     public saveKeyBindings(): void {
         this.selectKey('');
-        this.returnedValue.emit(this.newKeyBindings);
+        this.returnedValue.emit({ keyBindings: this.newKeyBindings, isMuted: !!this.isMutedCtrl.value });
         this.close();
     }
 
     public cancel(): void {
         this.selectKey('');
-        this.returnedValue.emit(this.initialKeyBindings);
+        this.returnedValue.emit({ keyBindings: this.initialKeyBindings, isMuted: this.settings.isMuted });
         this.close();
     }
 }

@@ -11,6 +11,7 @@ import { DinoGameStateService } from './dino-game-state.service';
 import { DIFFICULTY_CONFIG } from '../constants/main-config';
 import { Bird } from '../game-objects/bird';
 import { Coin } from '../game-objects/coin';
+import { DinoGameSettings, DinoGameSettingsService } from './dino-game-settings.service';
 
 @Injectable()
 export class DinoGameService {
@@ -19,7 +20,8 @@ export class DinoGameService {
     constructor(
         private readonly dinoGameObservers: DinoGameObservers,
         private readonly gameContainerSrv: DinoGameContainerService,
-        private readonly gameStateSrv: DinoGameStateService
+        private readonly gameStateSrv: DinoGameStateService,
+        private readonly gameSetingsSrv: DinoGameSettingsService
     ) {}
 
     public startGame(): void {
@@ -176,7 +178,8 @@ export class DinoGameService {
         const coin = new Coin(
             { height: '75px', width: '75px', left: `${containerWidth}px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
-            this.gameStateSubj$
+            this.gameStateSubj$,
+            this.gameSetingsSrv.settings
         );
         this.gameStateSrv.addGameObject(coin);
     }

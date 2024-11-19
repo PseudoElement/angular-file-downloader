@@ -6,7 +6,8 @@ import { DinoGameStateService } from './dino-game-state.service';
 import { RelObjectCoords } from '../../../models/game-object-types';
 import { BaseGameObject } from '../abstract/base-game-object';
 import { LocalStorageService } from 'src/app/core/storage/local-storage.service';
-import { DinoGameControlsService, KeysMap } from './dino-game-controls.service';
+import { DinoGameSettingsService } from './dino-game-settings.service';
+import { KeysBindings } from '../models/key-bindings-types';
 
 interface PlayerCollisionData {
     coords: RelObjectCoords;
@@ -20,8 +21,8 @@ interface CollisionData extends PlayerCollisionData {
 export class DinoGameObservers {
     private readonly subs: Subscription[] = [];
 
-    private get keyCodes(): KeysMap {
-        return this.gameControlsSrv.keyBindings;
+    private get keyCodes(): KeysBindings {
+        return this.gameSettingsSrv.keyBindings;
     }
 
     private get player(): Player {
@@ -33,7 +34,7 @@ export class DinoGameObservers {
     constructor(
         private readonly gameStateSrv: DinoGameStateService,
         private readonly localStorageSrv: LocalStorageService,
-        private readonly gameControlsSrv: DinoGameControlsService
+        private readonly gameSettingsSrv: DinoGameSettingsService
     ) {}
 
     public listenKeyEvents(pause: () => void, play: () => void): void {
@@ -46,10 +47,7 @@ export class DinoGameObservers {
                         .map((el) => el.value)
                         .includes(e.code)
                 ),
-                filter(
-                    (e: KeyboardEvent) =>
-                        this.gameStateSrv.isPlaying || (!this.gameStateSrv.isKilled && e.code === this.keyCodes.pause_unpause.value)
-                )
+                filter((e: KeyboardEvent) => this.gameStateSrv.isPlaying)
             )
             .subscribe((e: KeyboardEvent) => {
                 if (e.code === this.keyCodes.pause_unpause.value) {

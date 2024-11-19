@@ -3,6 +3,10 @@
 :host {
     .modal-wrapper {
         @include flex-row(center, center);
+        @include ff-alfa(18px);
+
+        color: greenyellow;
+        letter-spacing: 3px;
 
         position: fixed;
         z-index: 1000000000000000;
@@ -19,15 +23,14 @@
 
         width: 60%;
 
-        padding: 20px;
+        padding: 20px 75px;
         border-radius: 20px;
         background: #7a7979;
+        gap: 10px;
 
-        &__title {
-        }
-
-        &__controls {
+        &__part {
             @include flex-column(start, start);
+
             width: 100%;
 
             &-title {
@@ -36,7 +39,7 @@
 
             &-body {
                 @include flex-column(start, start);
-                gap: 30px;
+                gap: 10px;
             }
         }
 
@@ -50,23 +53,32 @@
         @include flex-row(start, center);
 
         gap: 10px;
-        line-height: 10px;
-
-        &__name {
-        }
+        height: 50px;
 
         &__value {
+            @include flex-column(center, center);
             cursor: pointer;
 
+            min-width: 50px;
+            min-height: 50px;
+            height: 100%;
+            width: 100%;
+
             border-radius: 3px;
-            padding: 10px;
             background: transparent;
             text-align: center;
-            transition: all 0.2s;
+            transition: all 0.1s;
             user-select: none;
 
-            &-active {
-                background: #e3d432;
+            &:hover {
+                background: rgb(186, 185, 185);
+            }
+        }
+
+        &__value-active {
+            background: #dad068;
+            &:hover {
+                background: #dad068;
             }
         }
     }

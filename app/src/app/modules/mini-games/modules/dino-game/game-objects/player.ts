@@ -107,7 +107,6 @@ export class Player extends CanvasGameObject implements AnimatedObject<PlayerAni
     protected setCanvasStyles(): void {}
 
     public farm(farmableObj: Farmable): void {
-        console.log('FARM');
         const newScore = this.gameState$.value.score + farmableObj.price;
         this.changeGameState({ score: newScore });
         farmableObj.beGrabbed();

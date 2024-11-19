@@ -1,11 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { DinoGameService } from '../../services/dino-game.service';
 import { DinoGameStateService } from '../../services/dino-game-state.service';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { MenuButtonType, MenuState } from 'src/app/shared/components/game-menu/constants/buttons';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
-import { GameSettingsModalComponent } from 'src/app/shared/components/game-settings-modal/game-settings-modal.component';
-import { DinoGameControlsService, KeysMap } from '../../services/dino-game-controls.service';
+import {
+    GameSettingsModalComponent,
+    SettingsReturnedValue
+} from 'src/app/shared/components/game-settings-modal/game-settings-modal.component';
+import { DinoGameSettingsService } from '../../services/dino-game-settings.service';
 
 @Component({
     selector: 'app-dino-game-background',
@@ -17,7 +20,7 @@ export class DinoGameBackgroundComponent implements OnDestroy {
     constructor(
         private readonly dinoGameSrv: DinoGameService,
         private readonly gameStateSrv: DinoGameStateService,
-        private readonly gameControlsSrv: DinoGameControlsService,
+        private readonly gameSettingsSrv: DinoGameSettingsService,
         private readonly sintolModalSrv: SintolLibDynamicComponentService
     ) {}
 
@@ -63,11 +66,13 @@ export class DinoGameBackgroundComponent implements OnDestroy {
         } else if (btnType === 'end') {
             this.dinoGameSrv.endGame();
         } else if (btnType === 'settings') {
-            const keyBindings = await this.sintolModalSrv.openConfirmModal<GameSettingsModalComponent, KeysMap>(
+            const { keyBindings, isMuted } = await this.sintolModalSrv.openConfirmModal<GameSettingsModalComponent, SettingsReturnedValue>(
                 GameSettingsModalComponent,
-                { initialKeyBindings: this.gameControlsSrv.keyBindings }
+                { initialKeyBindings: this.gameSettingsSrv.keyBindings, settings: this.gameSettingsSrv.settings }
             );
-            this.gameControlsSrv.changeKeyBindings(keyBindings);
+            console.log('MUTEDDDD', isMuted);
+            this.gameSettingsSrv.changeKeyBindings(keyBindings);
+            this.gameSettingsSrv.changeGameSettings({ isMuted });
         }
     }
 }

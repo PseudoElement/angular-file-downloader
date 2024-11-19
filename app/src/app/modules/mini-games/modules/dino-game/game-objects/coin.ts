@@ -7,6 +7,7 @@ import { AnimatedObject, CoinAction, Farmable, MobileObject } from '../models/ga
 import { GameObjectSpritesheetConfigs, ImagesForGameObject } from '../models/spritesheet-types';
 import { BaseGameObjectParams } from '../abstract/base-game-object';
 import { DinoGameState, FarmReward } from '../models/common';
+import { DinoGameSettings } from '../services/dino-game-settings.service';
 
 export class Coin extends CanvasGameObject implements MobileObject<CoinAction>, AnimatedObject<CoinAnimation>, Farmable {
     public type = GAME_OBJECTS.COIN;
@@ -44,7 +45,8 @@ export class Coin extends CanvasGameObject implements MobileObject<CoinAction>, 
     constructor(
         params: BaseGameObjectParams,
         containerInfo: GameContainerInfo,
-        private readonly _gameState$: BehaviorSubject<DinoGameState>
+        private readonly _gameState$: BehaviorSubject<DinoGameState>,
+        private readonly settings: DinoGameSettings
     ) {
         const rootNode = document.getElementById(containerInfo.id)!;
         super(params, containerInfo, rootNode);
@@ -101,9 +103,11 @@ export class Coin extends CanvasGameObject implements MobileObject<CoinAction>, 
     }
 
     public beGrabbed(): FarmReward {
-        const audio = new Audio('../../../../../../assets/audio/coin-earn.mp3');
-        audio.currentTime = 0.15;
-        audio.play();
+        if (!this.settings.isMuted) {
+            const audio = new Audio('../../../../../../assets/audio/coin-earn.mp3');
+            audio.currentTime = 0.15;
+            audio.play();
+        }
 
         this.destroy();
 

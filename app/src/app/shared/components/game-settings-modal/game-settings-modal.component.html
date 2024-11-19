@@ -1,13 +1,22 @@
 <div class="modal-wrapper" (click)="reset()">
     <div class="game-settings-modal">
-        <h2 class="game-settings-modal__title">Game settings</h2>
+        <h1 class="game-settings-modal__title">Game settings</h1>
 
-        <div class="game-settings-modal__controls">
-            <h3 class="game-settings-modal__controls-title">Controls</h3>
-            <div class="game-settings-modal__controls-body">
+        <div class="game-settings-modal__part">
+            <h2 class="game-settings-modal__part-title">Controls</h2>
+            <div class="game-settings-modal__part-body">
                 <ng-container *ngFor="let el of keysBindingsToArray">
-                    <ng-container *ngTemplateOutlet="keyControl; context: { name: el.key, friendlyValue: el.friendlyValue }"></ng-container>
+                    <ng-container
+                        *ngTemplateOutlet="keyControl; context: { name: el.key, friendlyValue: el.friendlyValue, value: el.value }"
+                    ></ng-container>
                 </ng-container>
+            </div>
+        </div>
+
+        <div class="game-settings-modal__part">
+            <h2 class="game-settings-modal__part-title">Others</h2>
+            <div class="game-settings-modal__part-body">
+                <app-checkbox [label]="'Mute sounds'" [control]="isMutedCtrl"></app-checkbox>
             </div>
         </div>
 
@@ -18,11 +27,11 @@
     </div>
 </div>
 
-<ng-template #keyControl let-name="name" let-friendlyValue="friendlyValue">
+<ng-template #keyControl let-name="name" let-friendlyValue="friendlyValue" let-value="value">
     <div class="key-control">
         <p class="key-control__name">{{ name | uppercase }}:&nbsp;</p>
         <p class="key-control__value" [class.key-control__value-active]="activeKey === name" (click)="handleKeyValueClick($event, name)">
-            {{ friendlyValue }}
+            {{ friendlyValue | prettifyCtrlKey : value }}
         </p>
     </div>
 </ng-template>

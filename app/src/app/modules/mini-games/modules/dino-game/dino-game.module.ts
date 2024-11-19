@@ -8,11 +8,11 @@ import { DinoGameObservers } from './services/dino-game-observers.service';
 import { DinoGameContainerService } from './services/dino-game-container.service';
 import { DinoGameStateService } from './services/dino-game-state.service';
 import { DinoGameRoutingModule } from './dino-game-routing.module';
-import { DinoGameControlsService } from './services/dino-game-controls.service';
+import { DinoGameSettingsService } from './services/dino-game-settings.service';
 
 @NgModule({
     declarations: [DinosaurGameComponent, DinoGameBackgroundComponent],
     imports: [CommonModule, DinoGameRoutingModule, SharedModule],
-    providers: [DinoGameService, DinoGameObservers, DinoGameContainerService, DinoGameStateService, DinoGameControlsService]
+    providers: [DinoGameService, DinoGameObservers, DinoGameContainerService, DinoGameStateService, DinoGameSettingsService]
 })
 export class DinoGameModule {}
