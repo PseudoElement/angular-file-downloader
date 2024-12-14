@@ -9,9 +9,9 @@ export class HttpApiService {
 
     constructor(private readonly httpClient: HttpClient) {}
 
-    public async get<T>(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }): Promise<T> {
+    public async get<T>(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }, url: string = this.baseUrl): Promise<T> {
         return firstValueFrom(
-            this.httpClient.get<T>(`${this.baseUrl}/${path}`, {
+            this.httpClient.get<T>(`${url}/${path}`, {
                 headers: options?.headers,
                 params: options?.params,
                 responseType: 'json'
