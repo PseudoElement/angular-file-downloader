@@ -9,10 +9,10 @@ export class HttpApiService {
 
     constructor(private readonly httpClient: HttpClient) {}
 
-    public async get<T>(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }, url: string = this.baseUrl): Promise<T> {
+    public async get<T>(path: string, options?: { params?: HttpParams; headers?: HttpHeaders }): Promise<T> {
         return firstValueFrom(
-            this.httpClient.get<T>(`${url}/${path}`, {
-                headers: options?.headers,
+            this.httpClient.get<T>(path, {
+                headers: { 'Content-Type': 'application/json', ...options?.headers },
                 params: options?.params,
                 responseType: 'json'
             })
@@ -20,7 +20,7 @@ export class HttpApiService {
     }
 
     public async post<T>(path: string, body: object, headers?: HttpHeaders): Promise<T> {
-        return firstValueFrom(this.httpClient.post<T>(`${this.baseUrl}/${path}`, body, { headers }));
+        return firstValueFrom(this.httpClient.post<T>(path, body, { headers }));
     }
 
     public async downloadFilePost(path: string, body: object, fileName?: string, headers?: HttpHeaders): Promise<void> {

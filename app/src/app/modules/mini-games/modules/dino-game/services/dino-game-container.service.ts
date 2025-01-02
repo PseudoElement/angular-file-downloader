@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, fromEvent, timer } from 'rxjs';
+import { BehaviorSubject, fromEvent, Subject, takeUntil, timer } from 'rxjs';
 import { AbsObjectCoords } from '../../../models/game-object-types';
 import { DYNO_CONTAINER_ID } from '../constants/common-consts';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable()
 export class DinoGameContainerService {
+    private _destroy$ = new Subject();
+
+    public dinoDestroy$ = this._destroy$.asObservable();
+
     public readonly gameContainerCoords$ = new BehaviorSubject<AbsObjectCoords>({
         top: 0,
         bottom: 0,
@@ -14,13 +17,20 @@ export class DinoGameContainerService {
     });
 
     constructor() {
-        timer(1_000).subscribe(() => this.setCoords());
+        timer(1_000)
+            .pipe(takeUntil(this.dinoDestroy$))
+            .subscribe(() => this.setCoords());
         this.subOnWindowResize();
+    }
+
+    public onDestroy(): void {
+        this._destroy$.next(null);
+        this._destroy$.complete();
     }
 
     private subOnWindowResize(): void {
         fromEvent(window, 'resize')
-            .pipe(takeUntilDestroyed())
+            .pipe(takeUntil(this.dinoDestroy$))
             .subscribe(() => this.setCoords());
     }
 

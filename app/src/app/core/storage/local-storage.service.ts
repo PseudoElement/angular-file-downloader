@@ -26,7 +26,6 @@ export class LocalStorageService {
         const bestTime = this.get('bestTime');
         const dinoKeyBindings = this.get<KeysBindings>('dinoKeyBindings');
         const dinoSettings = this.get<DinoGameSettings>('dinoSettings');
-        console.log('DIN0000', dinoSettings);
 
         this._storageState$.next({
             bestScore: bestScore ? Number(bestScore) : null,

@@ -1,0 +1,16 @@
+<div class="alerts-wrapper">
+    <div *ngFor="let alert of alerts$ | async" class="alert" (click)="closeAlert(alert)" @opacityAnimation>
+        <ng-container *ngTemplateOutlet="icon; context: { type: alert.type }"></ng-container>
+        <p class="alert-text">{{ alert.text }}</p>
+    </div>
+</div>
+
+<ng-template #icon let-type="type">
+    @switch (type) { @case ('success') {
+    <span class="material-symbols-outlined alert-icon alert-success"> check_circle </span>
+    } @case ('error') {
+    <span class="material-symbols-outlined alert-icon alert-error"> error </span>
+    } @case ('warn') {
+    <span class="material-symbols-outlined alert-icon alert-warn"> error </span>
+    } }
+</ng-template>

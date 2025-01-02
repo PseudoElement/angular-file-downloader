@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { PlayerKeyboardAction } from '../models/game-objects-types';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { KeysBindings } from '../models/key-bindings-types';
 import { DEFAULT_DINO_KEY_BINDINGS } from '../constants/key-bindings';
 import { LocalStorageService } from 'src/app/core/storage/local-storage.service';

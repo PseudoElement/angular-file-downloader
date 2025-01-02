@@ -31,6 +31,7 @@ import { TimerComponent } from './components/timer/timer.component';
 import { GameInfoElementComponent } from './components/game-info-element/game-info-element.component';
 import { GameSettingsModalComponent } from './components/game-settings-modal/game-settings-modal.component';
 import { PrettifyControlKeyPipe } from './pipes/prettify-control-key.pipe';
+import { AlertsComponent } from './components/alerts/alerts.component';
 
 @NgModule({
     exports: [
@@ -54,7 +55,8 @@ import { PrettifyControlKeyPipe } from './pipes/prettify-control-key.pipe';
         TimerComponent,
         GameInfoElementComponent,
         GameSettingsModalComponent,
-        PrettifyControlKeyPipe
+        PrettifyControlKeyPipe,
+        AlertsComponent
     ],
     declarations: [
         InputComponent,
@@ -78,7 +80,8 @@ import { PrettifyControlKeyPipe } from './pipes/prettify-control-key.pipe';
         TimerComponent,
         GameInfoElementComponent,
         GameSettingsModalComponent,
-        PrettifyControlKeyPipe
+        PrettifyControlKeyPipe,
+        AlertsComponent
     ],
     imports: [
         CommonModule,

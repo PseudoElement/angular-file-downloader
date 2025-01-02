@@ -1,0 +1,49 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .alerts-wrapper {
+        @include flex-column(space-between, baseline);
+        gap: 10px;
+
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 10000000000;
+    }
+
+    .alert {
+        @include flex-row(center, center);
+        @include ff-alfa(14px);
+        gap: 10px;
+        font-weight: 100;
+        cursor: pointer;
+
+        padding: 5px;
+
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 0 4px 0px gray;
+
+        border-radius: 10px;
+        background-color: white;
+
+        &-text {
+            width: 100%;
+        }
+        &-icon {
+            font-size: 28px;
+        }
+    }
+
+    .alert-success {
+        color: greenyellow;
+    }
+
+    .alert-error {
+        color: rgb(244, 50, 50);
+    }
+
+    .alert-warn {
+        color: orange;
+    }
+}

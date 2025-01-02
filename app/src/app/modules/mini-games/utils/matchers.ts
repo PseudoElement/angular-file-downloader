@@ -11,4 +11,9 @@ export class MiniGameMatchers {
         const pathParam = segments[0].path;
         return pathParam === MINI_GAMES.FLAPPY_BIRD;
     }
+
+    public static async matchSeabattleGame(_route: Route, segments: UrlSegment[]): Promise<boolean> {
+        const pathParam = segments[0].path;
+        return pathParam === MINI_GAMES.SEA_BATTLE;
+    }
 }

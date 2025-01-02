@@ -9,6 +9,7 @@ import {
     SettingsReturnedValue
 } from 'src/app/shared/components/game-settings-modal/game-settings-modal.component';
 import { DinoGameSettingsService } from '../../services/dino-game-settings.service';
+import { DinoGameContainerService } from '../../services/dino-game-container.service';
 
 @Component({
     selector: 'app-dino-game-background',
@@ -21,11 +22,13 @@ export class DinoGameBackgroundComponent implements OnDestroy {
         private readonly dinoGameSrv: DinoGameService,
         private readonly gameStateSrv: DinoGameStateService,
         private readonly gameSettingsSrv: DinoGameSettingsService,
+        private readonly gameContainerSrv: DinoGameContainerService,
         private readonly sintolModalSrv: SintolLibDynamicComponentService
     ) {}
 
     ngOnDestroy(): void {
         this.dinoGameSrv.endGame();
+        this.gameContainerSrv.onDestroy();
     }
 
     public readonly bgAnimation$ = this.gameStateSrv.gameState$.pipe(
