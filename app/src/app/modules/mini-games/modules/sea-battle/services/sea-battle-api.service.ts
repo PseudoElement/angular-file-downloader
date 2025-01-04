@@ -37,15 +37,15 @@ export class SeaBattleApiService {
         return ws;
     }
 
-    public async disconnectFromRoom(params: CreateRoomReqBody): Promise<void> {
-        try {
-            const resp = await this.httpApi.get<{ message: string }>(`${ENVIRONMENT.apiBaseUrl}/seabattle/disconnect`, {
-                params: params as unknown as HttpParams
-            });
-            this.alertsSrv.showAlert({ text: resp.message, type: 'success' });
-        } catch (err) {
-            console.log('API_disconnectFromRoom_Error ==> ', err);
-            this.alertsSrv.showAlert({ text: (err as HttpErrorResponse).error.message, type: 'error' });
-        }
+    public disconnectFromRoom(params: CreateRoomReqBody): Promise<{ message: string }> {
+        // try {
+        return this.httpApi.get<{ message: string }>(`${ENVIRONMENT.apiBaseUrl}/seabattle/disconnect`, {
+            params: params as unknown as HttpParams
+        });
+        //     this.alertsSrv.showAlert({ text: resp.message, type: 'success' });
+        // } catch (err) {
+        //     console.log('API_disconnectFromRoom_Error ==> ', err);
+        //     this.alertsSrv.showAlert({ text: (err as HttpErrorResponse).error.message, type: 'error' });
+        // }
     }
 }

@@ -32,6 +32,7 @@ import { GameInfoElementComponent } from './components/game-info-element/game-in
 import { GameSettingsModalComponent } from './components/game-settings-modal/game-settings-modal.component';
 import { PrettifyControlKeyPipe } from './pipes/prettify-control-key.pipe';
 import { AlertsComponent } from './components/alerts/alerts.component';
+import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.component';
 
 @NgModule({
     exports: [
@@ -56,7 +57,8 @@ import { AlertsComponent } from './components/alerts/alerts.component';
         GameInfoElementComponent,
         GameSettingsModalComponent,
         PrettifyControlKeyPipe,
-        AlertsComponent
+        AlertsComponent,
+        ConfirmModalComponent
     ],
     declarations: [
         InputComponent,
@@ -81,7 +83,8 @@ import { AlertsComponent } from './components/alerts/alerts.component';
         GameInfoElementComponent,
         GameSettingsModalComponent,
         PrettifyControlKeyPipe,
-        AlertsComponent
+        AlertsComponent,
+        ConfirmModalComponent
     ],
     imports: [
         CommonModule,

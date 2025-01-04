@@ -5,10 +5,21 @@ import { SeaBattleRoutingModule } from './sea-battle-routing.module';
 import { SeaBattleApiService } from './services/sea-battle-api.service';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { SeaBattleSocketService } from './services/sea-battle-socket.service';
+import { SeaBattleStateService } from './services/sea-battle-state.service';
+import { SeaBattleActionsPanelComponent } from './components/sea-battle-actions-panel/sea-battle-actions-panel.component';
+import { SeaBattleChatComponent } from './components/sea-battle-chat/sea-battle-chat.component';
+import { SeaBattleChatMessageComponent } from './components/sea-battle-chat-message/sea-battle-chat-message.component';
+import { SeaBattleFieldComponent } from './components/sea-battle-field/sea-battle-field.component';
 
 @NgModule({
-    declarations: [SeaBattleGameComponent],
+    declarations: [
+        SeaBattleGameComponent,
+        SeaBattleActionsPanelComponent,
+        SeaBattleChatComponent,
+        SeaBattleChatMessageComponent,
+        SeaBattleFieldComponent
+    ],
     imports: [CommonModule, SeaBattleRoutingModule, SharedModule],
-    providers: [SeaBattleApiService, SeaBattleSocketService]
+    providers: [SeaBattleApiService, SeaBattleSocketService, SeaBattleStateService]
 })
 export class SeaBattleModule {}

@@ -17,3 +17,11 @@ export const SOCKET_RESP_TYPE = {
 } as const;
 
 export type SocketRespType = (typeof SOCKET_RESP_TYPE)[keyof typeof SOCKET_RESP_TYPE];
+
+export const ROOM_STATE = {
+    PLAYING: 'PLAYING',
+    IDLE: 'IDLE',
+    END: 'WIN'
+} as const;
+
+export type RoomState = (typeof ROOM_STATE)[keyof typeof ROOM_STATE];

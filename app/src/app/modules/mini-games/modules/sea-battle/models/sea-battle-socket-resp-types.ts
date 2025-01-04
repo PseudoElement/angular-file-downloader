@@ -20,9 +20,9 @@ export type PlayerReadyRespMsg = BaseSocketRespMsg<{ player_email: string; playe
 
 export type PlayerStepRespMsg = BaseSocketRespMsg<{ player_email: string; player_id: string; step_result: StepResult; step: string }>;
 
-export type PlayerSetPositionsRespMsg = BaseSocketRespMsg<undefined>;
+export type PlayerSetPositionsRespMsg = BaseSocketRespMsg<{ player_email: string; player_id: string }>;
 
-export type WinGameRespMsg = BaseSocketRespMsg<undefined>;
+export type WinGameRespMsg = BaseSocketRespMsg<{ winner_email: string; winner_id: string }>;
 
 export type SocketRespMsg =
     | ConnectPlayerRespMsg
