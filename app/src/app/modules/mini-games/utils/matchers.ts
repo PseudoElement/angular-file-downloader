@@ -14,6 +14,7 @@ export class MiniGameMatchers {
 
     public static async matchSeabattleGame(_route: Route, segments: UrlSegment[]): Promise<boolean> {
         const pathParam = segments[0].path;
+        console.log();
         return pathParam === MINI_GAMES.SEA_BATTLE;
     }
 }

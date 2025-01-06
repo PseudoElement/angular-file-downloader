@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SeaBattleApiService } from './sea-battle-api.service';
-import { ConnectRoomReqBody, CreateRoomReqBody, RoomPlayer, RoomSocket } from '../models/sea-battle-api-types';
+import { ConnectRoomReqBody, CreateRoomReqBody, RoomInfoResp, RoomPlayer, RoomSocket } from '../models/sea-battle-api-types';
 import { AlertsService } from 'src/app/shared/services/alerts.service';
 import { SocketReqMsg } from '../models/sea-battle-socket-req-types';
 import {
@@ -13,6 +13,8 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { ROOM_STATE, SOCKET_RESP_TYPE, STEP_RESULT } from '../constants/socket-constants';
 import { SeaBattleStateService } from './sea-battle-state.service';
+import { Router } from '@angular/router';
+import { AuthService } from 'src/app/core/auth/auth.service';
 
 @Injectable()
 export class SeaBattleSocketService {
@@ -23,29 +25,39 @@ export class SeaBattleSocketService {
     constructor(
         private readonly seabattleApiSrv: SeaBattleApiService,
         private readonly alertsSrv: AlertsService,
-        private readonly seabattleState: SeaBattleStateService
+        private readonly seabattleState: SeaBattleStateService,
+        private readonly authSrv: AuthService,
+        private readonly router: Router
     ) {}
 
     public async createAndConnectToNewRoom(params: CreateRoomReqBody): Promise<void> {
         try {
-            const resp = await this.seabattleApiSrv.createRoom(params);
-            this.alertsSrv.showAlert({ text: `Room "${resp.room_name}" created successfully!`, type: 'success' });
-            await this.connectToRoom({ ...params, room_id: resp.room_id });
+            const roomInfo = await this.seabattleApiSrv.createRoom(params);
+            this.alertsSrv.showAlert({ text: `Room "${roomInfo.room_name}" created successfully!`, type: 'success' });
+            await this.connectToRoom({ ...params, room_id: roomInfo.room_id }, roomInfo);
         } catch (err) {
             console.log('createAndConnectToNewRoom_Error ==> ', err);
             this.alertsSrv.showAlert({ text: (err as HttpErrorResponse).error.message, type: 'error' });
         }
     }
 
-    public async connectToRoom(params: ConnectRoomReqBody): Promise<void> {
+    /**
+     *
+     * @param params {ConnectRoomReqBody}
+     * @param roomInfo may be loaded from seabattleApiSrv.createRoom and passed here.
+     */
+    public async connectToRoom(params: ConnectRoomReqBody, roomInfo?: RoomInfoResp): Promise<void> {
         try {
             const socket = this.seabattleApiSrv.connectToRoom(params);
-            const roomInfo = await this.seabattleApiSrv.fetchRoomInfo(params);
+            if (!roomInfo) {
+                roomInfo = await this.seabattleApiSrv.fetchRoomInfo(params);
+            }
 
-            socket.addEventListener('message', (e) => this.listenSocketMessage(socket, roomInfo.room_id, e.data));
-            socket.addEventListener('error', () => this.listenSocketError(roomInfo.room_id));
-            socket.addEventListener('open', () => this.listenSocketOpen(roomInfo.room_id));
+            socket.addEventListener('message', (e) => this.listenSocketMessage(socket, roomInfo!.room_id, JSON.parse(e.data)));
+            socket.addEventListener('error', () => this.listenSocketError(roomInfo!.room_id));
+            // socket.addEventListener('open', () => this.listenSocketOpen(roomInfo.room_id));
 
+            this.router.navigate(['mini-games', 'sea-battle', 'room', roomInfo.room_id]);
             this.alertsSrv.showAlert({ text: `You've connected to room "${roomInfo.room_name}"!`, type: 'success' });
         } catch (err) {
             console.log('connectToRoom_Error ==> ', err);
@@ -54,20 +66,22 @@ export class SeaBattleSocketService {
     }
 
     public sendMessage(socketId: string, msg: SocketReqMsg): void {
-        const room = this.rooms.find((r) => r.id === socketId);
+        const room = this.rooms.find((r) => r.data.room_id === socketId);
         room?.socket.send(JSON.stringify(msg));
     }
 
     public async disconnectFromRoom(socketId: string, playerEmail: string): Promise<void> {
         try {
-            const room = this.rooms.find((r) => r.id === socketId)!;
-            const filteredRooms = this.rooms.filter((r) => r.id !== socketId);
+            const room = this.rooms.find((r) => r.data.room_id === socketId)!;
+            const filteredRooms = this.rooms.filter((r) => room.data.room_id !== socketId);
 
             await this.seabattleApiSrv.disconnectFromRoom({ player_email: playerEmail, room_name: room.data.room_name });
 
-            room?.socket.removeEventListener('message', (e) => this.listenSocketMessage(room.socket, room.id, e.data));
-            room?.socket.removeEventListener('error', () => this.listenSocketError(room.id));
-            room?.socket.removeEventListener('open', () => this.listenSocketOpen(room.id));
+            room?.socket.removeEventListener('message', (e) =>
+                this.listenSocketMessage(room.socket, room.data.room_id, JSON.parse(e.data))
+            );
+            room?.socket.removeEventListener('error', () => this.listenSocketError(room.data.room_id));
+            // room?.socket.removeEventListener('open', () => this.listenSocketOpen(room.data.room_id));
 
             room?.socket.close();
             this.seabattleState.updateRooms(filteredRooms);
@@ -78,12 +92,12 @@ export class SeaBattleSocketService {
     }
 
     private listenSocketError(socketId: string): void {
-        const room = this.rooms.find((r) => r.id === socketId);
+        const room = this.rooms.find((r) => r.data.room_id === socketId);
         this.alertsSrv.showAlert({ text: `Error occured trying to connect to room ${room?.data.room_name}`, type: 'error' });
     }
 
     private listenSocketOpen(socketId: string): void {
-        const room = this.rooms.find((r) => r.id === socketId);
+        const room = this.rooms.find((r) => r.data.room_id === socketId);
         this.alertsSrv.showAlert({ text: `You connected to room ${room?.data.room_name}!`, type: 'success' });
     }
 
@@ -109,9 +123,10 @@ export class SeaBattleSocketService {
                 throw new Error(`Invalid SOCKET_RESP_TYPE ==> ${SOCKET_RESP_TYPE}`);
         }
 
-        const room = this.rooms.find((r) => r.id === roomId);
+        const room = this.rooms.find((r) => r.data.room_id === roomId);
         room?.data.messages.push(msg);
         this.seabattleState.updateRooms(this.rooms);
+        console.log('listenSocketMessage_ROOMS ===> ', this.rooms);
     }
 
     private handleConnectionMsg(socket: WebSocket, roomId: string, msg: ConnectPlayerRespMsg): void {
@@ -131,14 +146,13 @@ export class SeaBattleSocketService {
         } satisfies RoomPlayer;
 
         const newRoomSocket = {
-            id: roomId,
             socket,
             state: ROOM_STATE.IDLE,
             data: {
                 messages: [] as SocketRespMsg[],
                 room_name: msg.data.room_name,
                 room_id: msg.data.room_id,
-                players: [me, enemy]
+                players: { me, enemy }
             }
         } satisfies RoomSocket;
         console.log('NEW_SOCKET ===> ', newRoomSocket);
@@ -147,23 +161,24 @@ export class SeaBattleSocketService {
     }
 
     private handleDisconnectionMsg(roomId: string, msg: DisconnectPlayerRespMsg): void {
-        const room = this.rooms.find((r) => r.id === roomId);
-        room!.data.players = room!.data.players.filter((p) => p.playerEmail === msg.data.player_email || p.playerId === msg.data.player_id);
-        // @TODO use real check
-        room!.data.players[0].isOwner = true;
+        const filtered = this.rooms.filter((r) => r.data.room_id !== roomId);
+        this.seabattleState.updateRooms([...filtered]);
     }
 
     private handlePlayerSetPositions(roomId: string, msg: PlayerSetPositionsRespMsg): void {
-        const room = this.rooms.find((r) => r.id === roomId);
-        const readyPlayer = room?.data.players.find((p) => p.playerEmail === msg.data.player_email || p.playerId === msg.data.player_id)!;
-        readyPlayer.isReady = true;
+        const room = this.rooms.find((r) => r.data.room_id === roomId)!;
+        const isYou = msg.data.player_email === this.authSrv.user?.email;
+
+        if (isYou) {
+            room.data.players.me.isReady = true;
+        } else {
+            room.data.players.enemy!.isReady = true;
+        }
     }
 
     private handleStep(roomId: string, msg: PlayerStepRespMsg): void {
-        const room = this.rooms.find((r) => r.id === roomId);
-        const steppingPlayer = room!.data.players.find(
-            (p) => p.playerEmail === msg.data.player_email || p.playerId === msg.data.player_id
-        )!;
+        const room = this.rooms.find((r) => r.data.room_id === roomId)!;
+        const steppingPlayer = msg.data.player_email === this.authSrv.user?.email ? room.data.players.me : room.data.players.enemy!;
 
         const regex = new RegExp(`${msg.data.step}[^,]*,`);
         const cellValue = regex.exec(steppingPlayer.positions)![0];
@@ -179,6 +194,7 @@ export class SeaBattleSocketService {
                 steppingPlayer.positions = steppingPlayer.positions.replace(cellValueWithoutComma, killedCell);
                 break;
             case STEP_RESULT.ALREADY_CHECKED:
+                this.alertsSrv.showAlert({ text: `You've already checked ${msg.data.step} cell. Try another.`, type: 'warn' });
                 break;
             case STEP_RESULT.MISS:
                 const missedCell = `${cellValueWithoutComma}.`;
@@ -190,7 +206,7 @@ export class SeaBattleSocketService {
     }
 
     private handleWin(roomId: string): void {
-        const room = this.rooms.find((r) => r.id === roomId)!;
+        const room = this.rooms.find((r) => r.data.room_id === roomId)!;
         room.state = ROOM_STATE.END;
     }
 }

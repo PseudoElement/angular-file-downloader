@@ -1,0 +1,11 @@
+<ng-container *ngLet="{ room: room$ | async, yourPositions: yourPosiions$ | async, enemyPosiions: enemyPosiions$ | async } as state">
+    <div class="room-wrapper">
+        <h1 class="room-title">Room "{{ state.room.name }}"</h1>
+        <div class="room-main">
+            <app-input [label]="'Step'" [control]="stepCtrl"></app-input>
+        </div>
+        <div class="room-chat">
+            <app-sea-battle-chat [messages]="state.room.messages"></app-sea-battle-chat>
+        </div>
+    </div>
+</ng-container>

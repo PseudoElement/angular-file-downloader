@@ -11,3 +11,7 @@ on connect new player add Player in `players`
 connect to room ->
 get data from response and set in `room.data` ->
 apply listeners
+
+### TODO
+
+-   handle ALREADY_CHECKED case properly (maybe add counter with attempts, if more than 2, skip step for user)

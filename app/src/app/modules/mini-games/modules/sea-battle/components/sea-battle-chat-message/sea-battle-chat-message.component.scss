@@ -1,0 +1,11 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .message {
+        @include flex-row(space-between, center);
+        width: 100%;
+        max-width: 350px;
+        padding: 2px 5px;
+        font-weight: bold;
+    }
+}

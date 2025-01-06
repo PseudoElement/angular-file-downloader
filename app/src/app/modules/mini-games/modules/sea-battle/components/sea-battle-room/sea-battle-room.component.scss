@@ -1,0 +1,11 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .room-wrapper {
+        @include flex-row(space-around, center);
+
+        width: 100%;
+        border: 2px solid black;
+        margin: 10px 0;
+    }
+}

@@ -22,15 +22,17 @@ export interface ConnectRoomReqBody {
 export interface RoomSocket {
     socket: WebSocket;
     state: RoomState;
-    id: string;
     data: RoomSocketData;
 }
 
 export interface RoomSocketData {
     messages: SocketRespMsg[];
     room_name: string;
-    room_id?: string;
-    players: RoomPlayer[];
+    room_id: string;
+    players: {
+        me: RoomPlayer;
+        enemy: RoomPlayer | null;
+    };
 }
 
 export interface RoomPlayer {

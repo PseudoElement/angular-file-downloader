@@ -18,4 +18,8 @@ export class AuthService {
     }
 
     constructor() {}
+
+    public setUserEmail(email: string): void {
+        this._user$.next({ email });
+    }
 }

@@ -1,1 +1,6 @@
-<p>sea-battle-chat works!</p>
+<div class="chat-wrapper">
+    <h2>Game info</h2>
+    <div class="messages">
+        <app-sea-battle-chat-message *ngFor="let msg of messages" [message]="msg"></app-sea-battle-chat-message>
+    </div>
+</div>

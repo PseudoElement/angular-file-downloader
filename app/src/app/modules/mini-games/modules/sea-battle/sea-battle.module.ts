@@ -10,6 +10,7 @@ import { SeaBattleActionsPanelComponent } from './components/sea-battle-actions-
 import { SeaBattleChatComponent } from './components/sea-battle-chat/sea-battle-chat.component';
 import { SeaBattleChatMessageComponent } from './components/sea-battle-chat-message/sea-battle-chat-message.component';
 import { SeaBattleFieldComponent } from './components/sea-battle-field/sea-battle-field.component';
+import { SeaBattleRoomComponent } from './components/sea-battle-room/sea-battle-room.component';
 
 @NgModule({
     declarations: [
@@ -17,7 +18,8 @@ import { SeaBattleFieldComponent } from './components/sea-battle-field/sea-battl
         SeaBattleActionsPanelComponent,
         SeaBattleChatComponent,
         SeaBattleChatMessageComponent,
-        SeaBattleFieldComponent
+        SeaBattleFieldComponent,
+        SeaBattleRoomComponent
     ],
     imports: [CommonModule, SeaBattleRoutingModule, SharedModule],
     providers: [SeaBattleApiService, SeaBattleSocketService, SeaBattleStateService]
