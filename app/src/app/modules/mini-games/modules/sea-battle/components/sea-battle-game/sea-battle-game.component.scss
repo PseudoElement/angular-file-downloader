@@ -1,0 +1,7 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .actions-panel {
+        border-bottom: 2px solid gray;
+    }
+}

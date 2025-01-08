@@ -3,8 +3,10 @@ import { SeaBattleSocketService } from '../../services/sea-battle-socket.service
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { SeaBattleStateService } from '../../services/sea-battle-state.service';
-import { map } from 'rxjs';
+import { filter, map, Observable, tap } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { RoomSocket } from '../../models/sea-battle-api-types';
+import { SOCKET_RESP_TYPE } from '../../constants/socket-constants';
 
 @Component({
     selector: 'app-sea-battle-room',
@@ -15,7 +17,12 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 export class SeaBattleRoomComponent {
     private readonly roomId: string;
 
-    public readonly room$ = this.seabattleStateSrv.rooms$.pipe(map((rooms) => rooms.find((r) => r.data.room_id === this.roomId)!));
+    public readonly room$: Observable<RoomSocket> = this.seabattleStateSrv.rooms$.pipe(
+        tap((r) => console.log('ROOMS_+LISTTT ==> ', r)),
+        filter((rooms) => !!rooms.length),
+        map((rooms) => rooms.find((r) => r.data.room_id === this.roomId)!),
+        tap((r) => console.log('ROOM$ ==> ', r))
+    );
 
     public readonly yourPosiions$ = this.room$.pipe(map((room) => room.data.players.me));
 
@@ -37,6 +44,7 @@ export class SeaBattleRoomComponent {
     public async sendPositions(): Promise<void> {
         this.seabattleSocketSrv.sendMessage(this.roomId, {
             player_email: this.authSrv.user?.email!,
+            action_type: SOCKET_RESP_TYPE.SET_PLAYER_POSITIONS,
             data: {
                 player_positions: `
 		A1+,A2,A3,A4,A5,A6,A7,A8,A9,A10+,
@@ -57,9 +65,14 @@ export class SeaBattleRoomComponent {
     public async sendStep(): Promise<void> {
         this.seabattleSocketSrv.sendMessage(this.roomId, {
             player_email: this.authSrv.user?.email!,
+            action_type: SOCKET_RESP_TYPE.STEP,
             data: {
                 step: this.stepCtrl.value!
             }
         });
+    }
+
+    public disconnect(): void {
+        this.seabattleSocketSrv.disconnectFromRoom(this.roomId, this.authSrv.user!.email);
     }
 }

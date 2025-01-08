@@ -1,0 +1,11 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .close-btn {
+        width: 30px;
+        height: 30px;
+    }
+    .close-icon {
+        font-size: $fs-regular;
+    }
+}

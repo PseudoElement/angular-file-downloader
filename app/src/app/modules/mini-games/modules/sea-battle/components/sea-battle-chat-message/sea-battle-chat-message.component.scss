@@ -3,9 +3,15 @@
 :host {
     .message {
         @include flex-row(space-between, center);
+        gap: 10px;
+
         width: 100%;
         max-width: 350px;
         padding: 2px 5px;
         font-weight: bold;
+    }
+
+    img {
+        border-radius: 50%;
     }
 }

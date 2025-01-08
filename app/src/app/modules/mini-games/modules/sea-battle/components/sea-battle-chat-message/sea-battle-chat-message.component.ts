@@ -14,27 +14,27 @@ export class SeaBattleChatMessageComponent {
     public getIconPath(): string {
         switch (this.message.action_type) {
             case SOCKET_RESP_TYPE.CONNECT_PLAYER:
-                return '/app/src/assets/seabattle-icons/connect.png';
+                return '../../../../../../../assets/seabattle-icons/connect.png';
             case SOCKET_RESP_TYPE.DISCONNECT_PLAYER:
-                return '/app/src/assets/seabattle-icons/disconnect.png';
+                return '../../../../../../../assets/seabattle-icons/disconnect.png';
             case SOCKET_RESP_TYPE.SET_PLAYER_POSITIONS:
-                return '/app/src/assets/seabattle-icons/ready.png';
+                return '../../../../../../../assets/seabattle-icons/ready.png';
             case SOCKET_RESP_TYPE.WIN_GAME:
-                return '/app/src/assets/seabattle-icons/cup.png';
+                return '../../../../../../../assets/seabattle-icons/cup.png';
             case SOCKET_RESP_TYPE.STEP:
                 const stepMsg = this.message as PlayerStepRespMsg;
                 if (stepMsg.data.step_result === STEP_RESULT.ALREADY_CHECKED) {
-                    return '/app/src/assets/seabattle-icons/clown.png';
+                    return '../../../../../../../assets/seabattle-icons/clown.png';
                 } else if (stepMsg.data.step_result === STEP_RESULT.HIT) {
-                    return '/app/src/assets/seabattle-icons/hit.png';
+                    return '../../../../../../../assets/seabattle-icons/hit.png';
                 } else if (stepMsg.data.step_result === STEP_RESULT.KILL) {
-                    return '/app/src/assets/seabattle-icons/burst.png';
+                    return '../../../../../../../assets/seabattle-icons/burst.png';
                 } else {
-                    return '/app/src/assets/seabattle-icons/puff.png';
+                    return '../../../../../../../assets/seabattle-icons/puff.png';
                 }
             case SOCKET_RESP_TYPE.ERROR:
             default:
-                return '/app/src/assets/seabattle-icons/error.png';
+                return '../../../../../../../assets/seabattle-icons/error.png';
         }
     }
 }

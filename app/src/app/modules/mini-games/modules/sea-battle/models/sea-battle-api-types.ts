@@ -11,7 +11,10 @@ export interface RoomInfoReqBody {
     room_name: string;
 }
 
-export interface DisconnectRoomReqBody extends CreateRoomReqBody {}
+export interface DisconnectRoomReqBody {
+    player_email: string;
+    room_id: string;
+}
 
 export interface ConnectRoomReqBody {
     player_email: string;
@@ -29,6 +32,7 @@ export interface RoomSocketData {
     messages: SocketRespMsg[];
     room_name: string;
     room_id: string;
+    created_at: string;
     players: {
         me: RoomPlayer;
         enemy: RoomPlayer | null;
@@ -43,18 +47,31 @@ export interface RoomPlayer {
     isReady: boolean;
 }
 
+interface PlayerInfoFromBackend {
+    player_id: string;
+    player_email: string;
+    is_owner: boolean;
+}
+
+export interface RoomInfoFromBackend {
+    room_id: string;
+    room_name: string;
+    created_at: string;
+    players: PlayerInfoFromBackend[];
+}
+
 export interface RoomInfoResp {
     room_id: string;
     room_name: string;
     created_at: string;
-    your_data: {
-        player_id: string;
-        player_email: string;
-        is_owner: boolean;
-    };
-    enemy_data: {
-        player_id: string;
-        player_email: string;
-        is_owner: boolean;
+    your_data: PlayerInfoFromBackend;
+    enemy_data: PlayerInfoFromBackend;
+}
+
+export interface RoomsMapResp {
+    rooms: {
+        [roomId: string]: RoomInfoFromBackend;
     };
 }
+
+export type RoomsArray = Array<RoomInfoFromBackend>;

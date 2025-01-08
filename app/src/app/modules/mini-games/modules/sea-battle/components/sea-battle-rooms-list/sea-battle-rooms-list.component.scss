@@ -1,0 +1,39 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .rooms-list-wrapper {
+        @include flex-column(space-around, baseline);
+
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .rooms-list {
+        @include flex-column(space-around, baseline);
+        width: 100%;
+    }
+
+    .room-element {
+        @include flex-row(space-between, center);
+        gap: 20px;
+
+        position: relative;
+        top: 0;
+        left: 0;
+        height: 70px;
+        width: 100%;
+        margin: 20px 0;
+        padding: 10px 20px;
+        box-shadow: 7px 5px 2px 2px gray;
+        background-color: rgba(64, 215, 165, 0.7);
+        cursor: pointer;
+        transition: all 0.1s;
+        transform: skewX(-8deg);
+
+        &:hover {
+            box-shadow: 4px 4px 0 0;
+            top: 4px;
+            left: 4px;
+        }
+    }
+}

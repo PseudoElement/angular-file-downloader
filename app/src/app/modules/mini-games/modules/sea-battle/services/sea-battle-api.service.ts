@@ -1,13 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpApiService } from 'src/app/core/api/http-api.service';
 import { ENVIRONMENT } from 'src/environments/environment';
-import { ConnectRoomReqBody, CreateRoomReqBody, RoomInfoReqBody, RoomInfoResp } from '../models/sea-battle-api-types';
+import {
+    ConnectRoomReqBody,
+    CreateRoomReqBody,
+    DisconnectRoomReqBody,
+    RoomInfoReqBody,
+    RoomInfoResp
+} from '../models/sea-battle-api-types';
 import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { AlertsService } from 'src/app/shared/services/alerts.service';
 
 @Injectable()
 export class SeaBattleApiService {
     constructor(private readonly httpApi: HttpApiService, private readonly alertsSrv: AlertsService) {}
+
+    public fetchRoomsMapFromBackend(): Promise<any> {
+        return this.httpApi.get<RoomInfoResp>(`${ENVIRONMENT.apiBaseUrl}/seabattle/get-rooms`);
+    }
 
     public createRoom(params: CreateRoomReqBody): Promise<RoomInfoResp> {
         return this.httpApi.get<RoomInfoResp>(`${ENVIRONMENT.apiBaseUrl}/seabattle/create`, {
@@ -37,15 +47,9 @@ export class SeaBattleApiService {
         return ws;
     }
 
-    public disconnectFromRoom(params: CreateRoomReqBody): Promise<{ message: string }> {
-        // try {
+    public disconnectFromRoom(params: DisconnectRoomReqBody): Promise<{ message: string }> {
         return this.httpApi.get<{ message: string }>(`${ENVIRONMENT.apiBaseUrl}/seabattle/disconnect`, {
             params: params as unknown as HttpParams
         });
-        //     this.alertsSrv.showAlert({ text: resp.message, type: 'success' });
-        // } catch (err) {
-        //     console.log('API_disconnectFromRoom_Error ==> ', err);
-        //     this.alertsSrv.showAlert({ text: (err as HttpErrorResponse).error.message, type: 'error' });
-        // }
     }
 }

@@ -1,11 +1,14 @@
 <ng-container *ngLet="{ room: room$ | async, yourPositions: yourPosiions$ | async, enemyPosiions: enemyPosiions$ | async } as state">
-    <div class="room-wrapper">
-        <h1 class="room-title">Room "{{ state.room.name }}"</h1>
+    <div *ngIf="state.room" class="room-wrapper">
+        <h1 class="room-title">Room "{{ state.room.data.room_name }}"</h1>
         <div class="room-main">
             <app-input [label]="'Step'" [control]="stepCtrl"></app-input>
+            <app-button [text]="'Make step'" (click)="sendStep()"></app-button>
+            <app-button [text]="'Set positions'" (click)="sendPositions()"></app-button>
+            <app-button [text]="'Disconnect'" (click)="disconnect()"></app-button>
         </div>
         <div class="room-chat">
-            <app-sea-battle-chat [messages]="state.room.messages"></app-sea-battle-chat>
+            <app-sea-battle-chat [messages]="state.room.data.messages"></app-sea-battle-chat>
         </div>
     </div>
 </ng-container>

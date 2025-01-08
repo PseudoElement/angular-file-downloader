@@ -1,0 +1,16 @@
+<div *ngLet="roomsList$ | async as roomsList" class="rooms-list-wrapper">
+    <div class="header">
+        <h2 class="title">Seabattle Rooms</h2>
+        <app-button [text]="'Fetch rooms'" (click)="getList()"></app-button>
+    </div>
+    <div *ngIf="roomsList.length; else empty" class="rooms-list">
+        <div *ngFor="let room of roomsList" class="room-element">
+            <p>Room Name: {{ room.room_name }}</p>
+            <p>Room Id: {{ room.room_id }}</p>
+            <p>Creation time: {{ formatDate(room.created_at) }}</p>
+            <p>{{ room.players.length }}/2 players: {{ getRoomPlayersNames(room) }}</p>
+            <app-animated-button [type]="'link'" [text]="'Connect'" (click)="connectToRoom(room)"></app-animated-button>
+        </div>
+    </div>
+    <ng-template #empty><h4>No rooms available.</h4> </ng-template>
+</div>

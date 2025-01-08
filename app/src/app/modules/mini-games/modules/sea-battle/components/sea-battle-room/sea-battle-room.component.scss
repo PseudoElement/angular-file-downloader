@@ -2,10 +2,15 @@
 
 :host {
     .room-wrapper {
-        @include flex-row(space-around, center);
+        @include flex-column(space-around, center);
 
         width: 100%;
         border: 2px solid black;
         margin: 10px 0;
+    }
+
+    .room-main {
+        @include flex-row(baseline, center);
+        gap: 20px;
     }
 }

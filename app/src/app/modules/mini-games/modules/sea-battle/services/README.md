@@ -15,3 +15,4 @@ apply listeners
 ### TODO
 
 -   handle ALREADY_CHECKED case properly (maybe add counter with attempts, if more than 2, skip step for user)
+-   fix routing on not existing room

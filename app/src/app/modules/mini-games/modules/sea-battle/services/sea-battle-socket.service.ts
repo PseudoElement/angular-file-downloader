@@ -48,57 +48,60 @@ export class SeaBattleSocketService {
      */
     public async connectToRoom(params: ConnectRoomReqBody, roomInfo?: RoomInfoResp): Promise<void> {
         try {
-            const socket = this.seabattleApiSrv.connectToRoom(params);
             if (!roomInfo) {
                 roomInfo = await this.seabattleApiSrv.fetchRoomInfo(params);
             }
+            const socket = this.seabattleApiSrv.connectToRoom(params);
+
+            socket.onerror = function (err) {
+                console.log('SOCKET_ERROR', err);
+            };
 
             socket.addEventListener('message', (e) => this.listenSocketMessage(socket, roomInfo!.room_id, JSON.parse(e.data)));
             socket.addEventListener('error', () => this.listenSocketError(roomInfo!.room_id));
-            // socket.addEventListener('open', () => this.listenSocketOpen(roomInfo.room_id));
-
-            this.router.navigate(['mini-games', 'sea-battle', 'room', roomInfo.room_id]);
-            this.alertsSrv.showAlert({ text: `You've connected to room "${roomInfo.room_name}"!`, type: 'success' });
+            socket.addEventListener('open', () => this.listenSocketOpen(roomInfo!.room_id, roomInfo!.room_name));
         } catch (err) {
             console.log('connectToRoom_Error ==> ', err);
             this.alertsSrv.showAlert({ text: (err as HttpErrorResponse).error.message, type: 'error' });
         }
     }
 
-    public sendMessage(socketId: string, msg: SocketReqMsg): void {
-        const room = this.rooms.find((r) => r.data.room_id === socketId);
+    public sendMessage(roomId: string, msg: SocketReqMsg): void {
+        const room = this.rooms.find((r) => r.data.room_id === roomId);
         room?.socket.send(JSON.stringify(msg));
     }
 
-    public async disconnectFromRoom(socketId: string, playerEmail: string): Promise<void> {
+    public async disconnectFromRoom(roomId: string, playerEmail: string): Promise<void> {
         try {
-            const room = this.rooms.find((r) => r.data.room_id === socketId)!;
-            const filteredRooms = this.rooms.filter((r) => room.data.room_id !== socketId);
+            const room = this.rooms.find((r) => r.data.room_id === roomId)!;
+            const filteredRooms = this.rooms.filter((r) => room.data.room_id !== roomId);
 
-            await this.seabattleApiSrv.disconnectFromRoom({ player_email: playerEmail, room_name: room.data.room_name });
+            await this.seabattleApiSrv.disconnectFromRoom({ player_email: playerEmail, room_id: room.data.room_id });
 
             room?.socket.removeEventListener('message', (e) =>
                 this.listenSocketMessage(room.socket, room.data.room_id, JSON.parse(e.data))
             );
-            room?.socket.removeEventListener('error', () => this.listenSocketError(room.data.room_id));
-            // room?.socket.removeEventListener('open', () => this.listenSocketOpen(room.data.room_id));
-
+            room?.socket.removeEventListener('error', () => this.listenSocketError(room!.data.room_name));
+            room?.socket.removeEventListener('open', () => this.listenSocketOpen(room!.data.room_id, room!.data.room_name));
             room?.socket.close();
+
             this.seabattleState.updateRooms(filteredRooms);
+            this.router.navigate(['mini-games', 'sea-battle']);
             this.alertsSrv.showAlert({ text: `You disconnected from room ${room?.data.room_name}`, type: 'success' });
         } catch (err) {
             this.alertsSrv.showAlert({ text: (err as HttpErrorResponse).error.message, type: 'error' });
         }
     }
 
-    private listenSocketError(socketId: string): void {
-        const room = this.rooms.find((r) => r.data.room_id === socketId);
-        this.alertsSrv.showAlert({ text: `Error occured trying to connect to room ${room?.data.room_name}`, type: 'error' });
+    private listenSocketError(roomName: string): void {
+        this.alertsSrv.showAlert({ text: `Error occured trying to connect to room ${roomName}`, type: 'error' });
     }
 
-    private listenSocketOpen(socketId: string): void {
-        const room = this.rooms.find((r) => r.data.room_id === socketId);
-        this.alertsSrv.showAlert({ text: `You connected to room ${room?.data.room_name}!`, type: 'success' });
+    private listenSocketOpen(roomId: string, roomName: string): void {
+        setTimeout(() => {
+            this.router.navigate(['mini-games', 'sea-battle', 'room', roomId]);
+            this.alertsSrv.showAlert({ text: `You've connected to room "${roomName}"!`, type: 'success' });
+        }, 50);
     }
 
     private listenSocketMessage(socket: WebSocket, roomId: string, msg: SocketRespMsg): void {
@@ -120,16 +123,15 @@ export class SeaBattleSocketService {
                 this.handleWin(roomId);
                 break;
             default:
-                throw new Error(`Invalid SOCKET_RESP_TYPE ==> ${SOCKET_RESP_TYPE}`);
+                throw new Error(`Invalid SOCKET_RESP_TYPE ==> ${msg.action_type}`);
         }
 
         const room = this.rooms.find((r) => r.data.room_id === roomId);
         room?.data.messages.push(msg);
         this.seabattleState.updateRooms(this.rooms);
-        console.log('listenSocketMessage_ROOMS ===> ', this.rooms);
     }
 
-    private handleConnectionMsg(socket: WebSocket, roomId: string, msg: ConnectPlayerRespMsg): void {
+    private handleConnectionMsg(socket: WebSocket, _roomId: string, msg: ConnectPlayerRespMsg): void {
         const me = {
             isOwner: msg.data.your_data.is_owner,
             playerEmail: msg.data.your_data.player_email,
@@ -152,15 +154,15 @@ export class SeaBattleSocketService {
                 messages: [] as SocketRespMsg[],
                 room_name: msg.data.room_name,
                 room_id: msg.data.room_id,
+                created_at: msg.data.created_at,
                 players: { me, enemy }
             }
         } satisfies RoomSocket;
-        console.log('NEW_SOCKET ===> ', newRoomSocket);
 
         this.seabattleState.updateRooms([...this.rooms, newRoomSocket]);
     }
 
-    private handleDisconnectionMsg(roomId: string, msg: DisconnectPlayerRespMsg): void {
+    private handleDisconnectionMsg(roomId: string, _msg: DisconnectPlayerRespMsg): void {
         const filtered = this.rooms.filter((r) => r.data.room_id !== roomId);
         this.seabattleState.updateRooms([...filtered]);
     }

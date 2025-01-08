@@ -19,7 +19,7 @@ export const matcherGuard: CanMatchFn = async (route, segments): Promise<boolean
 
     const ok = await sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
         isConfirmModal: true,
-        text: `Do youn want to visit /${route.path}?`,
+        text: `Do you want to visit /${route.path}?`,
         title: 'Notification'
     });
 

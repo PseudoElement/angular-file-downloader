@@ -39,16 +39,6 @@ export class SeaBattleActionsPanelComponent {
         });
     }
 
-    public async connect(): Promise<void> {
-        const roomName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
-            title: 'Modal',
-            text: 'Input room name.'
-        });
-        // @TODO uncomment after email release
-        // this.seabattleSocketSrv.connectToRoom({ player_email: this.authService.user!.email, room_name: roomName });
-        this.seabattleSocketSrv.connectToRoom({ player_email: this.playerNameCtrl.value!, room_name: roomName });
-    }
-
     public disconnect(): void {
         // @TODO fix roomId
         // @TODO uncomment after email release

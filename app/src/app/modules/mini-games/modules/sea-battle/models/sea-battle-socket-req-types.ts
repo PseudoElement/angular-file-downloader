@@ -1,5 +1,8 @@
+import { SocketRespType } from '../constants/socket-constants';
+
 interface BaseSocketReqMsg<T> {
     player_email: string;
+    action_type: SocketRespType;
     data: T;
 }
 

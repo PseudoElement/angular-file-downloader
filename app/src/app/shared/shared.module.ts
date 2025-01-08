@@ -33,6 +33,7 @@ import { GameSettingsModalComponent } from './components/game-settings-modal/gam
 import { PrettifyControlKeyPipe } from './pipes/prettify-control-key.pipe';
 import { AlertsComponent } from './components/alerts/alerts.component';
 import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.component';
+import { CloseButtonComponent } from './components/buttons/close-button/close-button.component';
 
 @NgModule({
     exports: [
@@ -58,7 +59,8 @@ import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.
         GameSettingsModalComponent,
         PrettifyControlKeyPipe,
         AlertsComponent,
-        ConfirmModalComponent
+        ConfirmModalComponent,
+        CloseButtonComponent
     ],
     declarations: [
         InputComponent,
@@ -84,7 +86,8 @@ import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.
         GameSettingsModalComponent,
         PrettifyControlKeyPipe,
         AlertsComponent,
-        ConfirmModalComponent
+        ConfirmModalComponent,
+        CloseButtonComponent
     ],
     imports: [
         CommonModule,

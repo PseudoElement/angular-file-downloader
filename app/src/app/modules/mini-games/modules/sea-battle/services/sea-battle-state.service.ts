@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { RoomSocket } from '../models/sea-battle-api-types';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class SeaBattleStateService {
     private readonly _rooms$ = new BehaviorSubject<RoomSocket[]>([]);
 

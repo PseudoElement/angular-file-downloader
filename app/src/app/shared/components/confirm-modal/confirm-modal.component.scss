@@ -32,5 +32,11 @@
             gap: 30px;
             width: 100%;
         }
+
+        app-close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
     }
 }
