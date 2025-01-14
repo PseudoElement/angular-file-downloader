@@ -45,6 +45,7 @@ export interface RoomPlayer {
     positions: string;
     isOwner: boolean;
     isReady: boolean;
+    hasFall: boolean;
 }
 
 interface PlayerInfoFromBackend {

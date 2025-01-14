@@ -11,4 +11,6 @@ type NewStepReqMsg = BaseSocketReqMsg<{ step: string }>;
 
 type SetPlayerPositionsReqMsg = BaseSocketReqMsg<{ player_positions: string }>;
 
-export type SocketReqMsg = NewStepReqMsg | SetPlayerPositionsReqMsg;
+type PlayerReadyReqMsg = BaseSocketReqMsg<{}>;
+
+export type SocketReqMsg = NewStepReqMsg | SetPlayerPositionsReqMsg | PlayerReadyReqMsg;

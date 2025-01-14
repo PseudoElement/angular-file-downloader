@@ -3,10 +3,11 @@ import { SeaBattleSocketService } from '../../services/sea-battle-socket.service
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { SeaBattleStateService } from '../../services/sea-battle-state.service';
-import { filter, map, Observable, tap } from 'rxjs';
+import { filter, map, Observable, startWith, tap } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { RoomSocket } from '../../models/sea-battle-api-types';
 import { SOCKET_RESP_TYPE } from '../../constants/socket-constants';
+import { SeaBattlePlayerActionsService } from '../../services/sea-battle-player-actions.service';
 
 @Component({
     selector: 'app-sea-battle-room',
@@ -17,23 +18,35 @@ import { SOCKET_RESP_TYPE } from '../../constants/socket-constants';
 export class SeaBattleRoomComponent implements OnDestroy {
     private readonly roomId: string;
 
-    public readonly room$: Observable<RoomSocket> = this.seabattleStateSrv.rooms$.pipe(
+    public readonly room$: Observable<RoomSocket> = this.sbStateSrv.rooms$.pipe(
         filter((rooms) => !!rooms.length),
         map((rooms) => rooms.find((r) => r.data.room_id === this.roomId)!),
         tap((r) => console.log('ROOM$ ==> ', r))
     );
 
-    public readonly yourPosiions$ = this.room$.pipe(map((room) => room.data.players.me));
+    public readonly yourPosiions$ = this.room$.pipe(map((room) => room.data.players.me.positions));
 
-    public readonly enemyPosiions$ = this.room$.pipe(map((room) => room.data.players.enemy));
+    public readonly enemyPosiions$ = this.room$.pipe(
+        map((room) => room.data.players.enemy?.positions),
+        startWith('')
+    );
 
-    public readonly playerNameCtrl = new FormControl<string>('');
+    public readonly isReadyCtrl = new FormControl<boolean>(false);
 
     public readonly stepCtrl = new FormControl<string>('');
 
+    public get isReady(): boolean {
+        return this.isReadyCtrl.value!;
+    }
+
+    public hasEnemy(room: RoomSocket): boolean {
+        return !!room.data.players.enemy?.playerEmail;
+    }
+
     constructor(
-        private readonly seabattleSocketSrv: SeaBattleSocketService,
-        private readonly seabattleStateSrv: SeaBattleStateService,
+        private readonly sbSocketSrv: SeaBattleSocketService,
+        private readonly sbStateSrv: SeaBattleStateService,
+        private readonly sbPlayerActionsSrv: SeaBattlePlayerActionsService,
         private readonly route: ActivatedRoute,
         private readonly authSrv: AuthService,
         private readonly router: Router
@@ -42,15 +55,13 @@ export class SeaBattleRoomComponent implements OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.seabattleSocketSrv.disconnectFromRoom(this.roomId, this.authSrv.user!.email);
+        this.sbSocketSrv.disconnectFromRoom(this.roomId, this.authSrv.user!.email);
     }
 
     public async sendPositions(): Promise<void> {
-        this.seabattleSocketSrv.sendMessage(this.roomId, {
-            player_email: this.authSrv.user?.email!,
-            action_type: SOCKET_RESP_TYPE.SET_PLAYER_POSITIONS,
-            data: {
-                player_positions: `
+        this.sbPlayerActionsSrv.setPositions(
+            this.roomId,
+            `
 		A1+,A2,A3,A4,A5,A6,A7,A8,A9,A10+,
 		B1+,B2,B3,B4,B5,B6,B7,B8,B9,B10+,
 		C1+,C2,C3,C4,C5,C6,C7,C8,C9,C10+,
@@ -62,12 +73,11 @@ export class SeaBattleRoomComponent implements OnDestroy {
 		I1+*,I2,I3,I4,I5,I6,I7,I8,I9,I10+,
 		J1+,J2,J3+,J4,J5+*,J6,J7,J8,J9,J10+,
 		`
-            }
-        });
+        );
     }
 
     public async sendStep(): Promise<void> {
-        this.seabattleSocketSrv.sendMessage(this.roomId, {
+        this.sbSocketSrv.sendMessage(this.roomId, {
             player_email: this.authSrv.user?.email!,
             action_type: SOCKET_RESP_TYPE.STEP,
             data: {
@@ -78,5 +88,16 @@ export class SeaBattleRoomComponent implements OnDestroy {
 
     public disconnect(): void {
         this.router.navigate(['mini-games', 'sea-battle']);
+    }
+
+    public sendReadyStatus(): void {
+        if (this.isReady) return;
+
+        this.isReadyCtrl.setValue(!this.isReadyCtrl.value);
+        this.sbSocketSrv.sendMessage(this.roomId, {
+            player_email: this.authSrv.user?.email!,
+            action_type: SOCKET_RESP_TYPE.READY,
+            data: {}
+        });
     }
 }

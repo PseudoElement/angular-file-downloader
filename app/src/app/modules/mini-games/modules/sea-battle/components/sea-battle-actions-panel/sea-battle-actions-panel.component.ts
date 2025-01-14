@@ -34,7 +34,7 @@ export class SeaBattleActionsPanelComponent {
             text: 'Input room name.'
         });
         this.seabattleSocketSrv.createAndConnectToNewRoom({
-            player_email: this.playerNameCtrl.value!,
+            player_email: this.authService.user!.email!,
             room_name: roomName
         });
     }

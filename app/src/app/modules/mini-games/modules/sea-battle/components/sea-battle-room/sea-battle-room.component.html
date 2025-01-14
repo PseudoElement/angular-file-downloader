@@ -1,8 +1,16 @@
 <ng-container *ngLet="{ room: room$ | async, yourPositions: yourPosiions$ | async, enemyPosiions: enemyPosiions$ | async } as state">
     <div *ngIf="state.room" class="room-wrapper">
         <h1 class="room-title">Room "{{ state.room.data.room_name }}"</h1>
+        <div class="room-players">
+            <h3>Players:</h3>
+            <span>{{ state.room.data.players.me.playerEmail }} - {{ state.room.data.players.me.isReady ? 'ready' : 'not ready' }}</span>
+            <span *ngIf="hasEnemy(state.room)">
+                {{ state.room.data.players.enemy.playerEmail }} - {{ state.room.data.players.enemy.isReady ? 'ready' : 'not ready' }}
+            </span>
+        </div>
         <div class="room-main">
             <app-input [label]="'Step'" [control]="stepCtrl"></app-input>
+            <app-button [text]="isReady ? 'Ready' : 'Not Ready'" (click)="sendReadyStatus()"></app-button>
             <app-button [text]="'Make step'" (click)="sendStep()"></app-button>
             <app-button [text]="'Set positions'" (click)="sendPositions()"></app-button>
             <app-button [text]="'Disconnect'" (click)="disconnect()"></app-button>

@@ -6,6 +6,7 @@ import { SocketReqMsg } from '../models/sea-battle-socket-req-types';
 import {
     ConnectPlayerRespMsg,
     DisconnectPlayerRespMsg,
+    PlayerReadyRespMsg,
     PlayerSetPositionsRespMsg,
     PlayerStepRespMsg,
     SocketRespMsg
@@ -15,6 +16,7 @@ import { ROOM_STATE, SOCKET_RESP_TYPE, STEP_RESULT } from '../constants/socket-c
 import { SeaBattleStateService } from './sea-battle-state.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { CLEAR_SEABATTLE_FIELD } from '../constants/seabattle-consts';
 
 @Injectable()
 export class SeaBattleSocketService {
@@ -112,8 +114,10 @@ export class SeaBattleSocketService {
             case SOCKET_RESP_TYPE.DISCONNECT_PLAYER:
                 this.handleDisconnectionMsg(roomId, msg as DisconnectPlayerRespMsg);
                 break;
+            case SOCKET_RESP_TYPE.READY:
+                this.handleReadyMsg(roomId, msg as PlayerReadyRespMsg);
+                break;
             case SOCKET_RESP_TYPE.SET_PLAYER_POSITIONS:
-                this.handlePlayerSetPositions(roomId, msg as PlayerSetPositionsRespMsg);
                 break;
             case SOCKET_RESP_TYPE.STEP:
                 this.handleStep(roomId, msg as PlayerStepRespMsg);
@@ -135,15 +139,17 @@ export class SeaBattleSocketService {
             isOwner: msg.data.your_data.is_owner,
             playerEmail: msg.data.your_data.player_email,
             playerId: msg.data.your_data.player_id,
-            positions: '',
-            isReady: false
+            positions: CLEAR_SEABATTLE_FIELD,
+            isReady: false,
+            hasFall: false
         } satisfies RoomPlayer;
         const enemy = {
             isOwner: msg.data.enemy_data.is_owner,
             playerEmail: msg.data.enemy_data.player_email,
             playerId: msg.data.enemy_data.player_id,
-            positions: '',
-            isReady: false
+            positions: CLEAR_SEABATTLE_FIELD,
+            isReady: false,
+            hasFall: false
         } satisfies RoomPlayer;
 
         const newRoomSocket = {
@@ -158,55 +164,69 @@ export class SeaBattleSocketService {
             }
         } satisfies RoomSocket;
 
-        this.seabattleState.updateRooms([...this.rooms, newRoomSocket]);
+        if (msg.data.your_data.player_email === this.authSrv.user?.email) {
+            this.seabattleState.updateRooms([...this.rooms, newRoomSocket]);
+        }
     }
 
     private handleDisconnectionMsg(roomId: string, msg: DisconnectPlayerRespMsg): void {
         // is you disconected
         if (msg.data.player_email === this.authSrv.user?.email) {
             const filtered = this.rooms.filter((r) => r.data.room_id !== roomId);
-            this.seabattleState.updateRooms([...filtered]);
+            this.seabattleState.updateRooms(filtered);
+        } else {
+            this.seabattleState.removeEnemyFromRoom(roomId);
+            this.seabattleState.makePlayerAsOwner(roomId, this.authSrv.user!.email);
         }
     }
 
-    private handlePlayerSetPositions(roomId: string, msg: PlayerSetPositionsRespMsg): void {
-        const room = this.rooms.find((r) => r.data.room_id === roomId)!;
-        const isYou = msg.data.player_email === this.authSrv.user?.email;
-
-        if (isYou) {
-            room.data.players.me.isReady = true;
-        } else {
-            room.data.players.enemy!.isReady = true;
-        }
+    private handleReadyMsg(roomId: string, msg: PlayerReadyRespMsg): void {
+        this.seabattleState.updatePlayerState(roomId, msg.data.player_email, { isReady: true });
     }
 
     private handleStep(roomId: string, msg: PlayerStepRespMsg): void {
         const room = this.rooms.find((r) => r.data.room_id === roomId)!;
-        const steppingPlayer = msg.data.player_email === this.authSrv.user?.email ? room.data.players.me : room.data.players.enemy!;
+        /**
+         * if My step -> need update enemy.positions
+         * if not my step -> need update me.posiitons
+         */
+
+        const isYourStep = msg.data.player_email === this.authSrv.user?.email;
+        const affectedPositions = isYourStep ? room.data.players.enemy!.positions : room.data.players.me.positions;
+        const affectedPlayer = isYourStep ? room.data.players.enemy! : room.data.players.me;
+        const steppingPlayer = isYourStep ? room.data.players.me : room.data.players.enemy!;
 
         const regex = new RegExp(`${msg.data.step}[^,]*,`);
-        const cellValue = regex.exec(steppingPlayer.positions)![0];
+        const cellValue = regex.exec(affectedPositions)![0];
         const cellValueWithoutComma = cellValue.slice(0, cellValue.length - 1);
 
+        let newPositions = '';
+        let hasFall = false;
         switch (msg.data.step_result) {
             case STEP_RESULT.HIT:
                 const hitCell = `${cellValueWithoutComma}*`;
-                steppingPlayer.positions = steppingPlayer.positions.replace(cellValueWithoutComma, hitCell);
-                return;
+                newPositions = affectedPositions.replace(cellValueWithoutComma, hitCell);
+                break;
             case STEP_RESULT.KILL:
                 const killedCell = `${cellValueWithoutComma}*`;
-                steppingPlayer.positions = steppingPlayer.positions.replace(cellValueWithoutComma, killedCell);
+                newPositions = affectedPositions.replace(cellValueWithoutComma, killedCell);
                 break;
             case STEP_RESULT.ALREADY_CHECKED:
-                this.alertsSrv.showAlert({ text: `You've already checked ${msg.data.step} cell. Try another.`, type: 'warn' });
+                newPositions = affectedPositions;
+                hasFall = true;
+                if (steppingPlayer.playerEmail === this.authSrv.user?.email) {
+                    this.alertsSrv.showAlert({ text: `You've already checked ${msg.data.step} cell. Try another.`, type: 'warn' });
+                }
                 break;
             case STEP_RESULT.MISS:
                 const missedCell = `${cellValueWithoutComma}.`;
-                steppingPlayer.positions = steppingPlayer.positions.replace(cellValueWithoutComma, missedCell);
+                newPositions = affectedPlayer.positions.replace(cellValueWithoutComma, missedCell);
                 break;
             default:
                 throw new Error(`Invalid STEP_RESULT ${msg.data.step_result}!`);
         }
+
+        this.seabattleState.updatePlayerState(room.data.room_id, affectedPlayer.playerEmail, { positions: newPositions, hasFall });
     }
 
     private handleWin(roomId: string): void {

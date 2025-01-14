@@ -18,7 +18,7 @@ export class SeaBattleChatMessageComponent {
             case SOCKET_RESP_TYPE.DISCONNECT_PLAYER:
                 return '../../../../../../../assets/seabattle-icons/disconnect.webp';
             case SOCKET_RESP_TYPE.SET_PLAYER_POSITIONS:
-                return '../../../../../../../assets/seabattle-icons/ready.png';
+                return '../../../../../../../assets/seabattle-icons/set-positions.png';
             case SOCKET_RESP_TYPE.WIN_GAME:
                 return '../../../../../../../assets/seabattle-icons/cup.png';
             case SOCKET_RESP_TYPE.STEP:
@@ -32,6 +32,8 @@ export class SeaBattleChatMessageComponent {
                 } else {
                     return '../../../../../../../assets/seabattle-icons/puff.png';
                 }
+            case SOCKET_RESP_TYPE.READY:
+                return '../../../../../../../assets/seabattle-icons/ready.png';
             case SOCKET_RESP_TYPE.ERROR:
             default:
                 return '../../../../../../../assets/seabattle-icons/error.png';
