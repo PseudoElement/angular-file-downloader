@@ -86,7 +86,6 @@ export class SeaBattleSocketService {
             room?.socket.close();
 
             this.seabattleState.updateRooms(filteredRooms);
-            this.router.navigate(['mini-games', 'sea-battle']);
             this.alertsSrv.showAlert({ text: `You disconnected from room ${room?.data.room_name}`, type: 'success' });
         } catch (err) {
             this.alertsSrv.showAlert({ text: (err as HttpErrorResponse).error.message, type: 'error' });
@@ -127,7 +126,7 @@ export class SeaBattleSocketService {
         }
 
         const room = this.rooms.find((r) => r.data.room_id === roomId);
-        room?.data.messages.push(msg);
+        room!.data.messages = [...room!.data.messages, msg];
         this.seabattleState.updateRooms(this.rooms);
     }
 
@@ -162,9 +161,12 @@ export class SeaBattleSocketService {
         this.seabattleState.updateRooms([...this.rooms, newRoomSocket]);
     }
 
-    private handleDisconnectionMsg(roomId: string, _msg: DisconnectPlayerRespMsg): void {
-        const filtered = this.rooms.filter((r) => r.data.room_id !== roomId);
-        this.seabattleState.updateRooms([...filtered]);
+    private handleDisconnectionMsg(roomId: string, msg: DisconnectPlayerRespMsg): void {
+        // is you disconected
+        if (msg.data.player_email === this.authSrv.user?.email) {
+            const filtered = this.rooms.filter((r) => r.data.room_id !== roomId);
+            this.seabattleState.updateRooms([...filtered]);
+        }
     }
 
     private handlePlayerSetPositions(roomId: string, msg: PlayerSetPositionsRespMsg): void {

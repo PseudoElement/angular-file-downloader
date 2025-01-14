@@ -2,13 +2,15 @@
 
 :host {
     .message {
-        @include flex-row(space-between, center);
+        @include flex-row(flex-start, center);
         gap: 10px;
 
         width: 100%;
-        max-width: 350px;
-        padding: 2px 5px;
+        padding: 2px;
         font-weight: bold;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 2px 0 black;
     }
 
     img {

@@ -16,3 +16,4 @@ apply listeners
 
 -   handle ALREADY_CHECKED case properly (maybe add counter with attempts, if more than 2, skip step for user)
 -   fix routing on not existing room
+-   update IS_OWNER status on client if host disconnected

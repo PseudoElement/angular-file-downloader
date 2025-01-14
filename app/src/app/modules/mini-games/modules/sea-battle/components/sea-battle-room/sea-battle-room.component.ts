@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { SeaBattleSocketService } from '../../services/sea-battle-socket.service';
 import { FormControl } from '@angular/forms';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { SeaBattleStateService } from '../../services/sea-battle-state.service';
 import { filter, map, Observable, tap } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -14,11 +14,10 @@ import { SOCKET_RESP_TYPE } from '../../constants/socket-constants';
     styleUrl: './sea-battle-room.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeaBattleRoomComponent {
+export class SeaBattleRoomComponent implements OnDestroy {
     private readonly roomId: string;
 
     public readonly room$: Observable<RoomSocket> = this.seabattleStateSrv.rooms$.pipe(
-        tap((r) => console.log('ROOMS_+LISTTT ==> ', r)),
         filter((rooms) => !!rooms.length),
         map((rooms) => rooms.find((r) => r.data.room_id === this.roomId)!),
         tap((r) => console.log('ROOM$ ==> ', r))
@@ -36,9 +35,14 @@ export class SeaBattleRoomComponent {
         private readonly seabattleSocketSrv: SeaBattleSocketService,
         private readonly seabattleStateSrv: SeaBattleStateService,
         private readonly route: ActivatedRoute,
-        private readonly authSrv: AuthService
+        private readonly authSrv: AuthService,
+        private readonly router: Router
     ) {
         this.roomId = this.route.snapshot.paramMap.get('id')!;
+    }
+
+    ngOnDestroy(): void {
+        this.seabattleSocketSrv.disconnectFromRoom(this.roomId, this.authSrv.user!.email);
     }
 
     public async sendPositions(): Promise<void> {
@@ -73,6 +77,6 @@ export class SeaBattleRoomComponent {
     }
 
     public disconnect(): void {
-        this.seabattleSocketSrv.disconnectFromRoom(this.roomId, this.authSrv.user!.email);
+        this.router.navigate(['mini-games', 'sea-battle']);
     }
 }

@@ -14,9 +14,9 @@ export class SeaBattleChatMessageComponent {
     public getIconPath(): string {
         switch (this.message.action_type) {
             case SOCKET_RESP_TYPE.CONNECT_PLAYER:
-                return '../../../../../../../assets/seabattle-icons/connect.png';
+                return '../../../../../../../assets/seabattle-icons/connect.jpg';
             case SOCKET_RESP_TYPE.DISCONNECT_PLAYER:
-                return '../../../../../../../assets/seabattle-icons/disconnect.png';
+                return '../../../../../../../assets/seabattle-icons/disconnect.webp';
             case SOCKET_RESP_TYPE.SET_PLAYER_POSITIONS:
                 return '../../../../../../../assets/seabattle-icons/ready.png';
             case SOCKET_RESP_TYPE.WIN_GAME:
