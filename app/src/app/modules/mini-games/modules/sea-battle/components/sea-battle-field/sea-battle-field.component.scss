@@ -1,0 +1,50 @@
+@use 'src/styles.scss' as *;
+
+:host {
+    .field-wrapper {
+        border: 1px solid red;
+        border-radius: 5px;
+        width: 300px;
+        height: 300px;
+    }
+
+    .row {
+        @include flex-row(normal, center);
+        width: 100%;
+    }
+
+    .cell {
+        @include flex-row(center, center);
+
+        position: relative;
+        border: 1px solid black;
+        // width: 30px;
+        // height: 30px;
+
+        &-withShip {
+            background: orange;
+        }
+
+        &-hit {
+        }
+
+        &-miss {
+            width: 3px;
+            height: 3px;
+            border: 1px solid black;
+            border-radius: 50%;
+        }
+
+        &-number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            color: red;
+            font-size: 10px;
+        }
+
+        &-enemy__not-checked {
+            background-color: rgb(103, 197, 244);
+        }
+    }
+}

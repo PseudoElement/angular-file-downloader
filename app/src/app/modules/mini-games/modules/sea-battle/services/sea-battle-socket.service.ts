@@ -17,6 +17,7 @@ import { SeaBattleStateService } from './sea-battle-state.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { CLEAR_SEABATTLE_FIELD } from '../constants/seabattle-consts';
+import { getYouAndEnemyFromResp } from '../utils/get-you-and-enemy';
 
 @Injectable()
 export class SeaBattleSocketService {
@@ -134,19 +135,21 @@ export class SeaBattleSocketService {
         this.seabattleState.updateRooms(this.rooms);
     }
 
-    private handleConnectionMsg(socket: WebSocket, _roomId: string, msg: ConnectPlayerRespMsg): void {
+    private handleConnectionMsg(socket: WebSocket, roomId: string, msg: ConnectPlayerRespMsg): void {
+        const playersOfRoom = getYouAndEnemyFromResp(msg, this.authSrv.user!.email);
+        console.log('playersOfRoom', playersOfRoom);
         const me = {
-            isOwner: msg.data.your_data.is_owner,
-            playerEmail: msg.data.your_data.player_email,
-            playerId: msg.data.your_data.player_id,
+            isOwner: playersOfRoom.your_data.is_owner,
+            playerEmail: playersOfRoom.your_data.player_email,
+            playerId: playersOfRoom.your_data.player_id,
             positions: CLEAR_SEABATTLE_FIELD,
             isReady: false,
             hasFall: false
         } satisfies RoomPlayer;
         const enemy = {
-            isOwner: msg.data.enemy_data.is_owner,
-            playerEmail: msg.data.enemy_data.player_email,
-            playerId: msg.data.enemy_data.player_id,
+            isOwner: playersOfRoom.enemy_data.is_owner,
+            playerEmail: playersOfRoom.enemy_data.player_email,
+            playerId: playersOfRoom.enemy_data.player_id,
             positions: CLEAR_SEABATTLE_FIELD,
             isReady: false,
             hasFall: false
@@ -164,8 +167,18 @@ export class SeaBattleSocketService {
             }
         } satisfies RoomSocket;
 
-        if (msg.data.your_data.player_email === this.authSrv.user?.email) {
+        if (msg.data.stepping_player_email === this.authSrv.user?.email) {
             this.seabattleState.updateRooms([...this.rooms, newRoomSocket]);
+        } //enemy connected
+        else {
+            this.seabattleState.updateRoomState(roomId, playersOfRoom.enemy_data.player_email, {
+                isReady: false,
+                hasFall: false,
+                isOwner: playersOfRoom.enemy_data.is_owner,
+                playerEmail: playersOfRoom.enemy_data.player_email,
+                playerId: playersOfRoom.enemy_data.player_id,
+                positions: ''
+            });
         }
     }
 
@@ -181,7 +194,7 @@ export class SeaBattleSocketService {
     }
 
     private handleReadyMsg(roomId: string, msg: PlayerReadyRespMsg): void {
-        this.seabattleState.updatePlayerState(roomId, msg.data.player_email, { isReady: true });
+        this.seabattleState.updateRoomState(roomId, msg.data.player_email, { isReady: true });
     }
 
     private handleStep(roomId: string, msg: PlayerStepRespMsg): void {
@@ -226,7 +239,7 @@ export class SeaBattleSocketService {
                 throw new Error(`Invalid STEP_RESULT ${msg.data.step_result}!`);
         }
 
-        this.seabattleState.updatePlayerState(room.data.room_id, affectedPlayer.playerEmail, { positions: newPositions, hasFall });
+        this.seabattleState.updateRoomState(room.data.room_id, affectedPlayer.playerEmail, { positions: newPositions, hasFall });
     }
 
     private handleWin(roomId: string): void {

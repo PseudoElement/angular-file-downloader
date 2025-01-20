@@ -10,8 +10,9 @@ export type ConnectPlayerRespMsg = BaseSocketRespMsg<{
     room_id: string;
     room_name: string;
     created_at: string;
-    your_data: { player_id: string; player_email: string; is_owner: boolean };
-    enemy_data: { player_id: string; player_email: string; is_owner: boolean };
+    stepping_player_email: string;
+    player_1: { player_id: string; player_email: string; is_owner: boolean };
+    player_2: { player_id: string; player_email: string; is_owner: boolean };
 }>;
 
 export type DisconnectPlayerRespMsg = BaseSocketRespMsg<{ player_email: string; player_id: string; room_id: string; room_name: string }>;

@@ -18,5 +18,17 @@
         <div class="room-chat">
             <app-sea-battle-chat [messages]="state.room.data.messages"></app-sea-battle-chat>
         </div>
+        <div class="fields">
+            <app-sea-battle-field
+                *ngIf="state.yourPositions"
+                [positionsString]="state.yourPositions"
+                [isEnemyField]="false"
+            ></app-sea-battle-field>
+            <app-sea-battle-field
+                *ngIf="state.enemyPosiions"
+                [positionsString]="state.enemyPosiions"
+                [isEnemyField]="true"
+            ></app-sea-battle-field>
+        </div>
     </div>
 </ng-container>

@@ -20,6 +20,6 @@ export class SeaBattlePlayerActionsService {
                 player_positions: myPositions
             }
         });
-        this.sbStateSrv.updatePlayerState(roomId, this.authSrv.user!.email, { positions: myPositions });
+        this.sbStateSrv.updateRoomState(roomId, this.authSrv.user!.email, { positions: myPositions });
     }
 }

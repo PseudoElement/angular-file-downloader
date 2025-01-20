@@ -1,1 +1,15 @@
-<p>sea-battle-field works!</p>
+<div *ngLet="positionsMatrix$ | async as positionsMatrix" class="field-wrapper">
+    <div *ngFor="let row of positionsMatrix" class="row">
+        <div *ngFor="let cell of row" class="cell" [class.cell-withShip]="cell.hasShip">
+            @switch (cell.state) { @case ('HIT') {
+            <span class="material-symbols-outlined cell-hit"> close </span>
+            } @case ('MISS') {
+            <span class="cell-miss"> </span>
+            } @case('NOT_CHECKED') {
+            <span class="cell-not-checked" [class.cell-enemy__not-checked]="isEnemyField"></span>
+            } }
+
+            <span class="cell-number">{{ cell.value }}</span>
+        </div>
+    </div>
+</div>

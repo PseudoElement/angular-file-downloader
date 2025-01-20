@@ -13,4 +13,16 @@
         @include flex-row(baseline, center);
         gap: 20px;
     }
+
+    .room-players {
+        @include flex-column(baseline, normal);
+        gap: 5px;
+    }
+
+    .fields {
+        @include flex-row(space-around, center);
+
+        width: 100%;
+        margin-top: 10px;
+    }
 }

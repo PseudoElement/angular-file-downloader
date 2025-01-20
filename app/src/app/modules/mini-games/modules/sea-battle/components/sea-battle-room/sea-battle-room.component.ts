@@ -24,7 +24,10 @@ export class SeaBattleRoomComponent implements OnDestroy {
         tap((r) => console.log('ROOM$ ==> ', r))
     );
 
-    public readonly yourPosiions$ = this.room$.pipe(map((room) => room.data.players.me.positions));
+    public readonly yourPosiions$ = this.room$.pipe(
+        map((room) => room.data.players.me.positions),
+        startWith('')
+    );
 
     public readonly enemyPosiions$ = this.room$.pipe(
         map((room) => room.data.players.enemy?.positions),

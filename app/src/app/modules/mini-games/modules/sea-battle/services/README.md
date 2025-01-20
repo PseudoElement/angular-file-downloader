@@ -16,3 +16,5 @@ apply listeners
 
 -   handle ALREADY_CHECKED case properly (maybe add counter with attempts, if more than 2, skip step for user)
 -   update IS_OWNER status on client if host disconnected
+-   handle user connected to room, where he already exists
+-   fix cellValue undefined in positionsToMatrix

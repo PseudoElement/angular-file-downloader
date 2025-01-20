@@ -19,14 +19,14 @@ export class SeaBattleStateService {
         this._rooms$.next(rooms);
     }
 
-    public updatePlayerState(roomId: string, playerEmail: string, newProps: Partial<RoomPlayer>): void {
+    public updateRoomState(roomId: string, playerEmail: string, newProps: Partial<RoomPlayer>): void {
         const room = this.rooms.find((r) => r.data.room_id === roomId)!;
 
         let playerKey: keyof RoomSocketData['players'] = this.authSrv.user?.email === playerEmail ? 'me' : 'enemy';
         const updatedPlayer = { ...room.data.players[playerKey]!, ...newProps } as RoomPlayer;
         room.data.players = { ...room.data.players, [playerKey]: updatedPlayer };
 
-        console.log('updatePlayerState ==> ', room);
+        console.log('updateRoomState ==> ', room);
     }
 
     public removeEnemyFromRoom(roomId: string): void {
