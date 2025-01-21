@@ -8,6 +8,7 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import { RoomSocket } from '../../models/sea-battle-api-types';
 import { SOCKET_RESP_TYPE } from '../../constants/socket-constants';
 import { SeaBattlePlayerActionsService } from '../../services/sea-battle-player-actions.service';
+import { SeaBattleFieldService } from '../../services/sea-battle-field.service';
 
 @Component({
     selector: 'app-sea-battle-room',
@@ -20,8 +21,8 @@ export class SeaBattleRoomComponent implements OnDestroy {
 
     public readonly room$: Observable<RoomSocket> = this.sbStateSrv.rooms$.pipe(
         filter((rooms) => !!rooms.length),
-        map((rooms) => rooms.find((r) => r.data.room_id === this.roomId)!),
-        tap((r) => console.log('ROOM$ ==> ', r))
+        map((rooms) => rooms.find((r) => r.data.room_id === this.roomId)!)
+        // tap((r) => console.log('ROOM$ ==> ', r))
     );
 
     public readonly yourPosiions$ = this.room$.pipe(
@@ -33,6 +34,8 @@ export class SeaBattleRoomComponent implements OnDestroy {
         map((room) => room.data.players.enemy?.positions),
         startWith('')
     );
+
+    public readonly isChangeModeEnabled$ = this.sbFieldSrv.isChangeModeEnabled$;
 
     public readonly isReadyCtrl = new FormControl<boolean>(false);
 
@@ -52,7 +55,8 @@ export class SeaBattleRoomComponent implements OnDestroy {
         private readonly sbPlayerActionsSrv: SeaBattlePlayerActionsService,
         private readonly route: ActivatedRoute,
         private readonly authSrv: AuthService,
-        private readonly router: Router
+        private readonly router: Router,
+        private readonly sbFieldSrv: SeaBattleFieldService
     ) {
         this.roomId = this.route.snapshot.paramMap.get('id')!;
     }
@@ -62,7 +66,7 @@ export class SeaBattleRoomComponent implements OnDestroy {
     }
 
     public async sendPositions(): Promise<void> {
-        this.sbPlayerActionsSrv.setPositions(
+        this.sbPlayerActionsSrv.sendUpdatedPositions(
             this.roomId,
             `
 		A1+,A2,A3,A4,A5,A6,A7,A8,A9,A10+,
@@ -102,5 +106,9 @@ export class SeaBattleRoomComponent implements OnDestroy {
             action_type: SOCKET_RESP_TYPE.READY,
             data: {}
         });
+    }
+
+    public toggleChangeMode(): void {
+        this.sbFieldSrv.toggleChangeMode(this.roomId);
     }
 }

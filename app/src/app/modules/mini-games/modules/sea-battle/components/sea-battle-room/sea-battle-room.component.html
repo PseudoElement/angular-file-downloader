@@ -1,4 +1,11 @@
-<ng-container *ngLet="{ room: room$ | async, yourPositions: yourPosiions$ | async, enemyPosiions: enemyPosiions$ | async } as state">
+<ng-container
+    *ngLet="{
+        room: room$ | async,
+        yourPositions: yourPosiions$ | async,
+        enemyPosiions: enemyPosiions$ | async,
+        isChangeModeEnabled: isChangeModeEnabled$ | async
+    } as state"
+>
     <div *ngIf="state.room" class="room-wrapper">
         <h1 class="room-title">Room "{{ state.room.data.room_name }}"</h1>
         <div class="room-players">
@@ -10,9 +17,13 @@
         </div>
         <div class="room-main">
             <app-input [label]="'Step'" [control]="stepCtrl"></app-input>
+            <app-button
+                [text]="state.isChangeModeEnabled ? 'Disable change mode.' : 'Enable change mode.'"
+                (click)="toggleChangeMode()"
+            ></app-button>
             <app-button [text]="isReady ? 'Ready' : 'Not Ready'" (click)="sendReadyStatus()"></app-button>
             <app-button [text]="'Make step'" (click)="sendStep()"></app-button>
-            <app-button [text]="'Set positions'" (click)="sendPositions()"></app-button>
+            <app-button [text]="'Save random positions'" (click)="sendPositions()"></app-button>
             <app-button [text]="'Disconnect'" (click)="disconnect()"></app-button>
         </div>
         <div class="room-chat">
@@ -23,11 +34,13 @@
                 *ngIf="state.yourPositions"
                 [positionsString]="state.yourPositions"
                 [isEnemyField]="false"
+                [isChangeMode]="state.isChangeModeEnabled"
             ></app-sea-battle-field>
             <app-sea-battle-field
                 *ngIf="state.enemyPosiions"
                 [positionsString]="state.enemyPosiions"
                 [isEnemyField]="true"
+                [isChangeMode]="false"
             ></app-sea-battle-field>
         </div>
     </div>

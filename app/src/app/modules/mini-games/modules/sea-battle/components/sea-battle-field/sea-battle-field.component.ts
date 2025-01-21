@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { PlayerPositionsMatrix } from '../../models/positions';
-import { positionsToMatrix } from '../../utils/positions-converter';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { PlayerPosition, PlayerPositionsMatrix } from '../../models/positions';
+import { SeaBattleFieldService } from '../../services/sea-battle-field.service';
 
 @Component({
     selector: 'app-sea-battle-field',
@@ -11,11 +10,26 @@ import { positionsToMatrix } from '../../utils/positions-converter';
 })
 export class SeaBattleFieldComponent {
     @Input() set positionsString(val: string) {
-        const matrix = positionsToMatrix(val);
-        this.positionsMatrix$.next(matrix);
+        this.sbFieldSrv.updatePlayerPositions(val);
     }
 
     @Input() isEnemyField!: boolean;
 
-    public readonly positionsMatrix$ = new BehaviorSubject<PlayerPositionsMatrix>([]);
+    @Input() isChangeMode: boolean = false;
+
+    @Output() cellSelected: EventEmitter<PlayerPosition> = new EventEmitter();
+
+    @Output() positionsUpdated: EventEmitter<PlayerPositionsMatrix> = new EventEmitter();
+
+    public readonly positionsToShow$ = this.sbFieldSrv.positionsToShow$();
+
+    constructor(private readonly sbFieldSrv: SeaBattleFieldService) {}
+
+    public onCellSelect(cell: PlayerPosition): void {
+        if (this.isChangeMode) {
+            this.sbFieldSrv.selectCellInChangeMode(cell);
+        } else {
+            this.cellSelected.emit(cell);
+        }
+    }
 }

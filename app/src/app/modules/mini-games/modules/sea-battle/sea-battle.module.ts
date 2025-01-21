@@ -12,6 +12,7 @@ import { SeaBattleFieldComponent } from './components/sea-battle-field/sea-battl
 import { SeaBattleRoomComponent } from './components/sea-battle-room/sea-battle-room.component';
 import { SeaBattleRoomsListComponent } from './components/sea-battle-rooms-list/sea-battle-rooms-list.component';
 import { SeaBattlePlayerActionsService } from './services/sea-battle-player-actions.service';
+import { SeaBattleFieldService } from './services/sea-battle-field.service';
 
 @NgModule({
     declarations: [
@@ -24,6 +25,6 @@ import { SeaBattlePlayerActionsService } from './services/sea-battle-player-acti
         SeaBattleRoomsListComponent
     ],
     imports: [CommonModule, SeaBattleRoutingModule, SharedModule],
-    providers: [SeaBattleApiService, SeaBattleSocketService, SeaBattlePlayerActionsService]
+    providers: [SeaBattleApiService, SeaBattleSocketService, SeaBattlePlayerActionsService, SeaBattleFieldService]
 })
 export class SeaBattleModule {}

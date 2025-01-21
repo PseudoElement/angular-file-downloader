@@ -1,15 +1,37 @@
-<div *ngLet="positionsMatrix$ | async as positionsMatrix" class="field-wrapper">
-    <div *ngFor="let row of positionsMatrix" class="row">
-        <div *ngFor="let cell of row" class="cell" [class.cell-withShip]="cell.hasShip">
-            @switch (cell.state) { @case ('HIT') {
-            <span class="material-symbols-outlined cell-hit"> close </span>
-            } @case ('MISS') {
-            <span class="cell-miss"> </span>
-            } @case('NOT_CHECKED') {
-            <span class="cell-not-checked" [class.cell-enemy__not-checked]="isEnemyField"></span>
-            } }
+<div *ngLet="positionsToShow$ | async as positionsToShow" class="field-wrapper">
+    <h3>{{ isEnemyField ? 'Enemy field' : 'Your field' }}</h3>
+    <div class="field">
+        <div *ngFor="let row of positionsToShow" class="row">
+            <div
+                *ngFor="let cell of row"
+                class="cell"
+                [class.cell-change-mode]="isChangeMode"
+                [class.cell-change-mode__selected]="isChangeMode && cell.hasShip"
+                [class.cell-withShip]="cell.hasShip"
+                [class.cell-enemy__not-checked]="isEnemyField && cell.state === 'NOT_CHECKED'"
+                (click)="onCellSelect(cell)"
+            >
+                @switch (cell.state) { @case ('HIT') {
+                <span class="material-symbols-outlined cell-hit"> close </span>
+                } @case ('MISS') {
+                <span class="cell-miss"> </span>
+                } }
 
-            <span class="cell-number">{{ cell.value }}</span>
+                <span class="cell-number">{{ cell.value }}</span>
+            </div>
         </div>
     </div>
+
+    <ul *ngIf="!isEnemyField && isChangeMode" class="change-mode-description">
+        You enabled `Change Mode`. Click on cell to add/remove your ship. Your field needs contain:
+        <li>4 single-cell ships,</li>
+        <li>3 two-cells ships</li>
+        <li>2 three-cells ships</li>
+        <li>1 four-cells ship</li>
+        After you've selected all neccessary fields - Click on `Disable change mode` and click `OK` in modal to confirm you want to update
+        your positions.
+    </ul>
+
+    <div class="field-columns-line"></div>
+    <div class="field-rows-line"></div>
 </div>

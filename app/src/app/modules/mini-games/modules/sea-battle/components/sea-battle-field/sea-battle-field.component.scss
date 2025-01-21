@@ -2,10 +2,19 @@
 
 :host {
     .field-wrapper {
+        @include flex-column(center, center);
+        position: relative;
+    }
+
+    .field-columns-line {
+    }
+
+    .field-rows-line {
+    }
+
+    .field {
         border: 1px solid red;
         border-radius: 5px;
-        width: 300px;
-        height: 300px;
     }
 
     .row {
@@ -18,11 +27,18 @@
 
         position: relative;
         border: 1px solid black;
-        // width: 30px;
-        // height: 30px;
+        width: 3rem;
+        height: 3rem;
+        user-select: none;
 
-        &-withShip {
-            background: orange;
+        @media screen and (max-width: 1460px) {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        &:hover {
+            cursor: pointer;
+            filter: brightness(70%);
         }
 
         &-hit {
@@ -46,5 +62,21 @@
         &-enemy__not-checked {
             background-color: rgb(103, 197, 244);
         }
+
+        &-change-mode {
+            background-color: pink;
+
+            &__selected {
+                background-color: orange;
+            }
+        }
+
+        &-withShip {
+            background-color: blueviolet;
+        }
+    }
+
+    .change-mode-description {
+        color: red;
     }
 }

@@ -12,7 +12,7 @@ export class SeaBattlePlayerActionsService {
         private readonly authSrv: AuthService
     ) {}
 
-    public async setPositions(roomId: string, myPositions: string): Promise<void> {
+    public async sendUpdatedPositions(roomId: string, myPositions: string): Promise<void> {
         this.sbSocketSrv.sendMessage(roomId, {
             player_email: this.authSrv.user?.email!,
             action_type: SOCKET_RESP_TYPE.SET_PLAYER_POSITIONS,
