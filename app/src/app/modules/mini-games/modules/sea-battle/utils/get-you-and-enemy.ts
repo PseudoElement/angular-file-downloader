@@ -1,4 +1,7 @@
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { ConnectPlayerRespMsg } from '../models/sea-battle-socket-resp-types';
+import { RoomPlayer } from '../models/sea-battle-api-types';
+import { SeabattleRoom } from '../entities/room';
 
 export interface YouAndEnemyData {
     your_data: {
@@ -13,11 +16,11 @@ export interface YouAndEnemyData {
     };
 }
 
-export function getYouAndEnemyFromResp(msg: ConnectPlayerRespMsg, yourEmail: string): YouAndEnemyData {
+export function getYouAndEnemyFromResp(msg: ConnectPlayerRespMsg, authSrv: AuthService): YouAndEnemyData {
     const playerOfRoom = {} as YouAndEnemyData;
     const players = [msg.data.player_1, msg.data.player_2];
     for (const player of players) {
-        if (player.player_email === yourEmail) {
+        if (player.player_email === authSrv.user?.email) {
             playerOfRoom.your_data = player;
         } else {
             playerOfRoom.enemy_data = player;
@@ -25,4 +28,13 @@ export function getYouAndEnemyFromResp(msg: ConnectPlayerRespMsg, yourEmail: str
     }
 
     return playerOfRoom;
+}
+
+export function isYou(email: string, authSrv: AuthService): boolean {
+    return email === authSrv.user?.email;
+}
+
+export function whoStepsFirst(room: SeabattleRoom): RoomPlayer {
+    const rand = Math.random();
+    return rand > 0.5 ? room.data.players.me! : room.data.players.enemy!;
 }

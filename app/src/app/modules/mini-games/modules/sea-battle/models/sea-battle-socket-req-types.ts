@@ -13,4 +13,6 @@ type SetPlayerPositionsReqMsg = BaseSocketReqMsg<{ player_positions: string }>;
 
 type PlayerReadyReqMsg = BaseSocketReqMsg<{}>;
 
-export type SocketReqMsg = NewStepReqMsg | SetPlayerPositionsReqMsg | PlayerReadyReqMsg;
+type StartGameReqMsg = BaseSocketReqMsg<{}>;
+
+export type SocketReqMsg = NewStepReqMsg | SetPlayerPositionsReqMsg | PlayerReadyReqMsg | StartGameReqMsg;

@@ -11,7 +11,6 @@ import { SeaBattleChatMessageComponent } from './components/sea-battle-chat-mess
 import { SeaBattleFieldComponent } from './components/sea-battle-field/sea-battle-field.component';
 import { SeaBattleRoomComponent } from './components/sea-battle-room/sea-battle-room.component';
 import { SeaBattleRoomsListComponent } from './components/sea-battle-rooms-list/sea-battle-rooms-list.component';
-import { SeaBattlePlayerActionsService } from './services/sea-battle-player-actions.service';
 import { SeaBattleFieldService } from './services/sea-battle-field.service';
 
 @NgModule({
@@ -25,6 +24,6 @@ import { SeaBattleFieldService } from './services/sea-battle-field.service';
         SeaBattleRoomsListComponent
     ],
     imports: [CommonModule, SeaBattleRoutingModule, SharedModule],
-    providers: [SeaBattleApiService, SeaBattleSocketService, SeaBattlePlayerActionsService, SeaBattleFieldService]
+    providers: [SeaBattleApiService, SeaBattleSocketService, SeaBattleFieldService]
 })
 export class SeaBattleModule {}

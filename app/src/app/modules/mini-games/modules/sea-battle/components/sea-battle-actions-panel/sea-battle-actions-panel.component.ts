@@ -38,11 +38,4 @@ export class SeaBattleActionsPanelComponent {
             room_name: roomName
         });
     }
-
-    public disconnect(): void {
-        // @TODO fix roomId
-        // @TODO uncomment after email release
-        // this.seabattleSocketSrv.disconnectFromRoom(this.authService.user!.email, roomName);
-        this.seabattleSocketSrv.disconnectFromRoom('', '');
-    }
 }

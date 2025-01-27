@@ -1,4 +1,4 @@
-import { RoomState } from '../constants/socket-constants';
+import { RoomStatus } from '../constants/socket-constants';
 import { SocketRespMsg } from './sea-battle-socket-resp-types';
 
 export interface CreateRoomReqBody {
@@ -22,17 +22,14 @@ export interface ConnectRoomReqBody {
     room_id?: string;
 }
 
-export interface RoomSocket {
-    socket: WebSocket;
-    state: RoomState;
-    data: RoomSocketData;
-}
-
-export interface RoomSocketData {
+export interface SeabattleRoomData {
     messages: SocketRespMsg[];
-    room_name: string;
-    room_id: string;
-    created_at: string;
+    status: RoomStatus;
+    steppingPlayer: RoomPlayer | null;
+    roomName: string;
+    roomId: string;
+    createdAt: string;
+    isPlaying: boolean;
     players: {
         me: RoomPlayer;
         enemy: RoomPlayer | null;

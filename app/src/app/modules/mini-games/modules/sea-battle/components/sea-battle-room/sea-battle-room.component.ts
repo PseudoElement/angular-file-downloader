@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { SeaBattleSocketService } from '../../services/sea-battle-socket.service';
 import { FormControl } from '@angular/forms';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SeaBattleStateService } from '../../services/sea-battle-state.service';
-import { filter, map, Observable, startWith, tap } from 'rxjs';
+import { filter, interval, map, Observable, startWith, switchMap, takeWhile, tap } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
-import { RoomSocket } from '../../models/sea-battle-api-types';
-import { SOCKET_RESP_TYPE } from '../../constants/socket-constants';
-import { SeaBattlePlayerActionsService } from '../../services/sea-battle-player-actions.service';
+import { ROOM_STATUS, RoomStatus, SOCKET_RESP_TYPE } from '../../constants/socket-constants';
 import { SeaBattleFieldService } from '../../services/sea-battle-field.service';
+import { DELAY_BEFORE_STEP } from '../../constants/seabattle-consts';
+import { SeabattleRoom } from '../../entities/room';
 
 @Component({
     selector: 'app-sea-battle-room',
@@ -19,20 +19,37 @@ import { SeaBattleFieldService } from '../../services/sea-battle-field.service';
 export class SeaBattleRoomComponent implements OnDestroy {
     private readonly roomId: string;
 
-    public readonly room$: Observable<RoomSocket> = this.sbStateSrv.rooms$.pipe(
+    public readonly room$: Observable<SeabattleRoom> = this.sbStateSrv.rooms$.pipe(
         filter((rooms) => !!rooms.length),
-        map((rooms) => rooms.find((r) => r.data.room_id === this.roomId)!)
-        // tap((r) => console.log('ROOM$ ==> ', r))
+        map((rooms) => rooms.find((r) => r.id === this.roomId)!)
     );
 
     public readonly yourPosiions$ = this.room$.pipe(
         map((room) => room.data.players.me.positions),
+        // tap((yourPositions) => this.sbFieldSrv.updateYourPositions(yourPositions)),
         startWith('')
     );
 
     public readonly enemyPosiions$ = this.room$.pipe(
-        map((room) => room.data.players.enemy?.positions),
+        map((room) => room.data.players.enemy?.positions || ''),
+        // tap((enemyPositions) => this.sbFieldSrv.updateEnemyPositions(enemyPositions)),
         startWith('')
+    );
+
+    public readonly roomStatus$ = this.room$.pipe(
+        map((room) => room.data.status),
+        startWith(ROOM_STATUS.IDLE)
+    );
+
+    public readonly roomStatusText$ = this.room$.pipe(
+        switchMap((room) =>
+            room.data.status === ROOM_STATUS.DELAY_BEFORE_NEXT_STEP
+                ? interval(1_000).pipe(
+                      takeWhile((val) => val * 1_000 < DELAY_BEFORE_STEP),
+                      switchMap((secs) => this.getUiTextByRoomStatus(room.data.status, secs))
+                  )
+                : this.getUiTextByRoomStatus(room.data.status)
+        )
     );
 
     public readonly isChangeModeEnabled$ = this.sbFieldSrv.isChangeModeEnabled$;
@@ -45,14 +62,9 @@ export class SeaBattleRoomComponent implements OnDestroy {
         return this.isReadyCtrl.value!;
     }
 
-    public hasEnemy(room: RoomSocket): boolean {
-        return !!room.data.players.enemy?.playerEmail;
-    }
-
     constructor(
         private readonly sbSocketSrv: SeaBattleSocketService,
         private readonly sbStateSrv: SeaBattleStateService,
-        private readonly sbPlayerActionsSrv: SeaBattlePlayerActionsService,
         private readonly route: ActivatedRoute,
         private readonly authSrv: AuthService,
         private readonly router: Router,
@@ -66,7 +78,7 @@ export class SeaBattleRoomComponent implements OnDestroy {
     }
 
     public async sendPositions(): Promise<void> {
-        this.sbPlayerActionsSrv.sendUpdatedPositions(
+        this.sbSocketSrv.sendUpdatedPositions(
             this.roomId,
             `
 		A1+,A2,A3,A4,A5,A6,A7,A8,A9,A10+,
@@ -83,7 +95,15 @@ export class SeaBattleRoomComponent implements OnDestroy {
         );
     }
 
-    public async sendStep(): Promise<void> {
+    public start(): void {
+        this.sbSocketSrv.sendMessage(this.roomId, {
+            action_type: SOCKET_RESP_TYPE.START_GAME,
+            player_email: this.authSrv.user?.email!,
+            data: {}
+        });
+    }
+
+    public sendStep(): void {
         this.sbSocketSrv.sendMessage(this.roomId, {
             player_email: this.authSrv.user?.email!,
             action_type: SOCKET_RESP_TYPE.STEP,
@@ -110,5 +130,24 @@ export class SeaBattleRoomComponent implements OnDestroy {
 
     public toggleChangeMode(): void {
         this.sbFieldSrv.toggleChangeMode(this.roomId);
+    }
+
+    private async getUiTextByRoomStatus(roomStatus: RoomStatus, secs?: number): Promise<string> {
+        switch (roomStatus) {
+            case ROOM_STATUS.IDLE:
+                return 'Waiting for players!';
+            case ROOM_STATUS.READY_ENEMY_NEXT_STEP:
+            case ROOM_STATUS.READY_YOUR_NEXT_STEP:
+                const nextSteppingPlayerEmail = this.sbStateSrv.rooms.find((room) => room.data.roomId === this.roomId);
+                return `Waiting for step of ${nextSteppingPlayerEmail}.`;
+            case ROOM_STATUS.END:
+                return 'Game finished!';
+            case ROOM_STATUS.DELAY_BEFORE_NEXT_STEP:
+                const delay = (DELAY_BEFORE_STEP - Number(secs) * 1_000) / 1_000;
+                return `Waiting for ${delay}...`;
+            default:
+                console.log('Unknown_Status ==> ', roomStatus);
+                return 'Unknown state!!!';
+        }
     }
 }

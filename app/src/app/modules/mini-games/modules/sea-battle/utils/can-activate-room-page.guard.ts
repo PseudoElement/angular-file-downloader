@@ -9,7 +9,7 @@ export function isRoomWithIdExistGuard(_routeSnapshot: any, segments: UrlSegment
     const router = inject(Router);
 
     const roomId = segments[1]?.path;
-    const foundRoom = seabattleStateSrv.rooms.some((r) => r.data.room_id === roomId);
+    const foundRoom = seabattleStateSrv.rooms.some((r) => r.id === roomId);
 
     if (!foundRoom) {
         console.log(`Room with id ${roomId} doesn't exist. Existing rooms is ==> `, seabattleStateSrv.rooms);

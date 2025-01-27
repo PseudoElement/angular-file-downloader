@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface BaseAlert {
     text: string;
-    type: 'success' | 'warn' | 'error';
+    type: 'success' | 'warn' | 'error' | 'info';
     closeDelay?: number;
 }
 

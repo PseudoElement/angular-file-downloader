@@ -17,11 +17,11 @@ export async function canDeactivateSeabattleRoom(
     const authSrv = inject(AuthService);
 
     const roomId = routeSnapshot.paramMap.get('id')!;
-    const foundRoom = seabattleStateSrv.rooms.find((r) => r.data.room_id === roomId)!;
+    const foundRoom = seabattleStateSrv.rooms.find((r) => r.id === roomId)!;
 
     const wantLeave = await sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
         isConfirmModal: true,
-        text: `Do you want to leave room "${foundRoom.data.room_name}"?`,
+        text: `Do you want to leave room "${foundRoom.data.roomName}"?`,
         title: 'Notification'
     });
 
