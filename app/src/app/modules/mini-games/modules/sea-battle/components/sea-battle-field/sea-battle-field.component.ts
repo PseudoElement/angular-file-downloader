@@ -25,8 +25,6 @@ export class SeaBattleFieldComponent {
 
     @Input() isChangeMode: boolean = false;
 
-    @Input() isDisabled: boolean = false;
-
     @Output() cellSelected: EventEmitter<PlayerPosition> = new EventEmitter();
 
     @Output() positionsUpdated: EventEmitter<PlayerPositionsMatrix> = new EventEmitter();

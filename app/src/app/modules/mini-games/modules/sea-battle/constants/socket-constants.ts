@@ -2,7 +2,8 @@ export const STEP_RESULT = {
     HIT: 'HIT',
     MISS: 'MISS',
     KILL: 'KILL',
-    ALREADY_CHECKED: 'ALREADY_CHECKED'
+    ALREADY_CHECKED: 'ALREADY_CHECKED',
+    EMPTY_STEP: 'EMPTY_STEP'
 } as const;
 
 export type StepResult = (typeof STEP_RESULT)[keyof typeof STEP_RESULT];

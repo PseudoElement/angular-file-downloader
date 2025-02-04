@@ -2,10 +2,11 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import { RoomPlayer, SeabattleRoomData } from '../models/sea-battle-api-types';
 import { isYou, YouAndEnemyData } from '../utils/get-you-and-enemy';
 import { SocketRespMsg } from '../models/sea-battle-socket-resp-types';
-import { ROOM_STATUS } from '../constants/socket-constants';
-import { CLEAR_SEABATTLE_FIELD } from '../constants/seabattle-consts';
+import { ROOM_STATUS, RoomStatus } from '../constants/socket-constants';
+import { CLEAR_SEABATTLE_FIELD, DELAY_BEFORE_STEP } from '../constants/seabattle-consts';
+import { SeabattleRoomUtils } from './room-utils';
 
-export interface RoomSocketInitStruct {
+export interface SeabattleRoomInitStruct {
     roomName: string;
     roomId: string;
     createdAt: string;
@@ -41,8 +42,15 @@ export class SeabattleRoom {
         return this._data;
     }
 
-    constructor(socket: WebSocket, initStruct: RoomSocketInitStruct, private readonly authSrv: AuthService) {
+    public get status(): RoomStatus {
+        return this._data.status;
+    }
+
+    public readonly utils: SeabattleRoomUtils;
+
+    constructor(socket: WebSocket, initStruct: SeabattleRoomInitStruct, private readonly authSrv: AuthService) {
         this._socket = socket;
+        this.utils = new SeabattleRoomUtils(this);
 
         const me = {
             isOwner: initStruct.playersOfRoom.your_data.is_owner,
@@ -81,8 +89,6 @@ export class SeabattleRoom {
         const playerKey: keyof SeabattleRoomData['players'] = isYou(playerEmail, this.authSrv) ? 'me' : 'enemy';
         const updatedPlayer = { ...this._data.players[playerKey]!, ...newProps } as RoomPlayer;
         this._data.players = { ...this._data.players, [playerKey]: updatedPlayer };
-
-        console.log('updatePlayerInRoom ==> ', this);
     }
 
     public removeEnemyFromRoom(): void {

@@ -4,13 +4,12 @@
         yourPositions: yourPosiions$ | async,
         enemyPosiions: enemyPosiions$ | async,
         isChangeModeEnabled: isChangeModeEnabled$ | async,
-        roomStatus: roomStatus$ | async,
         roomStatusText: roomStatusText$ | async
     } as state"
 >
     <div *ngIf="state.room" class="room-wrapper">
         <h1 class="room-title">Room "{{ state.room.data.roomName }}"</h1>
-        <h2 class="room-status">{{ state.roomStatusText }}</h2>
+        <h2 class="room-status" [@roomStatusAnimation]="_roomStatusUpdate$ | async">{{ state.roomStatusText }}</h2>
         <div class="room-players">
             <h3>Players:</h3>
             <span>{{ state.room.data.players.me.playerEmail }} - {{ state.room.data.players.me.isReady ? 'ready' : 'not ready' }}</span>
@@ -21,14 +20,15 @@
         <div class="room-main">
             <app-input [label]="'Step'" [control]="stepCtrl"></app-input>
             <app-button
+                [disabled]="state.room.isPlaying"
                 [text]="state.isChangeModeEnabled ? 'Disable change mode.' : 'Enable change mode.'"
-                (click)="toggleChangeMode()"
+                (onClick)="toggleChangeMode()"
             ></app-button>
-            <app-button *ngIf="state.room.isYouOwner && state.roomStatus === 'IDLE'" [text]="'Start'" (click)="start()"></app-button>
-            <app-button [text]="isReady ? 'Ready' : 'Not Ready'" (click)="sendReadyStatus()"></app-button>
-            <app-button [text]="'Make step'" (click)="sendStep()"></app-button>
-            <app-button [text]="'Save random positions'" (click)="sendPositions()"></app-button>
-            <app-button [text]="'Disconnect'" (click)="disconnect()"></app-button>
+            <app-button *ngIf="state.room.isYouOwner && canStart" [text]="'Start'" (onClick)="start()"></app-button>
+            <app-button [text]="isReady ? 'Ready' : 'Not Ready'" [disabled]="isReady" (onClick)="sendReadyStatus()"></app-button>
+            <app-button [text]="'Make step'" (onClick)="sendStep()"></app-button>
+            <app-button [text]="'Save random positions'" (onClick)="sendPositions()"></app-button>
+            <app-button [text]="'Disconnect'" (onClick)="disconnect()"></app-button>
         </div>
 
         <div class="room-chat">
@@ -40,14 +40,12 @@
                 [isEnemyField]="false"
                 [positionsString]="state.yourPositions"
                 [isChangeMode]="state.isChangeModeEnabled"
-                [isDisabled]="false"
             ></app-sea-battle-field>
             <app-sea-battle-field
                 *ngIf="state.enemyPosiions"
                 [isEnemyField]="true"
                 [positionsString]="state.enemyPosiions"
-                [isChangeMode]="false"
-                [isDisabled]="state.roomStatus === 'READY_ENEMY_NEXT_STEP' || state.roomStatus === 'DELAY_BEFORE_NEXT_STEP'"
+                [isChangeMode]="state.room.status === 'READY_YOUR_NEXT_STEP'"
             ></app-sea-battle-field>
         </div>
     </div>

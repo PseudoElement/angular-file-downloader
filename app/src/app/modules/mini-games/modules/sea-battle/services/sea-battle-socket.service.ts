@@ -18,6 +18,7 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import { getYouAndEnemyFromResp, isYou, whoStepsFirst } from '../utils/get-you-and-enemy';
 import { SeabattleRoom } from '../entities/room';
 import { CLEAR_SEABATTLE_FIELD } from '../constants/seabattle-consts';
+import { handleNextStepOrder } from '../utils/handle-next-step-order';
 
 @Injectable()
 export class SeaBattleSocketService {
@@ -192,7 +193,13 @@ export class SeaBattleSocketService {
         const room = this.sbStateSrv.getRoomById(roomId);
         if (msg.data.player_email !== this.authSrv.user?.email) {
             room.removeEnemyFromRoom();
-            room.makePlayerAsOwner(this.authSrv.user!.email);
+            room.updatePlayerInRoom(this.authSrv.user!.email, {
+                hasFall: false,
+                isOwner: true,
+                isReady: false,
+                positions: CLEAR_SEABATTLE_FIELD
+            });
+            room.updateData({ isPlaying: false, status: ROOM_STATUS.IDLE });
         } else {
             this.sbStateSrv.leaveRoom(roomId);
         }
@@ -201,6 +208,10 @@ export class SeaBattleSocketService {
     private handleReadyMsg(roomId: string, msg: PlayerReadyRespMsg): void {
         const room = this.sbStateSrv.getRoomById(roomId);
         room.updatePlayerInRoom(msg.data.player_email, { isReady: true });
+
+        if (room.data.players.enemy?.isReady && room.data.players.me.isReady) {
+            room.updateData({ status: ROOM_STATUS.READY_TO_START });
+        }
     }
 
     private handleStep(roomId: string, msg: PlayerStepRespMsg): void {
@@ -209,6 +220,7 @@ export class SeaBattleSocketService {
         const affectedPositions = isYou(msg.data.player_email, this.authSrv)
             ? room.data.players.enemy!.positions
             : room.data.players.me.positions;
+
         const affectedPlayer = isYou(msg.data.player_email, this.authSrv) ? room.data.players.enemy! : room.data.players.me;
         const steppingPlayer = isYou(msg.data.player_email, this.authSrv) ? room.data.players.me : room.data.players.enemy!;
 
@@ -227,12 +239,10 @@ export class SeaBattleSocketService {
                 const killedCell = `${cellValueWithoutComma}*`;
                 newPositions = affectedPositions.replace(cellValueWithoutComma, killedCell);
                 break;
+            case STEP_RESULT.EMPTY_STEP:
             case STEP_RESULT.ALREADY_CHECKED:
                 newPositions = affectedPositions;
                 hasFall = true;
-                if (steppingPlayer.playerEmail === this.authSrv.user?.email) {
-                    this.alertsSrv.showAlert({ text: `You've already checked ${msg.data.step} cell. Try another.`, type: 'warn' });
-                }
                 break;
             case STEP_RESULT.MISS:
                 const missedCell = `${cellValueWithoutComma}.`;
@@ -243,17 +253,7 @@ export class SeaBattleSocketService {
         }
 
         room.updatePlayerInRoom(affectedPlayer.playerEmail, { positions: newPositions, hasFall });
-        const nextSteppingPlayer = isYou(msg.data.player_email, this.authSrv) ? room.data.players.me : room.data.players.enemy;
-        room.updateData({
-            status: ROOM_STATUS.DELAY_BEFORE_NEXT_STEP,
-            steppingPlayer: nextSteppingPlayer
-        });
-        setTimeout(() => {
-            const newRoomStatus = isYou(msg.data.player_email, this.authSrv)
-                ? ROOM_STATUS.READY_YOUR_NEXT_STEP
-                : ROOM_STATUS.READY_ENEMY_NEXT_STEP;
-            room.updateData({ status: newRoomStatus });
-        }, 3_000);
+        handleNextStepOrder(room, msg, this.authSrv);
     }
 
     private handleWin(roomId: string): void {

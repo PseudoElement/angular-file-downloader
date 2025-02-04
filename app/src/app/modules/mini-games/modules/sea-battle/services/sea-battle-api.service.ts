@@ -6,7 +6,8 @@ import {
     CreateRoomReqBody,
     DisconnectRoomReqBody,
     RoomInfoReqBody,
-    RoomInfoResp
+    RoomInfoResp,
+    RoomsMapResp
 } from '../models/sea-battle-api-types';
 import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { AlertsService } from 'src/app/shared/services/alerts.service';
@@ -15,8 +16,8 @@ import { AlertsService } from 'src/app/shared/services/alerts.service';
 export class SeaBattleApiService {
     constructor(private readonly httpApi: HttpApiService, private readonly alertsSrv: AlertsService) {}
 
-    public fetchRoomsMapFromBackend(): Promise<any> {
-        return this.httpApi.get<RoomInfoResp>(`${ENVIRONMENT.apiBaseUrl}/seabattle/get-rooms`);
+    public fetchRoomsMapFromBackend(): Promise<RoomsMapResp> {
+        return this.httpApi.get<RoomsMapResp>(`${ENVIRONMENT.apiBaseUrl}/seabattle/get-rooms`);
     }
 
     public createRoom(params: CreateRoomReqBody): Promise<RoomInfoResp> {

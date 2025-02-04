@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { BehaviorSubject, Subject, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, interval, startWith, Subject, switchMap, tap, throttle, throttleTime } from 'rxjs';
 import { RoomInfoFromBackend, RoomsArray } from '../../models/sea-battle-api-types';
 import { SeaBattleApiService } from '../../services/sea-battle-api.service';
 import { roomsMapToArray } from '../../utils/rooms-map-converter';
@@ -24,15 +24,14 @@ export class SeaBattleRoomsListComponent {
         private readonly authService: AuthService
     ) {
         setTimeout(() => this._updateRoomsList$.next(null), 0);
-        this._updateRoomsList$
+        combineLatest([this._updateRoomsList$, interval(10_000).pipe(startWith(0))])
             .pipe(
-                tap(() => console.log('CALLLLLLL')),
-                // switchMap(() => interval(5_000)),
+                throttleTime(10_000),
                 switchMap(() => this.seabattleApiSrv.fetchRoomsMapFromBackend()),
                 takeUntilDestroyed()
             )
             .subscribe((roomsMap) => {
-                console.log('rooms_map ===> ', roomsMap);
+                console.log('ROOMS_REQUEST');
                 this.roomsList$.next(roomsMapToArray(roomsMap));
             });
     }

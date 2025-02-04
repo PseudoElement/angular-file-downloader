@@ -1,9 +1,9 @@
 @switch (type) { @case ('basic') {
-<button mat-button>{{ text }}</button>
+<button mat-button [disabled]="disabled" (click)="click()">{{ text }}</button>
 } @case ('raised') {
-<button mat-raised-button>{{ text }}</button>
+<button mat-raised-button [disabled]="disabled" (click)="click()">{{ text }}</button>
 } @case ('stroked') {
-<button mat-stroked-button>{{ text }}</button>
+<button mat-stroked-button [disabled]="disabled" (click)="click()">{{ text }}</button>
 } @case ('flat') {
-<button mat-flat-button>{{ text }}</button>
+<button mat-flat-button [disabled]="disabled" (click)="click()">{{ text }}</button>
 } }

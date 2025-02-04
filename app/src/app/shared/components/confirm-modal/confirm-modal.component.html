@@ -4,7 +4,7 @@
         <p class="modal-body">{{ text }}</p>
         <app-input [label]="'Value'" [control]="valueCtrl" [placeholder]="'Input value'"></app-input>
         <div class="modal-buttons">
-            <app-button (click)="accept()" [text]="'Send'" [type]="'flat'"></app-button>
+            <app-button (onClick)="accept()" [text]="'Send'" [type]="'flat'"></app-button>
         </div>
     </div>
 

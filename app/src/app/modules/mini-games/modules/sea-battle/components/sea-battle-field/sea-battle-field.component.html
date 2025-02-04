@@ -8,9 +8,10 @@
                 [class.cell-change-mode]="isChangeMode"
                 [class.cell-change-mode__selected]="isChangeMode && cell.hasShip"
                 [class.cell-enemy__not-checked]="isEnemyField && cell.state === 'NOT_CHECKED'"
+                [class.cell-hit]="cell.state === 'HIT'"
                 (click)="onCellSelect(cell)"
             >
-                <span *ngIf="cell.state === 'HIT'" class="material-symbols-outlined cell-hit"> close </span>
+                <span *ngIf="cell.state === 'HIT'" class="material-symbols-outlined"> close </span>
                 <span *ngIf="cell.hasShip && cell.state !== 'HIT'" class="material-symbols-outlined cell-has-ship"> sailing </span>
                 <span *ngIf="cell.state === 'MISS'" class="cell-miss"> </span>
 

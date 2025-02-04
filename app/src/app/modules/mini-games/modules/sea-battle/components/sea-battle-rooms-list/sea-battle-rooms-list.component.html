@@ -1,7 +1,7 @@
 <div *ngLet="roomsList$ | async as roomsList" class="rooms-list-wrapper">
     <div class="header">
         <h2 class="title">Seabattle Rooms</h2>
-        <app-button [text]="'Fetch rooms'" (click)="getList()"></app-button>
+        <app-button [text]="'Fetch rooms'" (onClick)="getList()"></app-button>
     </div>
     <div *ngIf="roomsList.length; else empty" class="rooms-list">
         <div *ngFor="let room of roomsList" class="room-element">

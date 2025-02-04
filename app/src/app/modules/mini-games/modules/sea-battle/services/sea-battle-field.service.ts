@@ -40,7 +40,7 @@ export class SeaBattleFieldService {
             )
             .subscribe(() =>
                 this.alertsSrv.showAlert({
-                    text: `You enabled "Change Mode". Click on cell on yout field to add/remove your ship. Your field needs contain:\n
+                    text: `You enabled "Change Mode". Click on cell on your field to add/remove your ship. Your field needs contain:\n
 - 4 single-cell ships\n
 - 3 two-cells ships\n
 - 2 three-cells ships\n

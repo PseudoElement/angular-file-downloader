@@ -21,7 +21,4 @@ apply listeners
 
 ### TODO
 
--   handle ALREADY_CHECKED case properly (maybe add counter with attempts, if more than 2, skip step for user)
--   handle user connected to room, where he already exists
--   fix setPositions where you set positions and enemy field also updated
--   clear room fields and players data on enemy disconnection
+-   fix next step order in statusText

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { ButtonType } from 'src/app/shared/models/buttons';
 
 @Component({
@@ -10,5 +10,15 @@ import { ButtonType } from 'src/app/shared/models/buttons';
 export class ButtonComponent {
     @Input({ required: true }) text!: string;
 
+    @Input() disabled: boolean = false;
+
     @Input() type: ButtonType = 'raised';
+
+    @Output() onClick: EventEmitter<void> = new EventEmitter();
+
+    public click(): void {
+        if (!this.disabled) {
+            this.onClick.emit();
+        }
+    }
 }

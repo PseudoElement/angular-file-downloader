@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { ActivatedRouteSnapshot, Router, UrlSegment } from '@angular/router';
+import { Router, UrlSegment } from '@angular/router';
 import { SeaBattleStateService } from '../services/sea-battle-state.service';
 import { AlertsService } from 'src/app/shared/services/alerts.service';
 

@@ -48,14 +48,13 @@
         }
 
         &-hit {
-            width: 2rem;
-            height: 2rem;
+            background-color: rgb(245, 91, 155);
         }
 
         &-miss {
             width: 3px;
             height: 3px;
-            border: 2px solid black;
+            border: 5px solid black;
             border-radius: 50%;
         }
 
