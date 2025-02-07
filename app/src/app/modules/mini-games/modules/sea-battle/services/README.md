@@ -21,4 +21,4 @@ apply listeners
 
 ### TODO
 
--   fix next step order in statusText
+-   handle Game end properly, disable and clear fields fields etc...

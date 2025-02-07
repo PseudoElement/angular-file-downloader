@@ -31,7 +31,6 @@ export class SeaBattleRoomsListComponent {
                 takeUntilDestroyed()
             )
             .subscribe((roomsMap) => {
-                console.log('ROOMS_REQUEST');
                 this.roomsList$.next(roomsMapToArray(roomsMap));
             });
     }

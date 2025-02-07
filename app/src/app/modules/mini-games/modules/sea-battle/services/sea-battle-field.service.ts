@@ -20,6 +20,8 @@ export class SeaBattleFieldService {
 
     private readonly _posiitonsInChangeMode$ = new BehaviorSubject<PlayerPositionsMatrix>([]);
 
+    private readonly _canSendUpdatedPositions$ = new BehaviorSubject<boolean>(false);
+
     public readonly isChangeModeEnabled$ = this._isChangeModeEnabled$.asObservable();
 
     public readonly yourPositions$ = this._yourPositions$.asObservable();
@@ -28,11 +30,15 @@ export class SeaBattleFieldService {
 
     public readonly posiitonsInChangeMode$ = this._posiitonsInChangeMode$.asObservable();
 
-    constructor(
-        private readonly sintolModalSrv: SintolLibDynamicComponentService,
-        private readonly sbSocketSrv: SeaBattleSocketService,
-        private readonly alertsSrv: AlertsService
-    ) {
+    public get canSendUpdatedPositions(): boolean {
+        return this._canSendUpdatedPositions$.value;
+    }
+
+    public get yourPositionsStr(): string {
+        return positionsMatrixToString(this._yourPositions$.value);
+    }
+
+    constructor(private readonly sintolModalSrv: SintolLibDynamicComponentService, private readonly alertsSrv: AlertsService) {
         this.isChangeModeEnabled$
             .pipe(
                 filter((enabled) => Boolean(enabled)),
@@ -68,7 +74,9 @@ After you've selected all neccessary fields - Click on "Disable change mode" and
                 this._posiitonsInChangeMode$.next(positionsStringToMatrix(CLEAR_SEABATTLE_FIELD));
             } else {
                 const strPositions = positionsMatrixToString(updatedPositions);
-                this.sbSocketSrv.sendUpdatedPositions(roomId, strPositions);
+                this.updateYourPositions(strPositions);
+                this._posiitonsInChangeMode$.next(positionsStringToMatrix(CLEAR_SEABATTLE_FIELD));
+                this.setCanSendUpdatedPositions(true);
             }
         }
 
@@ -100,5 +108,9 @@ After you've selected all neccessary fields - Click on "Disable change mode" and
 
     public updateEnemyPositions(positions: string): void {
         this._enemyPositions$.next(positionsStringToMatrix(positions));
+    }
+
+    public setCanSendUpdatedPositions(canSend: boolean): void {
+        this._canSendUpdatedPositions$.next(canSend);
     }
 }

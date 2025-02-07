@@ -7,34 +7,49 @@
         roomStatusText: roomStatusText$ | async
     } as state"
 >
-    <div *ngIf="state.room" class="room-wrapper">
-        <h1 class="room-title">Room "{{ state.room.data.roomName }}"</h1>
-        <h2 class="room-status" [@roomStatusAnimation]="_roomStatusUpdate$ | async">{{ state.roomStatusText }}</h2>
-        <div class="room-players">
-            <h3>Players:</h3>
-            <span>{{ state.room.data.players.me.playerEmail }} - {{ state.room.data.players.me.isReady ? 'ready' : 'not ready' }}</span>
-            <span *ngIf="state.room.hasEnemy">
-                {{ state.room.data.players.enemy.playerEmail }} - {{ state.room.data.players.enemy.isReady ? 'ready' : 'not ready' }}
-            </span>
-        </div>
-        <div class="room-main">
-            <app-input [label]="'Step'" [control]="stepCtrl"></app-input>
-            <app-button
-                [disabled]="state.room.isPlaying"
-                [text]="state.isChangeModeEnabled ? 'Disable change mode.' : 'Enable change mode.'"
-                (onClick)="toggleChangeMode()"
-            ></app-button>
-            <app-button *ngIf="state.room.isYouOwner && canStart" [text]="'Start'" (onClick)="start()"></app-button>
-            <app-button [text]="isReady ? 'Ready' : 'Not Ready'" [disabled]="isReady" (onClick)="sendReadyStatus()"></app-button>
-            <app-button [text]="'Make step'" (onClick)="sendStep()"></app-button>
-            <app-button [text]="'Save random positions'" (onClick)="sendPositions()"></app-button>
-            <app-button [text]="'Disconnect'" (onClick)="disconnect()"></app-button>
+    <div *ngIf="state.room" class="room">
+        <div class="room__header">
+            <h1 class="room-title">Room "{{ state.room.data.roomName }}"</h1>
+            <h2 class="room-status" [@roomStatusAnimation]="_roomStatusUpdate$ | async">{{ state.roomStatusText }}</h2>
         </div>
 
-        <div class="room-chat">
-            <app-sea-battle-chat [messages]="state.room.data.messages"></app-sea-battle-chat>
+        <div class="room__main">
+            <div class="room__left">
+                <div class="room__left-players">
+                    <h3>Players:</h3>
+                    <span
+                        >{{ state.room.data.players.me.playerEmail }} -
+                        {{ state.room.data.players.me.isReady ? 'ready' : 'not ready' }}</span
+                    >
+                    <span *ngIf="state.room.hasEnemy">
+                        {{ state.room.data.players.enemy.playerEmail }} -
+                        {{ state.room.data.players.enemy.isReady ? 'ready' : 'not ready' }}
+                    </span>
+                </div>
+
+                <div class="room__left-buttons">
+                    <app-button *ngIf="state.room.isYouOwner && canStart" [text]="'Start'" (onClick)="start()"></app-button>
+                    <app-button
+                        [disabled]="!canUseChangeMode"
+                        [text]="state.isChangeModeEnabled ? 'Disable change mode.' : 'Enable change mode.'"
+                        (onClick)="toggleChangeMode()"
+                    ></app-button>
+                    <app-button [text]="'Confirm positions'" [disabled]="!canSendPositions" (onClick)="sendPositions()"></app-button>
+                    <app-button
+                        [text]="isReady ? 'Ready' : 'Not Ready'"
+                        [disabled]="!canUseChangeMode || isReady"
+                        (onClick)="sendReadyStatus()"
+                    ></app-button>
+                    <app-button [text]="'Disconnect'" (onClick)="disconnect()"></app-button>
+                </div>
+            </div>
+
+            <div class="room__right">
+                <app-sea-battle-chat [messages]="state.room.data.messages"></app-sea-battle-chat>
+            </div>
         </div>
-        <div class="fields">
+
+        <div class="room__fields">
             <app-sea-battle-field
                 *ngIf="state.yourPositions"
                 [isEnemyField]="false"
@@ -46,6 +61,7 @@
                 [isEnemyField]="true"
                 [positionsString]="state.enemyPosiions"
                 [isChangeMode]="state.room.status === 'READY_YOUR_NEXT_STEP'"
+                (cellSelected)="onEnemyCellSelected($event)"
             ></app-sea-battle-field>
         </div>
     </div>

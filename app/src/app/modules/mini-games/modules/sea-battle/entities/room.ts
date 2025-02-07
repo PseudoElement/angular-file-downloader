@@ -30,6 +30,10 @@ export class SeabattleRoom {
         return !!this._data.players.enemy?.playerEmail;
     }
 
+    public get hasBothPlayers(): boolean {
+        return !!this._data.players.me.playerEmail && !!this.data.players.enemy?.playerEmail;
+    }
+
     public get isPlaying(): boolean {
         return this._data.isPlaying;
     }

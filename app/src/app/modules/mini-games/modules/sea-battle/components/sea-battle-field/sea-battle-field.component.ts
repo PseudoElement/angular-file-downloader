@@ -42,17 +42,14 @@ export class SeaBattleFieldComponent {
                 distinctUntilChanged()
             )
             .subscribe((positions) => {
-                console.log('POSITIPASDN__', positions);
                 this.positionsToShow = positions;
                 this.cdr.markForCheck();
             });
     }
 
     public onCellSelect(cell: PlayerPosition): void {
-        if (this.isChangeMode) {
-            this.sbFieldSrv.selectCellInChangeMode(cell);
-        } else {
-            this.cellSelected.emit(cell);
-        }
+        if (!this.isChangeMode) return;
+        if (this.isEnemyField) this.cellSelected.emit(cell);
+        else this.sbFieldSrv.selectCellInChangeMode(cell);
     }
 }

@@ -1,25 +1,47 @@
 @use 'src/styles.scss' as *;
 
 :host {
-    .room-wrapper {
+    .room {
         @include flex-column(space-around, center);
 
         width: 100%;
-        border: 2px solid black;
         margin: 10px 0;
     }
 
-    .room-main {
-        @include flex-row(baseline, center);
-        gap: 20px;
+    .room__header {
+        @include flex-column(center, center);
+        width: 100%;
     }
 
-    .room-players {
-        @include flex-column(baseline, normal);
-        gap: 5px;
+    .room__main {
+        @include flex-row(space-between, baseline);
+        width: 100%;
+
+        .room__left {
+            @include flex-column(space-around, baseline);
+            gap: 10px;
+
+            &-players,
+            &-buttons {
+                @include flex-column(space-around, baseline);
+                gap: 5px;
+                width: 100%;
+            }
+
+            &-players {
+                span {
+                    font-size: 20px;
+                    font-weight: bold;
+                }
+            }
+        }
+
+        .room__right {
+            // width: 100%;
+        }
     }
 
-    .fields {
+    .room__fields {
         @include flex-row(space-around, center);
 
         width: 100%;

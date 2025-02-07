@@ -17,8 +17,9 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { getYouAndEnemyFromResp, isYou, whoStepsFirst } from '../utils/get-you-and-enemy';
 import { SeabattleRoom } from '../entities/room';
-import { CLEAR_SEABATTLE_FIELD } from '../constants/seabattle-consts';
+import { CLEAR_SEABATTLE_FIELD, DELAY_BEFORE_STEP } from '../constants/seabattle-consts';
 import { handleNextStepOrder } from '../utils/handle-next-step-order';
+import { SeaBattleFieldService } from './sea-battle-field.service';
 
 @Injectable()
 export class SeaBattleSocketService {
@@ -30,6 +31,7 @@ export class SeaBattleSocketService {
         private readonly sbApiSrv: SeaBattleApiService,
         private readonly alertsSrv: AlertsService,
         private readonly sbStateSrv: SeaBattleStateService,
+        private readonly sbFieldSrv: SeaBattleFieldService,
         private readonly authSrv: AuthService,
         private readonly router: Router
     ) {}
@@ -146,6 +148,9 @@ export class SeaBattleSocketService {
         const room = this.sbStateSrv.getRoomById(roomId);
         room.data.messages = [...room!.data.messages, msg];
         this.sbStateSrv.updateRooms(this.rooms);
+
+        const chatEl = document.querySelector('.messages');
+        chatEl?.scrollBy({ behavior: 'smooth', left: 0, top: 500 });
     }
 
     private handleStartGame(roomId: string): void {
@@ -159,7 +164,6 @@ export class SeaBattleSocketService {
 
     private handleConnectionMsg(socket: WebSocket, roomId: string, msg: ConnectPlayerRespMsg): void {
         const playersOfRoom = getYouAndEnemyFromResp(msg, this.authSrv);
-        console.log('playersOfRoom', playersOfRoom);
 
         // you connected
         if (msg.data.stepping_player_email === this.authSrv.user?.email) {
@@ -253,11 +257,18 @@ export class SeaBattleSocketService {
         }
 
         room.updatePlayerInRoom(affectedPlayer.playerEmail, { positions: newPositions, hasFall });
-        handleNextStepOrder(room, msg, this.authSrv);
+        handleNextStepOrder(room, msg, this.authSrv, this.sbStateSrv);
     }
 
     private handleWin(roomId: string): void {
         const room = this.sbStateSrv.getRoomById(roomId);
-        room.updateData({ status: ROOM_STATUS.END });
+
+        room.updateData({ status: ROOM_STATUS.END, steppingPlayer: null });
+        this.sbFieldSrv.updateEnemyPositions(CLEAR_SEABATTLE_FIELD);
+        this.sbFieldSrv.updateYourPositions(CLEAR_SEABATTLE_FIELD);
+
+        setTimeout(() => {
+            room.updateData({ status: ROOM_STATUS.IDLE, steppingPlayer: null });
+        }, DELAY_BEFORE_STEP);
     }
 }

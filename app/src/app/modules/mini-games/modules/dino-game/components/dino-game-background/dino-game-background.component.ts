@@ -73,7 +73,6 @@ export class DinoGameBackgroundComponent implements OnDestroy {
                 GameSettingsModalComponent,
                 { initialKeyBindings: this.gameSettingsSrv.keyBindings, settings: this.gameSettingsSrv.settings }
             );
-            console.log('MUTEDDDD', isMuted);
             this.gameSettingsSrv.changeKeyBindings(keyBindings);
             this.gameSettingsSrv.changeGameSettings({ isMuted });
         }

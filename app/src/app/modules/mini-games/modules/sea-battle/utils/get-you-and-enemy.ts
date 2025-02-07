@@ -35,6 +35,8 @@ export function isYou(email: string, authSrv: AuthService): boolean {
 }
 
 export function whoStepsFirst(room: SeabattleRoom): RoomPlayer {
-    const rand = Math.random();
-    return rand > 0.5 ? room.data.players.me! : room.data.players.enemy!;
+    if (room.data.players.me.isOwner) {
+        return room.data.players.me;
+    }
+    return room.data.players.enemy!;
 }

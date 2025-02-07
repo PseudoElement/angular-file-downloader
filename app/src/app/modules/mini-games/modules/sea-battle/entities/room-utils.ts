@@ -7,6 +7,8 @@ export class SeabattleRoomUtils {
 
     public getUiTextByRoomStatus(roomStatus: RoomStatus, secs?: number): string {
         switch (roomStatus) {
+            case ROOM_STATUS.PROCESSING:
+                return 'Processing...';
             case ROOM_STATUS.IDLE:
                 return 'Waiting for players.';
             case ROOM_STATUS.READY_ENEMY_NEXT_STEP:
