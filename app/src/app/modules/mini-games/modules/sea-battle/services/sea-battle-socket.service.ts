@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { getYouAndEnemyFromResp, isYou, whoStepsFirst } from '../utils/get-you-and-enemy';
 import { SeabattleRoom } from '../entities/room';
-import { CLEAR_SEABATTLE_FIELD, DELAY_BEFORE_STEP } from '../constants/seabattle-consts';
+import { CLEAR_SEABATTLE_FIELD } from '../constants/seabattle-consts';
 import { handleNextStepOrder } from '../utils/handle-next-step-order';
 import { SeaBattleFieldService } from './sea-battle-field.service';
 
@@ -86,7 +86,7 @@ export class SeaBattleSocketService {
             }
         });
         const room = this.sbStateSrv.getRoomById(roomId);
-        room.updatePlayerInRoom(this.authSrv.user!.email, { positions: myPositions });
+        room.updatePlayerInRoom(this.authSrv.user!.email, { positions: myPositions, isSetPositions: true });
     }
 
     public async disconnectFromRoom(roomId: string, playerEmail: string): Promise<void> {
@@ -140,6 +140,9 @@ export class SeaBattleSocketService {
                 break;
             case SOCKET_RESP_TYPE.START_GAME:
                 this.handleStartGame(roomId);
+                break;
+            case SOCKET_RESP_TYPE.RESET:
+                this.handleReset(roomId);
                 break;
             default:
                 throw new Error(`Invalid SOCKET_RESP_TYPE ==> ${msg.action_type}`);
@@ -263,12 +266,28 @@ export class SeaBattleSocketService {
     private handleWin(roomId: string): void {
         const room = this.sbStateSrv.getRoomById(roomId);
 
-        room.updateData({ status: ROOM_STATUS.END, steppingPlayer: null });
+        room.updateData({ status: ROOM_STATUS.END, steppingPlayer: null, isPlaying: false });
+    }
+
+    private handleReset(roomId: string): void {
+        const room = this.sbStateSrv.getRoomById(roomId);
+
         this.sbFieldSrv.updateEnemyPositions(CLEAR_SEABATTLE_FIELD);
         this.sbFieldSrv.updateYourPositions(CLEAR_SEABATTLE_FIELD);
-
-        setTimeout(() => {
-            room.updateData({ status: ROOM_STATUS.IDLE, steppingPlayer: null });
-        }, DELAY_BEFORE_STEP);
+        room.updateData({ status: ROOM_STATUS.IDLE, steppingPlayer: null });
+        room.updatePlayerInRoom(room.data.players.me.playerEmail, {
+            positions: CLEAR_SEABATTLE_FIELD,
+            hasFall: false,
+            isReady: false,
+            isSetPositions: false
+        });
+        if (room.data.players.enemy) {
+            room.updatePlayerInRoom(room.data.players.enemy.playerEmail, {
+                positions: CLEAR_SEABATTLE_FIELD,
+                hasFall: false,
+                isReady: false,
+                isSetPositions: false
+            });
+        }
     }
 }

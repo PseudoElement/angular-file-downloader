@@ -13,7 +13,6 @@
     }
 
     .field {
-        border: 1px solid red;
         border-radius: 5px;
     }
 
@@ -47,22 +46,11 @@
             @include flex-row(center, center);
         }
 
-        &-hit {
-            background-color: rgb(245, 91, 155);
-        }
-
-        &-miss {
-            width: 10px;
-            height: 10px;
-            background: black;
-            border-radius: 50%;
-        }
-
         &-number {
             position: absolute;
             top: 2px;
             left: 2px;
-            color: red;
+            color: rgb(71, 2, 149) (160, 3, 3);
             font-size: 10px;
         }
 
@@ -72,15 +60,41 @@
 
         &-change-mode {
             background-color: pink;
+            animation: fading 1s linear 0s infinite alternate none;
 
             &__selected {
                 background-color: rgb(255, 217, 0);
             }
         }
 
+        &-hit {
+            background-color: rgb(218, 74, 86);
+        }
+
+        &-hit-icon {
+            width: 2rem;
+            height: 2rem;
+        }
+
         &-has-ship {
             width: 2rem;
             height: 2rem;
+        }
+
+        &-miss {
+            width: 10px;
+            height: 10px;
+            background: black;
+            border-radius: 50%;
+        }
+    }
+
+    @keyframes fading {
+        from {
+            opacity: 0.4;
+        }
+        to {
+            opacity: 1;
         }
     }
 }

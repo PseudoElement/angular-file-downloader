@@ -71,7 +71,15 @@ export class SeaBattleRoomComponent implements OnDestroy {
     }
 
     public get canStart(): boolean {
-        return this.room.data.status === ROOM_STATUS.READY_TO_START;
+        return this.room.isYouOwner && this.room.data.status === ROOM_STATUS.READY_TO_START;
+    }
+
+    public get canReset(): boolean {
+        return this.room.isYouOwner && this.room.data.status === ROOM_STATUS.END;
+    }
+
+    public get isDisabledReadyBtn(): boolean {
+        return this.isReady || !this.room.data.players.me.isSetPositions || !this.canUseChangeMode;
     }
 
     public get canSendPositions(): boolean {
@@ -79,7 +87,11 @@ export class SeaBattleRoomComponent implements OnDestroy {
     }
 
     public get canUseChangeMode(): boolean {
-        return !this.room.isPlaying && this.room.hasBothPlayers;
+        return !this.room.isPlaying && !this.isReady && this.room.hasBothPlayers;
+    }
+
+    public get canMakeStep(): boolean {
+        return this.room.isPlaying && this.room.status === ROOM_STATUS.READY_YOUR_NEXT_STEP;
     }
 
     constructor(
@@ -115,6 +127,15 @@ export class SeaBattleRoomComponent implements OnDestroy {
         });
 
         this.room.updateData({ status: ROOM_STATUS.PROCESSING });
+    }
+
+    // on finish to clear positions
+    public reset(): void {
+        this.sbSocketSrv.sendMessage(this.roomId, {
+            player_email: this.authSrv.user?.email!,
+            action_type: SOCKET_RESP_TYPE.RESET,
+            data: {}
+        });
     }
 
     public onEnemyCellSelected(playerPosition: PlayerPosition): void {

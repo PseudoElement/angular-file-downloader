@@ -37,6 +37,7 @@ export class SeaBattleChatMessageComponent {
             case SOCKET_RESP_TYPE.START_GAME:
                 return '../../../../../../../assets/seabattle-icons/ready.png';
             case SOCKET_RESP_TYPE.ERROR:
+            case SOCKET_RESP_TYPE.RESET:
             default:
                 return '../../../../../../../assets/seabattle-icons/error.png';
         }

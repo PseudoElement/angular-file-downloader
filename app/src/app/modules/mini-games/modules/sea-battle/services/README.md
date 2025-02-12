@@ -21,4 +21,4 @@ apply listeners
 
 ### TODO
 
--   handle Game end properly, disable and clear fields fields etc...
+-   validate ship positions before sendPositions before game start

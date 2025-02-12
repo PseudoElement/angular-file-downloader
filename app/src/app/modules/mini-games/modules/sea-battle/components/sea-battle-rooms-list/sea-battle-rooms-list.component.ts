@@ -24,9 +24,9 @@ export class SeaBattleRoomsListComponent {
         private readonly authService: AuthService
     ) {
         setTimeout(() => this._updateRoomsList$.next(null), 0);
-        combineLatest([this._updateRoomsList$, interval(10_000).pipe(startWith(0))])
+        combineLatest([this._updateRoomsList$, interval(5_000).pipe(startWith(0))])
             .pipe(
-                throttleTime(10_000),
+                throttleTime(3_000),
                 switchMap(() => this.seabattleApiSrv.fetchRoomsMapFromBackend()),
                 takeUntilDestroyed()
             )

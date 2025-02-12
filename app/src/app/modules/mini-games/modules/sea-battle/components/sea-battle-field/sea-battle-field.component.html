@@ -1,5 +1,11 @@
 <div class="field-wrapper">
-    <h3>{{ isEnemyField ? 'Enemy field' : 'Your field' }}</h3>
+    @if (isEnemyField) {
+    <h3>Enemy field</h3>
+    } @else { @if (isChangeMode) {
+    <h3 [style.color]="'red'">Set your ships on field</h3>
+    } @else {
+    <h3>Your field</h3>
+    } }
     <div class="field">
         <div *ngFor="let row of positionsToShow" class="row">
             <div
@@ -11,7 +17,7 @@
                 [class.cell-hit]="cell.state === 'HIT'"
                 (click)="onCellSelect(cell)"
             >
-                <span *ngIf="cell.state === 'HIT'" class="material-symbols-outlined"> close </span>
+                <span *ngIf="cell.state === 'HIT'" class="material-symbols-outlined cell-hit-icon"> close </span>
                 <span *ngIf="cell.hasShip && cell.state !== 'HIT'" class="material-symbols-outlined cell-has-ship"> sailing </span>
                 <span *ngIf="cell.state === 'MISS'" class="cell-miss"> </span>
 

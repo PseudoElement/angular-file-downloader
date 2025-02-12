@@ -51,7 +51,7 @@ export class SeaBattleFieldService {
 - 3 two-cells ships\n
 - 2 three-cells ships\n
 - 1 four-cells ship\n
-After you've selected all neccessary fields - Click on "Disable change mode" and click "OK" in modal to confirm you want to update your positions.`,
+After you've selected all neccessary fields - Click on "Disable change mode" and click "OK". Then click to "Confirm" button to save your positions on server.`,
                     type: 'info',
                     closeDelay: 30_000
                 })

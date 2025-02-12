@@ -3,7 +3,7 @@ import { RoomPlayer, SeabattleRoomData } from '../models/sea-battle-api-types';
 import { isYou, YouAndEnemyData } from '../utils/get-you-and-enemy';
 import { SocketRespMsg } from '../models/sea-battle-socket-resp-types';
 import { ROOM_STATUS, RoomStatus } from '../constants/socket-constants';
-import { CLEAR_SEABATTLE_FIELD, DELAY_BEFORE_STEP } from '../constants/seabattle-consts';
+import { CLEAR_SEABATTLE_FIELD } from '../constants/seabattle-consts';
 import { SeabattleRoomUtils } from './room-utils';
 
 export interface SeabattleRoomInitStruct {
@@ -62,6 +62,7 @@ export class SeabattleRoom {
             playerId: initStruct.playersOfRoom.your_data.player_id,
             positions: CLEAR_SEABATTLE_FIELD,
             isReady: false,
+            isSetPositions: false,
             hasFall: false
         } satisfies RoomPlayer;
         const enemy = {
@@ -70,6 +71,7 @@ export class SeabattleRoom {
             playerId: initStruct.playersOfRoom.enemy_data.player_id,
             positions: CLEAR_SEABATTLE_FIELD,
             isReady: false,
+            isSetPositions: false,
             hasFall: false
         } satisfies RoomPlayer;
 
@@ -91,6 +93,9 @@ export class SeabattleRoom {
 
     public updatePlayerInRoom(playerEmail: string, newProps: Partial<RoomPlayer>): void {
         const playerKey: keyof SeabattleRoomData['players'] = isYou(playerEmail, this.authSrv) ? 'me' : 'enemy';
+        // if enemy is null
+        if (!(playerKey in this._data.players)) return;
+
         const updatedPlayer = { ...this._data.players[playerKey]!, ...newProps } as RoomPlayer;
         this._data.players = { ...this._data.players, [playerKey]: updatedPlayer };
     }

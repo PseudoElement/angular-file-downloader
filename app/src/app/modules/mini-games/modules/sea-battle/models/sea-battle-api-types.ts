@@ -42,6 +42,7 @@ export interface RoomPlayer {
     positions: string;
     isOwner: boolean;
     isReady: boolean;
+    isSetPositions: boolean;
     hasFall: boolean;
 }
 

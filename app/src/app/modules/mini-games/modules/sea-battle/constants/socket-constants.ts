@@ -16,7 +16,8 @@ export const SOCKET_RESP_TYPE = {
     WIN_GAME: 'WIN_GAME',
     ERROR: 'ERROR',
     READY: 'READY',
-    START_GAME: 'START_GAME'
+    START_GAME: 'START_GAME',
+    RESET: 'RESET'
 } as const;
 
 export type SocketRespType = (typeof SOCKET_RESP_TYPE)[keyof typeof SOCKET_RESP_TYPE];

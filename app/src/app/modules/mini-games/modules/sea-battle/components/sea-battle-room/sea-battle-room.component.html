@@ -28,7 +28,8 @@
                 </div>
 
                 <div class="room__left-buttons">
-                    <app-button *ngIf="state.room.isYouOwner && canStart" [text]="'Start'" (onClick)="start()"></app-button>
+                    <app-button *ngIf="canStart" [text]="'Start'" (onClick)="start()"></app-button>
+                    <app-button *ngIf="canReset" [text]="'Reset'" (onClick)="reset()"></app-button>
                     <app-button
                         [disabled]="!canUseChangeMode"
                         [text]="state.isChangeModeEnabled ? 'Disable change mode.' : 'Enable change mode.'"
@@ -37,7 +38,7 @@
                     <app-button [text]="'Confirm positions'" [disabled]="!canSendPositions" (onClick)="sendPositions()"></app-button>
                     <app-button
                         [text]="isReady ? 'Ready' : 'Not Ready'"
-                        [disabled]="!canUseChangeMode || isReady"
+                        [disabled]="isDisabledReadyBtn"
                         (onClick)="sendReadyStatus()"
                     ></app-button>
                     <app-button [text]="'Disconnect'" (onClick)="disconnect()"></app-button>
@@ -60,7 +61,7 @@
                 *ngIf="state.enemyPosiions"
                 [isEnemyField]="true"
                 [positionsString]="state.enemyPosiions"
-                [isChangeMode]="state.room.status === 'READY_YOUR_NEXT_STEP'"
+                [isChangeMode]="canMakeStep"
                 (cellSelected)="onEnemyCellSelected($event)"
             ></app-sea-battle-field>
         </div>
