@@ -9,6 +9,7 @@ import { SeaBattleSocketService } from './sea-battle-socket.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AlertsService } from 'src/app/shared/services/alerts.service';
 import { CLEAR_SEABATTLE_FIELD } from '../constants/seabattle-consts';
+import { isValidSelectedShips } from '../utils/seabattle-validators';
 
 @Injectable()
 export class SeaBattleFieldService {
@@ -46,11 +47,8 @@ export class SeaBattleFieldService {
             )
             .subscribe(() =>
                 this.alertsSrv.showAlert({
-                    text: `You enabled "Change Mode". Click on cell on your field to add/remove your ship. Your field needs contain:\n
-- 4 single-cell ships\n
-- 3 two-cells ships\n
-- 2 three-cells ships\n
-- 1 four-cells ship\n
+                    text: `You enabled "Change Mode". Click on cell on your field to add/remove your ship. Your field needs contain:
+4 single-cell ships, 3 two-cells ships, 2 three-cells ships, 1 four-cells ship. Between ships should be at least 1 empty cell.
 After you've selected all neccessary fields - Click on "Disable change mode" and click "OK". Then click to "Confirm" button to save your positions on server.`,
                     type: 'info',
                     closeDelay: 30_000
@@ -70,17 +68,23 @@ After you've selected all neccessary fields - Click on "Disable change mode" and
                 text: 'You want to update and save your new positions? You can change it anytime if you need.',
                 isConfirmModal: true
             });
+
             if (!ok) {
                 this._posiitonsInChangeMode$.next(positionsStringToMatrix(CLEAR_SEABATTLE_FIELD));
-            } else {
+                this._isChangeModeEnabled$.next(false);
+                return;
+            }
+
+            if (isValidSelectedShips(updatedPositions)) {
                 const strPositions = positionsMatrixToString(updatedPositions);
                 this.updateYourPositions(strPositions);
                 this._posiitonsInChangeMode$.next(positionsStringToMatrix(CLEAR_SEABATTLE_FIELD));
                 this.setCanSendUpdatedPositions(true);
+                this._isChangeModeEnabled$.next(false);
+            } else {
+                this.alertsSrv.showAlert({ text: "Selected cells aren't according to game rules.", type: 'warn' });
             }
         }
-
-        this._isChangeModeEnabled$.next(!this._isChangeModeEnabled$.value);
     }
 
     public selectCellInChangeMode(selectedCell: PlayerPosition): void {

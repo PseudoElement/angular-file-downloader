@@ -24,7 +24,7 @@ I1+*,I2,I3,I4,I5,I6,I7,I8,I9,I10+,
 J1+,J2,J3+,J4,J5+*,J6,J7,J8,J9,J10+,
 `;
 
-export const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] as const;
-export const columns = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const;
+export const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] as const;
+export const COLUMNS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const;
 
 export const DELAY_BEFORE_STEP = 5_000;

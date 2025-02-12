@@ -1,7 +1,9 @@
 <div class="field-wrapper">
-    @if (isEnemyField) {
+    @if (isEnemyField) { @if (isChangeMode) {
+    <h3 [style.color]="'red'">Select cell on enemy field</h3>
+    } @else {
     <h3>Enemy field</h3>
-    } @else { @if (isChangeMode) {
+    } } @else { @if (isChangeMode) {
     <h3 [style.color]="'red'">Set your ships on field</h3>
     } @else {
     <h3>Your field</h3>

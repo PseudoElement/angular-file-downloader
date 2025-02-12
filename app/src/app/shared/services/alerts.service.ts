@@ -11,7 +11,7 @@ export interface AlertInfo extends BaseAlert {
     id: string;
 }
 
-const DEFAULT_CLOSE_DELAY = 60_000;
+const DEFAULT_CLOSE_DELAY = 15_000;
 
 @Injectable({
     providedIn: 'root'

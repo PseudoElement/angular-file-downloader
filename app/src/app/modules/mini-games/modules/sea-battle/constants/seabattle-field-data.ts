@@ -13,3 +13,5 @@ export const FIELD_SYMBOLS = {
 } as const;
 
 export type FieldSymbol = (typeof FIELD_SYMBOLS)[keyof typeof FIELD_SYMBOLS];
+
+export type ShipSize = number;

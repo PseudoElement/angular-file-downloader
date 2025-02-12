@@ -21,4 +21,4 @@ apply listeners
 
 ### TODO
 
--   validate ship positions before sendPositions before game start
+-   check positions validator correctness
