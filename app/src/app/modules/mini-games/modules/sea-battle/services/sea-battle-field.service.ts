@@ -62,6 +62,11 @@ After you've selected all neccessary fields - Click on "Disable change mode" and
         const prevPositions = this._yourPositions$.value;
         const updatedPositions = this._posiitonsInChangeMode$.value;
 
+        if (isEnabled) {
+            this._isChangeModeEnabled$.next(true);
+            return;
+        }
+
         if (!isEnabled && !compareObjects(prevPositions, updatedPositions)) {
             const ok = await this.sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
                 title: 'Confiramtion',

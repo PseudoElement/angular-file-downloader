@@ -27,4 +27,4 @@ J1+,J2,J3+,J4,J5+*,J6,J7,J8,J9,J10+,
 export const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] as const;
 export const COLUMNS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const;
 
-export const DELAY_BEFORE_STEP = 5_000;
+export const DELAY_BEFORE_STEP = 1_000;

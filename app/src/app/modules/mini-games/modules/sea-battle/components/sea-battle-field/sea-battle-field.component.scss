@@ -30,11 +30,6 @@
         height: 3rem;
         user-select: none;
 
-        @media screen and (max-width: 1460px) {
-            width: 2rem;
-            height: 2rem;
-        }
-
         &:hover {
             cursor: pointer;
             filter: brightness(70%);
@@ -72,9 +67,7 @@
         }
 
         &-hit-icon {
-            // width: 2rem;
-            // height: 2rem;
-            font-size: 2rem;
+            font-size: 2.5rem;
         }
 
         &-has-ship {
@@ -88,6 +81,16 @@
             height: 10px;
             background: black;
             border-radius: 50%;
+        }
+
+        @include smallPC {
+            width: 2rem;
+            height: 2rem;
+
+            &-hit-icon,
+            &-has-ship {
+                width: 1.5rem;
+            }
         }
     }
 
