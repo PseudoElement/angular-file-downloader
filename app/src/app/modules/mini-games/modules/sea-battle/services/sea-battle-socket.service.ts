@@ -119,7 +119,7 @@ export class SeaBattleSocketService {
     }
 
     private listenSocketMessage(socket: WebSocket, roomId: string, msg: SocketRespMsg): void {
-        console.log('msg.SOCKET ====> ', msg);
+        // console.log('msg.SOCKET ====> ', msg);
         switch (msg.action_type) {
             case SOCKET_RESP_TYPE.CONNECT_PLAYER:
                 this.handleConnectionMsg(socket, roomId, msg as ConnectPlayerRespMsg);
