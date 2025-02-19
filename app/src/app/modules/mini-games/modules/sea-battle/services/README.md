@@ -20,5 +20,3 @@ apply listeners
 4.
 
 ### TODO
-
--   check positions validator correctness

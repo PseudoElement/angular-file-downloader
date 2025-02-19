@@ -64,7 +64,7 @@ export class SeaBattleSocketService {
             };
 
             socket.addEventListener('message', (e) => this.listenSocketMessage(socket, roomInfo!.room_id, JSON.parse(e.data)));
-            socket.addEventListener('error', () => this.listenSocketError(roomInfo!.room_id));
+            socket.addEventListener('error', (e) => this.listenSocketError(roomInfo!.room_id, JSON.stringify(e)));
             socket.addEventListener('open', () => this.listenSocketOpen(roomInfo!.room_id, roomInfo!.room_name));
         } catch (err) {
             console.log('connectToRoom_Error ==> ', err);
@@ -96,7 +96,7 @@ export class SeaBattleSocketService {
             await this.sbApiSrv.disconnectFromRoom({ player_email: playerEmail, room_id: room.data.roomId });
 
             room?.socket.removeEventListener('message', (e) => this.listenSocketMessage(room.socket, room.data.roomId, JSON.parse(e.data)));
-            room?.socket.removeEventListener('error', () => this.listenSocketError(room!.data.roomName));
+            room?.socket.removeEventListener('error', (e) => this.listenSocketError(room!.data.roomName, JSON.stringify(e)));
             room?.socket.removeEventListener('open', () => this.listenSocketOpen(room!.data.roomId, room!.data.roomName));
             room?.socket.close();
 
@@ -107,8 +107,8 @@ export class SeaBattleSocketService {
         }
     }
 
-    private listenSocketError(roomName: string): void {
-        this.alertsSrv.showAlert({ text: `Error occured trying to connect to room ${roomName}`, type: 'error' });
+    private listenSocketError(roomName: string, msg: string): void {
+        this.alertsSrv.showAlert({ text: `Error occured trying to connect to room ${roomName}. Error: ${msg}`, type: 'error' });
     }
 
     private listenSocketOpen(roomId: string, roomName: string): void {
