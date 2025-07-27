@@ -107,6 +107,7 @@ export class DownloadService {
         if (columnInfo.type === COLUMN_TYPES.DATE) {
             return columnInfo.fromDate!.getTime();
         } else {
+            if (!columnInfo.max) return 0;
             return Number(columnInfo.min);
         }
     }
@@ -115,6 +116,7 @@ export class DownloadService {
         if (columnInfo.type === COLUMN_TYPES.DATE) {
             return columnInfo.toDate!.getTime();
         } else {
+            if (!columnInfo.max) return 0;
             return Number(columnInfo.max);
         }
     }

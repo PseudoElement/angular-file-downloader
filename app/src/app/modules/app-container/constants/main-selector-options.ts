@@ -46,20 +46,20 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                     },
                     {
                         isOpen: false,
-                        value: 'Rust',
-                        navigationUrl: `/download-games/${GAMES_IDS.RUST}`,
+                        value: 'Snake(MacOS)',
+                        navigationUrl: `/download-games/${GAMES_IDS.SNAKE_MAC}`,
                         children: []
                     },
                     {
                         isOpen: false,
-                        value: 'CS 2.0',
-                        navigationUrl: `/download-games/${GAMES_IDS.CS_2}`,
+                        value: 'Snake(Windows)',
+                        navigationUrl: `/download-games/${GAMES_IDS.SNAKE_WINDOWS}`,
                         children: []
                     },
                     {
                         isOpen: false,
-                        value: 'WH40K Space Marine 2',
-                        navigationUrl: `/download-games/${GAMES_IDS.SPACE_MARINE_2}`,
+                        value: 'Snake(Linux)',
+                        navigationUrl: `/download-games/${GAMES_IDS.SNAKE_LINUX}`,
                         children: []
                     }
                 ],

@@ -16,12 +16,39 @@ export const GAMES_IDS = {
     SPACE_SHOOTER: 'space-shooter',
     KNIGTH_PLATFORMER: 'knight-platformer',
     ASTEROIDS: 'asteroids',
-    FLAPPY_BIRD: 'flappy-bird'
+    FLAPPY_BIRD: 'flappy-bird',
+    SNAKE_MAC: 'snake-macos',
+    SNAKE_WINDOWS: 'snake-windows',
+    SNAKE_LINUX: 'snake-linux'
 } as const;
 
 export type GameId = (typeof GAMES_IDS)[keyof typeof GAMES_IDS];
 
 export const GAMES: GameUiInfo[] = [
+    {
+        img: `${basePath}/terminal-snake.png`,
+        description: `Classic snake game. You need to earn points eatting red squares of food.`,
+        id: GAMES_IDS.SNAKE_MAC,
+        link: `games/${GAMES_IDS.SNAKE_MAC}`,
+        title: 'Snake game(MacOS)',
+        isDownloader: true
+    },
+    {
+        img: `${basePath}/terminal-snake.png`,
+        description: `Classic snake game. You need to earn points eatting red squares of food.`,
+        id: GAMES_IDS.SNAKE_WINDOWS,
+        link: `games/${GAMES_IDS.SNAKE_WINDOWS}`,
+        title: 'Snake game(Windows)',
+        isDownloader: true
+    },
+    {
+        img: `${basePath}/terminal-snake.png`,
+        description: `Classic snake game. You need to earn points eatting red squares of food.`,
+        id: GAMES_IDS.SNAKE_LINUX,
+        link: `games/${GAMES_IDS.SNAKE_LINUX}`,
+        title: 'Snake game(Linux)',
+        isDownloader: true
+    },
     {
         img: `${basePath}/knight-platformer.jpg`,
         description: `Basic template of platformer.`,
@@ -46,41 +73,5 @@ The main idea is to score as many points as possible, as in all games created fo
         link: `games/${GAMES_IDS.ASTEROIDS}`,
         title: 'Asteroids',
         isDownloader: true
-    },
-    {
-        img: `${basePath}/flappy-bird.jpg`,
-        description: `Legendary "Flappy Bird" game.`,
-        id: GAMES_IDS.FLAPPY_BIRD,
-        link: `games/${GAMES_IDS.FLAPPY_BIRD}`,
-        title: 'Flappy Bird',
-        isDownloader: true
-    },
-    {
-        img: `${basePath}/space-marine-2.jpg`,
-        description: `Embody the superhuman skill and brutality of a Space Marine.
-Unleash deadly abilities and devastating weaponry to obliterate the relentless Tyranid swarms.
-Defend the Imperium in spectacular third-person action in solo or multiplayer modes.`,
-        id: GAMES_IDS.SPACE_MARINE_2,
-        link: 'https://store.steampowered.com/app/2183900/Warhammer_40000_Space_Marine_2',
-        title: 'Warhammer 40000 Space Marine 2',
-        isDownloader: false
-    },
-    {
-        img: `${basePath}/cs2.jpg`,
-        description: `For over two decades, Counter-Strike has offered an elite competitive experience,
-one shaped by millions of players from across the globe. And now the next chapter in the CS story is about to begin. This is Counter-Strike 2.`,
-        id: GAMES_IDS.CS_2,
-        link: 'https://store.steampowered.com/app/730/CounterStrike_2',
-        title: 'CS 2.0',
-        isDownloader: false
-    },
-    {
-        img: `${basePath}/rust.webp`,
-        description: `Survival game. The only aim in Rust is to survive.
-Everything wants you to die - the island’s wildlife and other inhabitants, the environment, other survivors. Do whatever it takes to last another night.`,
-        id: GAMES_IDS.RUST,
-        link: 'https://store.steampowered.com/app/252490/Rust',
-        title: 'Rust',
-        isDownloader: false
     }
 ] as const;

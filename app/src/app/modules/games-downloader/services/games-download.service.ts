@@ -15,7 +15,10 @@ export class GamesDownloadService {
         [GAMES_IDS.FLAPPY_BIRD]: false,
         [GAMES_IDS.RUST]: false,
         [GAMES_IDS.CS_2]: false,
-        [GAMES_IDS.SPACE_MARINE_2]: false
+        [GAMES_IDS.SPACE_MARINE_2]: false,
+        [GAMES_IDS.SNAKE_LINUX]: false,
+        [GAMES_IDS.SNAKE_MAC]: false,
+        [GAMES_IDS.SNAKE_WINDOWS]: false
     });
 
     constructor(private readonly httpApi: HttpApiService, private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
