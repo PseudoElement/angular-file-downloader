@@ -40,12 +40,6 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                     },
                     {
                         isOpen: false,
-                        value: 'Flappy bird',
-                        navigationUrl: `/download-games/${GAMES_IDS.FLAPPY_BIRD}`,
-                        children: []
-                    },
-                    {
-                        isOpen: false,
                         value: 'Snake(MacOS)',
                         navigationUrl: `/download-games/${GAMES_IDS.SNAKE_MAC}`,
                         children: []
