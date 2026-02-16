@@ -1,6 +1,6 @@
 <main>
     <app-header></app-header>
-    <app-main-option-selector [options]="options"></app-main-option-selector>
+    <app-main-option-selector *ngIf="(dimension$ | async) === 'desktop'" [options]="options"></app-main-option-selector>
     <div class="outlet">
         <router-outlet></router-outlet>
     </div>

@@ -12,11 +12,6 @@ const routes: Routes = [
     },
     {
         path: ':id',
-        canMatch: [MiniGameMatchers.matchFlappyBirdGame],
-        loadChildren: () => import('./modules/flappy-bird-game/flappy-bird-game.module').then((m) => m.FlappyBirdGameModule)
-    },
-    {
-        path: ':id',
         canMatch: [MiniGameMatchers.matchSeabattleGame],
         loadChildren: () => import('./modules/sea-battle/sea-battle.module').then((m) => m.SeaBattleModule)
     }

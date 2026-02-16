@@ -13,5 +13,12 @@
         overflow-y: auto;
         overflow-x: hidden;
         border: 1px solid gray;
+
+        &.modal {
+            position: relative;
+            top: unset;
+            left: intial;
+            bottom: unset;
+        }
     }
 }

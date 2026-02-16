@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { MainSelectorOption } from '../../models/components-types';
 
 @Component({
@@ -9,4 +9,8 @@ import { MainSelectorOption } from '../../models/components-types';
 })
 export class MainOptionSelectorComponent {
     @Input({ required: true }) options!: MainSelectorOption[];
+
+    @Input() fromModal: boolean = false;
+
+    @Output() handleClick: EventEmitter<MainSelectorOption> = new EventEmitter();
 }

@@ -74,12 +74,6 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
             },
             {
                 isOpen: false,
-                value: 'Flappy Birds',
-                navigationUrl: `/mini-games/${MINI_GAMES.FLAPPY_BIRD}`,
-                children: []
-            },
-            {
-                isOpen: false,
                 value: 'Sea Battle',
                 navigationUrl: `/mini-games/${MINI_GAMES.SEA_BATTLE}`,
                 children: []

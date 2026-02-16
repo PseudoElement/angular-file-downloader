@@ -1,8 +1,17 @@
-<header>
-    <h2>Links</h2>
-    <div class="links">
-        <a *ngFor="let social of socials" [href]="social.href" target="_blank">
-            <img appPerspectOnHover [perspective]="5" [src]="social.absPath" [alt]="social.alt" />
-        </a>
-    </div>
-</header>
+<ng-container *ngIf="dimension$ | async as dimension">
+    <header>
+        <ng-container *ngIf="dimension === 'desktop'; else mobileHeader">
+            <h2>Links</h2>
+            <div class="links">
+                <a *ngFor="let social of socials" [href]="social.href" target="_blank">
+                    <img appPerspectOnHover [perspective]="5" [src]="social.absPath" [alt]="social.alt" />
+                </a>
+            </div>
+        </ng-container>
+        <ng-template #mobileHeader>
+            <div class="menu" (click)="openSelectorModal()">
+                <span class="material-symbols-outlined"> menu </span>
+            </div>
+        </ng-template>
+    </header>
+</ng-container>

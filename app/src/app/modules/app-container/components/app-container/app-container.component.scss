@@ -1,3 +1,5 @@
+@use 'src/styles.scss' as *;
+
 .outlet {
     position: absolute;
     padding: 10px 30px;
@@ -6,4 +8,9 @@
     min-height: calc(100vh - 95px);
     width: 100%;
     max-width: calc(100vw - 400px);
+
+    @include tablet {
+        top: 47px;
+        left: 10px;
+    }
 }

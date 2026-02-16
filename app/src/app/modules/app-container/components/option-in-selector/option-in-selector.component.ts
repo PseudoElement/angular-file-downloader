@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { MainSelectorOption } from '../../models/components-types';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ENVIRONMENT } from 'src/environments/environment';
@@ -25,6 +25,8 @@ import { Router } from '@angular/router';
 export class OptionInSelectorComponent {
     @Input({ required: true }) info!: MainSelectorOption;
 
+    @Output() onClick: EventEmitter<MainSelectorOption> = new EventEmitter();
+
     public get hasChildren(): boolean {
         return this.info.children.length > 0;
     }
@@ -49,21 +51,25 @@ export class OptionInSelectorComponent {
 
     public handleClick(option: MainSelectorOption): void {
         if (option.navigationUrl) {
-            this.navigateByUrl(option.navigationUrl);
+            console.log('EMIT_option.navigationUrl');
+            this.navigateByUrl(option);
         }
         if (option.children.length) {
             option.isOpen = !option.isOpen;
+            console.log('EMIT_option.children.length');
         }
     }
 
-    private navigateByUrl(link: string): void {
+    private navigateByUrl(option: MainSelectorOption): void {
         const appDomain = ENVIRONMENT.appDomain;
-        const urlWithoutProtocol = link.replace(/http?.:\/\//gi, '');
+        const urlWithoutProtocol = option.navigationUrl!.replace(/http?.:\/\//gi, '');
         const domain = urlWithoutProtocol.split('/')[0];
-        if (link.includes('https') && domain !== appDomain) {
-            window.open(link, '_blank');
+
+        this.onClick.emit(option);
+        if (option.navigationUrl!.includes('https') && domain !== appDomain) {
+            window.open(option.navigationUrl, '_blank');
         } else {
-            this.router.navigate([link]);
+            this.router.navigate([option.navigationUrl]);
         }
     }
 }

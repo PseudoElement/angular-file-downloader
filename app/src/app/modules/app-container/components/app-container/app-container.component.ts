@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MAIN_SELECTOR_OPTIONS } from '../../constants/main-selector-options';
+import { ViewportService } from 'src/app/shared/services/viewport.service';
 
 @Component({
     selector: 'app-container',
@@ -9,4 +10,8 @@ import { MAIN_SELECTOR_OPTIONS } from '../../constants/main-selector-options';
 })
 export class AppContainerComponent {
     public readonly options = MAIN_SELECTOR_OPTIONS;
+
+    public readonly dimension$ = this.viewportSrv.dimension$;
+
+    constructor(private readonly viewportSrv: ViewportService) {}
 }

@@ -2,18 +2,12 @@
     <div class="option-in-selector__content" [class.option-in-selector__content-opened]="info.isOpen" (click)="handleClick(info)">
         <p class="option-in-selector__text">{{ info.value }}</p>
         <app-arrow-down-button *ngIf="hasChildren" [isOpen]="info.isOpen"></app-arrow-down-button>
-        <!-- <span
-            *ngIf="hasChildren"
-            class="material-symbols-outlined option-in-selector__arrow"
-            [class.option-in-selector__arrow-opened]="info.isOpen"
-        >
-            keyboard_arrow_down
-        </span> -->
     </div>
     <div *ngIf="info.children.length > 0 && info.isOpen" [@showHideAnimation]>
         <app-option-in-selector
             *ngFor="let option of info.children; trackBy: trackByFn"
             [info]="getOptionWithDimmedBG(option, info.bgColorRGB!)"
+            (onClick)="onClick.emit($event)"
         >
         </app-option-in-selector>
     </div>
