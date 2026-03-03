@@ -82,6 +82,13 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
     },
     {
         isOpen: false,
+        value: 'VoiceChat',
+        navigationUrl: '/voicechat',
+        bgColorRGB: START_RGB,
+        children: []
+    },
+    {
+        isOpen: false,
         value: 'Telegram Bots',
         navigationUrl: '/telegram-bots',
         bgColorRGB: START_RGB,

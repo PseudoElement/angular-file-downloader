@@ -26,6 +26,10 @@ const routes: Routes = [
         path: 'mini-games',
         loadChildren: () => import('./modules/mini-games/mini-games.module').then((m) => m.MiniGamesModule)
     },
+    {
+        path: 'voicechat',
+        loadChildren: () => import('./modules/voice-chat/voice-chat.module').then((m) => m.VoiceChatModule)
+    },
     { path: '**', redirectTo: 'download-files' }
 ];
 
