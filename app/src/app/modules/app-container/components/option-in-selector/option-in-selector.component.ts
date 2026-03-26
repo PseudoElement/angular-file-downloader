@@ -51,12 +51,10 @@ export class OptionInSelectorComponent {
 
     public handleClick(option: MainSelectorOption): void {
         if (option.navigationUrl) {
-            console.log('EMIT_option.navigationUrl');
             this.navigateByUrl(option);
         }
         if (option.children.length) {
             option.isOpen = !option.isOpen;
-            console.log('EMIT_option.children.length');
         }
     }
 

@@ -3,6 +3,7 @@ import { FormControl, Validators } from '@angular/forms';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 import { BehaviorSubject } from 'rxjs';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
+import { LocalPeer } from '../../entities/local-peer';
 
 @Component({
     selector: 'app-voice-chat',
@@ -12,8 +13,6 @@ import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/c
 })
 export class VoiceChatComponent {
     public readonly _messages$ = new BehaviorSubject<Array<{ name: string; msg: string }>>([]);
-
-    private pc: RTCPeerConnection | null = null;
 
     private rtcChannel: RTCDataChannel | null = null;
 
@@ -25,7 +24,27 @@ export class VoiceChatComponent {
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }]
     };
 
+    private pc: RTCPeerConnection | null = null;
+
+    private localPeer = new LocalPeer();
+
     constructor(private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
+
+    private playTrack(event: RTCTrackEvent): void {
+        console.log('[playTrack] event', event);
+        const audio = new Audio();
+        audio.srcObject = event.streams[0];
+        audio.play();
+    }
+
+    public async speak(): Promise<void> {
+        const stream = await this.localPeer.speak();
+        // get voice and send it to RTCPeerCoonection
+        stream.getTracks().forEach((track) => {
+            console.log('track ==>', track);
+            this.pc!.addTrack(track, stream);
+        });
+    }
 
     /**
      * 1. Создатель вызывает createOffer и выставляет свой дескриптор в setLocalDescription себе
@@ -37,13 +56,17 @@ export class VoiceChatComponent {
      */
 
     public async createRoom(): Promise<void> {
+        this.pc = new RTCPeerConnection(this.rtcConfig);
+
+        // 1. Add local tracks first
+        await this.speak();
+
         this.username = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
             title: 'Modal',
             text: 'Input your name.'
         });
 
-        this.pc = new RTCPeerConnection(this.rtcConfig);
-
+        this.pc.addEventListener('track', this.playTrack);
         this.pc.addEventListener('icecandidate', (e) => {
             console.log('event icecandidate', e.candidate?.toJSON());
             if (!e.candidate) {
@@ -108,6 +131,10 @@ export class VoiceChatComponent {
     public async connectToRoom(): Promise<void> {
         this.pc = new RTCPeerConnection(this.rtcConfig);
 
+        // 1. Add local tracks first
+        await this.speak();
+
+        this.pc.addEventListener('track', this.playTrack);
         this.pc.addEventListener('icecandidate', (e) => {
             console.log('event icecandidate', e);
             if (!e.candidate) {
