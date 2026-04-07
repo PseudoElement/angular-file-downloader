@@ -8,10 +8,10 @@
         <app-button (onClick)="speak()" [text]="'Speak'"></app-button>
     </div>
 
-    <!--<div class="chat-section">
+    <div class="chat-section">
         <app-input [label]="'Message'" [control]="messageCtrl"></app-input>
         <app-button (onClick)="sendMessage()" [text]="'Send'"></app-button>
-    </div>-->
+    </div>
 
     <div class="messages">
         <p *ngFor="let msg of _messages$ | async">User {{ msg.name }} write: {{ msg.msg }}</p>

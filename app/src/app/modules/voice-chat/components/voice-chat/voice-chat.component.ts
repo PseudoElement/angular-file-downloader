@@ -25,8 +25,6 @@ export class VoiceChatComponent {
 
     private pc: RTCPeerConnection | null = null;
 
-    // private localPeer = new HostPeer({ me: true, signalingClientParams: {} });
-
     constructor(private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
 
     private playTrack(event: RTCTrackEvent): void {
@@ -36,14 +34,14 @@ export class VoiceChatComponent {
         audio.play();
     }
 
-    // public async speak(): Promise<void> {
-    //     const stream = await this.localPeer.speak();
-    //     // get voice and send it to RTCPeerCoonection
-    //     stream.getTracks().forEach((track) => {
-    //         console.log('track ==>', track);
-    //         this.pc!.addTrack(track, stream);
-    //     });
-    // }
+    public async speak(): Promise<void> {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log('[LocalPeer_startVoice] stream ==>', stream);
+        stream.getTracks().forEach((track) => {
+            console.log('track ==>', track);
+            this.pc!.addTrack(track, stream);
+        });
+    }
 
     /**
      * 1. Создатель вызывает createOffer и выставляет свой дескриптор в setLocalDescription себе
@@ -58,7 +56,7 @@ export class VoiceChatComponent {
         this.pc = new RTCPeerConnection(this.rtcConfig);
 
         // 1. Add local tracks first
-        // await this.speak();
+        await this.speak();
 
         this.username = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
             title: 'Modal',
@@ -100,25 +98,25 @@ export class VoiceChatComponent {
         await this.pc.setLocalDescription(offer);
     }
 
-    // public async setRemoteDescriptor(): Promise<void> {
-    //     const remoteSDP = JSON.parse((document.getElementById('remote-sdp') as HTMLTextAreaElement)!.value);
-    //     return this.pc!.setRemoteDescription(new RTCSessionDescription(remoteSDP)).catch((err) =>
-    //         console.log('setRemoteDescriptor err', err)
-    //     );
-    // }
+    public async setRemoteDescriptor(): Promise<void> {
+        const remoteSDP = JSON.parse((document.getElementById('remote-sdp') as HTMLTextAreaElement)!.value);
+        return this.pc!.setRemoteDescription(new RTCSessionDescription(remoteSDP)).catch((err) =>
+            console.log('setRemoteDescriptor err', err)
+        );
+    }
 
-    // public sendMessage(): void {
-    //     if (!this.messageCtrl.valid) return;
-    //     console.log('rtcChannel readyState:', this.rtcChannel?.readyState);
-    //     console.log('pc connectionState:', this.pc?.connectionState);
-    //     console.log('pc iceConnectionState:', this.pc?.iceConnectionState);
-    //     if (this.rtcChannel?.readyState !== 'open') {
-    //         console.warn('Channel not open yet! State:', this.rtcChannel?.readyState);
-    //         return;
-    //     }
-    //     const msg = { name: this.username, msg: this.messageCtrl.value };
-    //     this.rtcChannel.send(JSON.stringify(msg));
-    // }
+    public sendMessage(): void {
+        if (!this.messageCtrl.valid) return;
+        console.log('rtcChannel readyState:', this.rtcChannel?.readyState);
+        console.log('pc connectionState:', this.pc?.connectionState);
+        console.log('pc iceConnectionState:', this.pc?.iceConnectionState);
+        if (this.rtcChannel?.readyState !== 'open') {
+            console.warn('Channel not open yet! State:', this.rtcChannel?.readyState);
+            return;
+        }
+        const msg = { name: this.username, msg: this.messageCtrl.value };
+        this.rtcChannel.send(JSON.stringify(msg));
+    }
 
     // public disconnect(): void {
     //     this.rtcChannel?.close();
@@ -131,7 +129,7 @@ export class VoiceChatComponent {
         this.pc = new RTCPeerConnection(this.rtcConfig);
 
         // 1. Add local tracks first
-        // await this.speak();
+        await this.speak();
 
         this.pc.addEventListener('track', this.playTrack);
         this.pc.addEventListener('icecandidate', (e) => {
@@ -161,7 +159,7 @@ export class VoiceChatComponent {
             };
         });
 
-        // await this.setRemoteDescriptor();
+        await this.setRemoteDescriptor();
         const answer = await this.pc.createAnswer();
         await this.pc.setLocalDescription(answer);
         console.log('Answer set as local description');

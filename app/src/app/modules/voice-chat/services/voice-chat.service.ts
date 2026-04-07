@@ -1,38 +1,105 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HostPeer } from '../entities/host-peer';
-import { GuestPeer } from '../entities/guest-peer';
-import { Peer } from '../entities/peer';
+import { SignalingClient } from '../entities/signaling-client';
+import { VoicechatUser } from '../entities/voicechat-user';
+import { HttpClient } from '@angular/common/http';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
-import { firstValueFrom } from 'rxjs';
+import { CreateRoomRespBody } from '../models/http-models-from-server';
 import { ENVIRONMENT } from 'src/environments/environment';
 import { CreateRoomReqBody } from '../models/http-models-to-server';
-import { CreateRoomRespBody } from '../models/http-models-from-server';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import {
+    WsAnswerMsgFromServer,
+    WsMsgFromServer,
+    WsOfferMsgFromServer,
+    WsUserConnectedMsgFromServer,
+    WsUserDisconnectedMsgFromServer,
+    WsYouConnectedMsgFromServer
+} from '../models/ws-models-from-server';
+import { WsConnectMsgToServer, WsDisconnectMsgToServer } from '../models/ws-models-to-server';
+import { RTC_CONFIG } from '../constants/ice-servers';
 
 /**
- * Когда получаю сообщение CONNECT с контентом ConnectionDataToClient нужно:
- * 1. Добавить новый RTCPeerConnection в массив peerConnections
- * 2. Добавить подписки на получение localDescription и remoteDesriprition
+ * 1. CONNECT:
+ * - на клиенте-отправителе отправляем ивент CONNECT c user_name
+ * - на сервере создаем NewUser(username, isHost, room_id) и
+ *    а) подключившемуся юзеру отправляем ивент YOU_CONNECTED c models.VoiceRoom
+ *    б) остальным юзерам отправляем ивент USER_CONNECTED с connected_user(уже содержит uer_id)
+ *       и создаем новый инстэнс User в списке users(lля каждого пользователя будет свой RTCPeerConnection и RTCChannel)
+ * - на клиенте-получател:
+ *    а) если получаем ON_CONNECTION(текущий юзер) - то рассылаем оферы
+ *    б) на клиенте USER_CONNECTED(остальные) - добавляем пользователя в массив users
+ *
+ * 2. DISCONNECT:
+ * - на клиенте отправляем DISCONNECT с user_name, user_id и дисконнектим локально signalingClient
+ *   и очищаем всех юзеров, удаляем все подписки и покидаем комнату
+ * - на сервере удаляем по user_id из слайса users
+ *   и отправляем всем клиентам ивент USER_DISCONNECTED с user_name, user_id
+ *
+ * 3. OFFER:
+ * - на клиенте-отправителе, который отправил ивент CONNECT после получения обратного сообщения от сервера с models.VoiceRoom,
+ *   создаем new RTCPeerConnection(), делаем createOffer, создаем RTCChannel, выставляем setLocalDescription,
+ *   отправляем для каждого user_id ивент OFFER с offering_user_id, offering_user_descriptor, target_user_id
+ * - на сервере по target_user_id ищем в OnOfferCommand получателя оффера и
+ *   отправляем ему ивент OFFER_CREATED с offering_user_id, offering_user_descriptor
+ *
+ *   на клиенте OFFER_CREATED:
+ *   на клиенте-получателе создаем new RTCPeerConnection(), выставляем setRemoteDescription, делаем подписки,
+ *   вызываем createAnswer(), выставляем setLocalDescription,
+ *   и отправляем ивент ANSWER с answering_user_id, answering_user_descriptor, target_user_id
+ *
+ * 4. ANSWER_CREATED:
+ * - на клиенте-получателе находим нужный peer по answering_user_id, выставляем setRemoteDescription
+ * - на сервере находим нужного user по target_user_id
+ *   и отправляем ему answering_user_id, answering_user_descriptor, target_user_id
  */
 
 @Injectable()
 export class VoiceChatService {
-    private peerConnections: RTCPeerConnection[] = [];
+    private userName: string = '';
 
-    private peer: Peer | null = null;
+    private roomId: string = '';
 
-    public username: string = '';
+    private readonly _users$ = new BehaviorSubject<VoicechatUser[]>([]);
 
-    public roomId: string = '';
+    public get users(): VoicechatUser[] {
+        return this._users$.value;
+    }
+
+    private setUsers(users: VoicechatUser[]): void {
+        this._users$.next(users);
+    }
+
+    // ── Private state ───────────────────────────────────────────────
+    /** One SignalingClient (WebSocket wrapper) shared by all peer connections. */
+    public signalingClient: SignalingClient = new SignalingClient({
+        onConnect: () => this.onSocketConnected(),
+        onMessage: (msg) => this.onSocketMessage(msg)
+    });
 
     constructor(
         private readonly httpClient: HttpClient,
         private readonly sintolModalSrv: SintolLibDynamicComponentService
     ) {}
 
-    public async createVoiceRoom(socketUrl: string): Promise<void> {
-        this.username = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
+    public disconnect(): void {
+        const me = this.users.find((u) => u.userName === this.userName)!;
+        const disconnectMsg: WsDisconnectMsgToServer = {
+            action: 'DISCONNECT',
+            data: {
+                disconnected_user_name: me.userName,
+                disconnected_user_id: me.userId
+            }
+        };
+        this.signalingClient.sendMsg(JSON.stringify(disconnectMsg));
+        this.signalingClient.disconnect();
+        this.setUsers([]);
+        this.roomId = '';
+        this.userName = '';
+    }
+
+    public async createVoiceRoom(): Promise<void> {
+        this.userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
             title: 'Modal',
             text: 'Input your name.'
         });
@@ -42,52 +109,138 @@ export class VoiceChatService {
         });
 
         const createRoomReqBody: CreateRoomReqBody = {
-            host_name: this.username,
-            max_peers: 10,
+            host_name: this.userName,
+            max_ueers: 10,
             room_name: roomName
         };
+
         const resp = await firstValueFrom(
             this.httpClient.post<CreateRoomRespBody>(`${ENVIRONMENT.apiBaseUrl}/voicechat/create`, createRoomReqBody)
         );
-        this.roomId = resp.room_id;
+        this.roomId = resp.data.room_id;
 
-        const peer = new HostPeer({
-            me: true,
-            userName: this.username,
-            signalingClientParams: {
-                onConnect: undefined,
-                onMessage: undefined
-            }
-        });
-        this.peer = peer;
-        this.peer.connect(socketUrl, this.roomId, this.username);
+        const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${this.userName}`;
+        this.signalingClient.connect(socketUrl);
     }
 
-    public async connectToRoom(socketUrl: string): Promise<void> {
-        this.username = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
+    public async connectToVoiceRoom(roomId: string): Promise<void> {
+        this.userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
             title: 'Modal',
             text: 'Input your name.'
         });
-        this.roomId = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
-            title: 'Modal',
-            text: 'Input room id.'
-        });
+        this.roomId = roomId;
 
-        const peer = new GuestPeer({
-            me: true,
-            userName: this.username,
-            signalingClientParams: {
-                onConnect: undefined,
-                onMessage: undefined
+        const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${this.userName}`;
+        this.signalingClient.connect(socketUrl);
+    }
+
+    private onSocketConnected(): void {
+        const msg: WsConnectMsgToServer = {
+            action: 'CONNECT',
+            data: {
+                room_id: this.roomId,
+                connected_user_name: this.userName
+            }
+        };
+        this.signalingClient.sendMsg(JSON.stringify(msg));
+    }
+
+    private onSocketMessage(msg: { data: string }): void {
+        let parsed: WsMsgFromServer;
+        try {
+            parsed = JSON.parse(msg.data) as WsMsgFromServer;
+            console.log('[VoiceChatService] WS ←', parsed.action, parsed);
+        } catch (err) {
+            console.error('[VoiceChatService] Failed to parse WS message:', err);
+            return;
+        }
+
+        switch (parsed.action) {
+            case 'YOU_CONNECTED':
+                this.handleYouConnected(parsed);
+                break;
+            case 'USER_CONNECTED':
+                this.handleUserConnected(parsed);
+                break;
+            case 'USER_DISCONNECTED':
+                this.handleUserDisconnected(parsed);
+                break;
+            case 'OFFER_CREATED':
+                this.handleOffer(parsed);
+                break;
+            case 'ANSWER_CREATED':
+                this.handleAnswer(parsed);
+                break;
+            default:
+                console.log('[VoiceChatService_onSocketMessage] Unknown WS action:', (parsed as any).action);
+        }
+    }
+
+    private async handleYouConnected(msg: WsYouConnectedMsgFromServer): Promise<void> {
+        const apiUsers = msg.data.room.users;
+        const users = apiUsers.map(
+            (user) =>
+                new VoicechatUser({
+                    userId: user.id,
+                    userName: user.name,
+                    isHost: user.is_host,
+                    pc: new RTCPeerConnection(RTC_CONFIG),
+                    audioElement: null,
+                    dataChannel: null
+                })
+        );
+        this.setUsers(users);
+
+        const me = users.find((user) => user.userName === this.userName);
+        console.log('[VoiceChatService_handleYouConnected] me', me);
+        if (!me) return;
+
+        if (users.length > 1) {
+            for (const user of users) {
+                if (user.userId === me.userId) continue;
+                await user.handleOffer(this.signalingClient, me.userId, {
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: false
+                });
+            }
+        }
+    }
+
+    private handleUserConnected(msg: WsUserConnectedMsgFromServer): void {
+        const connectedUser = msg.data;
+        const user = new VoicechatUser({
+            userId: connectedUser.connected_user_id,
+            userName: connectedUser.connected_user_name,
+            isHost: false,
+            pc: new RTCPeerConnection(RTC_CONFIG),
+            audioElement: null,
+            dataChannel: null
+        });
+        this.setUsers([...this.users, user]);
+    }
+
+    private handleUserDisconnected(msg: WsUserDisconnectedMsgFromServer): void {
+        const disconnectedData = msg.data;
+        const user = this.users.find((u) => u.userId === disconnectedData.disconnected_user_id);
+        if (!user) return;
+
+        user.audioElement?.pause();
+        user.dataChannel?.close();
+        user.pc.close();
+        if (user.audioElement) user.audioElement.srcObject = null;
+
+        const filteredUsers = this.users.filter((u) => u.userId !== disconnectedData.disconnected_user_id);
+        filteredUsers.forEach((u) => {
+            if (user.userId === disconnectedData.new_host_id) {
+                u.isHost = true;
+            } else {
+                u.isHost = false;
             }
         });
-        this.peer = peer;
-        this.peer.connect(socketUrl, this.roomId, this.username);
+        this.setUsers(filteredUsers);
     }
 
-    public leaveRoom(): void {
-        this.peer?.disconnect();
-        this.peer = null;
-        this.peerConnections = [];
-    }
+    private handleOffer(msg: WsOfferMsgFromServer): void {}
+
+    private handleAnswer(msg: WsAnswerMsgFromServer): void {}
 }

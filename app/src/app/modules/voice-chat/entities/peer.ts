@@ -40,7 +40,6 @@ export abstract class Peer {
         this.pc?.close();
         this.setPeerConnection(null);
         this.setRtcDataChannel(null);
-        this.signalingClient.disconnect();
     }
 
     protected playTrack(event: RTCTrackEvent): void {

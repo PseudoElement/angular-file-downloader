@@ -1,5 +1,5 @@
 export interface CreateRoomReqBody {
     room_name: string;
-    max_peers: number;
+    max_ueers: number;
     host_name: string;
 }

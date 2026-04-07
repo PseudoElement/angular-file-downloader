@@ -1,3 +1,5 @@
+import { SignalingClient } from '../entities/signaling-client';
+
 export interface WebRtcUser {
     pc: RTCPeerConnection;
     username: string;
@@ -5,7 +7,7 @@ export interface WebRtcUser {
     isHost: boolean;
 }
 
-export type SocketEventHandler = (msg: { data: string }, socket: WebSocket) => void;
+export type SocketEventHandler = (msg: { data: string }) => void;
 
 export interface SignalingClientParams {
     onMessage?: SocketEventHandler;
@@ -15,5 +17,5 @@ export interface SignalingClientParams {
 export interface PeerCreationParams {
     userName: string;
     me: boolean;
-    signalingClientParams: SignalingClientParams;
+    signalingClient: SignalingClient;
 }
