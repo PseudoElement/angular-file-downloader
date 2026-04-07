@@ -4,14 +4,14 @@
         <app-button (onClick)="createRoom()" [text]="'Create voice room'"></app-button>
         <app-button (onClick)="setRemoteDescriptor()" [text]="'Set remote SDP'"></app-button>
         <app-button (onClick)="connectToRoom()" [text]="'Connect to room'"></app-button>
-        <app-button (onClick)="disconnect()" [text]="'Disconnect'"></app-button>
+        <!--<app-button (onClick)="disconnect()" [text]="'Disconnect'"></app-button>-->
         <app-button (onClick)="speak()" [text]="'Speak'"></app-button>
     </div>
 
-    <div class="chat-section">
+    <!--<div class="chat-section">
         <app-input [label]="'Message'" [control]="messageCtrl"></app-input>
         <app-button (onClick)="sendMessage()" [text]="'Send'"></app-button>
-    </div>
+    </div>-->
 
     <div class="messages">
         <p *ngFor="let msg of _messages$ | async">User {{ msg.name }} write: {{ msg.msg }}</p>
