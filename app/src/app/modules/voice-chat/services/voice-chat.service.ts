@@ -58,6 +58,8 @@ import { RTC_CONFIG } from '../constants/ice-servers';
 export class VoiceChatService {
     private userName: string = '';
 
+    private userId: string = '';
+
     private roomId: string = '';
 
     private readonly _users$ = new BehaviorSubject<VoicechatUser[]>([]);
@@ -83,18 +85,19 @@ export class VoiceChatService {
     ) {}
 
     public disconnect(): void {
-        const me = this.users.find((u) => u.userName === this.userName)!;
         const disconnectMsg: WsDisconnectMsgToServer = {
             action: 'DISCONNECT',
             data: {
-                disconnected_user_name: me.userName,
-                disconnected_user_id: me.userId
+                disconnected_user_name: this.userName,
+                disconnected_user_id: this.userId
             }
         };
         this.signalingClient.sendMsg(JSON.stringify(disconnectMsg));
         this.signalingClient.disconnect();
+        this.users.forEach((user) => user.disconnect());
         this.setUsers([]);
         this.roomId = '';
+        this.userId = '';
         this.userName = '';
     }
 
@@ -178,31 +181,31 @@ export class VoiceChatService {
 
     private async handleYouConnected(msg: WsYouConnectedMsgFromServer): Promise<void> {
         const apiUsers = msg.data.room.users;
-        const users = apiUsers.map(
-            (user) =>
-                new VoicechatUser({
-                    userId: user.id,
-                    userName: user.name,
-                    isHost: user.is_host,
-                    pc: new RTCPeerConnection(RTC_CONFIG),
-                    audioElement: null,
-                    dataChannel: null
-                })
-        );
+        const users = apiUsers
+            .filter((user) => user.name !== this.userName)
+            .map(
+                (user) =>
+                    new VoicechatUser({
+                        userId: user.id,
+                        userName: user.name,
+                        isHost: user.is_host,
+                        pc: new RTCPeerConnection(RTC_CONFIG),
+                        audioElement: null,
+                        dataChannel: null
+                    })
+            );
         this.setUsers(users);
 
-        const me = users.find((user) => user.userName === this.userName);
+        const me = apiUsers.find((user) => user.name === this.userName);
         console.log('[VoiceChatService_handleYouConnected] me', me);
-        if (!me) return;
+        if (!me || !users.length) return;
 
-        if (users.length > 1) {
-            for (const user of users) {
-                if (user.userId === me.userId) continue;
-                await user.handleOffer(this.signalingClient, me.userId, {
-                    offerToReceiveAudio: true,
-                    offerToReceiveVideo: false
-                });
-            }
+        this.userId = me.id;
+        for (const user of users) {
+            await user.sendOffer(this.signalingClient, me.id, {
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: false
+            });
         }
     }
 
@@ -240,7 +243,27 @@ export class VoiceChatService {
         this.setUsers(filteredUsers);
     }
 
-    private handleOffer(msg: WsOfferMsgFromServer): void {}
+    /**
+     * Incoming offer from someone to open peer connection
+     */
+    private async handleOffer(msg: WsOfferMsgFromServer): Promise<void> {
+        const offeringUserFromApi = msg.data;
+        const offeringUser = this.users.find((u) => u.userId === offeringUserFromApi.offering_user_id);
+        console.log('[handleOffer] offeringUser:', offeringUser);
+        if (!offeringUser) return;
 
-    private handleAnswer(msg: WsAnswerMsgFromServer): void {}
+        await offeringUser.sendAnswer(this.signalingClient, msg);
+    }
+
+    /**
+     * Incoming answer from someone you sent the offer to
+     */
+    private async handleAnswer(msg: WsAnswerMsgFromServer): Promise<void> {
+        const answeringUserFromApi = msg.data;
+        const answeringUser = this.users.find((u) => u.userId === answeringUserFromApi.answering_user_id);
+        console.log('[handleAnswer] answeringUser:', answeringUser);
+        if (!answeringUser) return;
+
+        await answeringUser.receiveAnswer(msg);
+    }
 }

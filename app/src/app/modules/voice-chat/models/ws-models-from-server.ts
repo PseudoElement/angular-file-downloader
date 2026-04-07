@@ -46,7 +46,6 @@ export interface WsOfferMsgFromServer {
     data: {
         offering_user_id: string;
         offering_user_descriptor: string;
-        target_user_id: string;
     };
 }
 
@@ -55,7 +54,6 @@ export interface WsAnswerMsgFromServer {
     data: {
         answering_user_id: string;
         answering_user_descriptor: string;
-        target_user_id: string;
     };
 }
 

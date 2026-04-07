@@ -1,5 +1,6 @@
 import { VoicechatUserParams } from '../models/voicechat-user';
-import { WsOfferMsgToServer } from '../models/ws-models-to-server';
+import { WsAnswerMsgFromServer, WsOfferMsgFromServer } from '../models/ws-models-from-server';
+import { WsAnswerMsgToServer, WsOfferMsgToServer } from '../models/ws-models-to-server';
 import { SignalingClient } from './signaling-client';
 
 export class VoicechatUser {
@@ -24,10 +25,17 @@ export class VoicechatUser {
         this.audioElement = p.audioElement;
     }
 
-    public async handleOffer(signalingClient: SignalingClient, senderUserId: string, options: RTCOfferOptions): Promise<void> {
-        this.createDataChannel();
-        this.setupDataChannel(this.dataChannel!, this.userName);
+    public disconnect(): void {
+        this.dataChannel?.close();
+        this.audioElement?.pause();
+        this.audioElement = null;
+        this.pc.close();
+    }
 
+    public async sendOffer(signalingClient: SignalingClient, senderUserId: string, options: RTCOfferOptions): Promise<void> {
+        await this.streamMediaToPeer();
+
+        this.pc.addEventListener('track', this.playTrack);
         // When all ICE candidates are gathered, send the complete offer.
         this.pc.addEventListener('icecandidate', (e) => {
             if (e.candidate) return; // still gathering
@@ -35,7 +43,7 @@ export class VoicechatUser {
             const localDesc = this.pc.localDescription?.toJSON();
             if (!localDesc) return;
 
-            console.log(`[VoicechatUser_handleOffer] Sending OFFER to ${this.userName}`);
+            console.log(`[sendOffer] Sending OFFER to ${this.userName}`);
             const offerMsg: WsOfferMsgToServer = {
                 action: 'OFFER',
                 data: {
@@ -47,8 +55,83 @@ export class VoicechatUser {
             signalingClient.sendMsg(JSON.stringify(offerMsg));
         });
 
+        this.createDataChannel();
+        this.setupDataChannel(this.dataChannel!, this.userName);
+
         const offer = await this.pc.createOffer(options);
         await this.pc.setLocalDescription(offer);
+    }
+
+    public async sendAnswer(signalingClient: SignalingClient, msg: WsOfferMsgFromServer): Promise<void> {
+        await this.streamMediaToPeer();
+
+        this.pc.addEventListener('track', this.playTrack);
+        // When all ICE candidates are gathered, send the complete answer.
+        this.pc.addEventListener('icecandidate', (e) => {
+            if (e.candidate) return;
+
+            const localDesc = this.pc.localDescription?.toJSON();
+            if (!localDesc) return;
+
+            console.log(`[sendAnswer] Sending ANSWER to ${this.userName}`);
+            const answerMsg: WsAnswerMsgToServer = {
+                action: 'ANSWER',
+                data: {
+                    answering_user_descriptor: JSON.stringify(localDesc),
+                    answering_user_id: this.userId,
+                    target_user_id: msg.data.offering_user_id
+                }
+            };
+            signalingClient.sendMsg(JSON.stringify(answerMsg));
+        });
+        this.pc.addEventListener('connectionstatechange', () => {
+            console.log('[sendAnswer] Connection state:', this.pc.connectionState);
+        });
+        this.pc.addEventListener('iceconnectionstatechange', () => {
+            console.log('[sendAnswer] ICE connection state:', this.pc.iceConnectionState);
+        });
+        this.pc.addEventListener('datachannel', (event) => {
+            console.log('[sendAnswer] datachannel event received!');
+            this.dataChannel = event.channel;
+            this.dataChannel.onmessage = (e) => {
+                console.log('[sendAnswer] Received:', e.data);
+            };
+            this.dataChannel.onopen = () => {
+                console.log('[sendAnswer] Data channel OPENED ', this.dataChannel!.readyState);
+            };
+            this.dataChannel.onclose = () => {
+                console.log('[sendAnswer] Data channel CLOSED');
+            };
+        });
+
+        const remoteSDP = JSON.parse(msg.data.offering_user_descriptor);
+        await this.pc
+            .setRemoteDescription(new RTCSessionDescription(remoteSDP))
+            .catch((err) => console.log('[sendAnswer] setRemoteDescription err:', err));
+        const answer = await this.pc.createAnswer();
+        await this.pc.setLocalDescription(answer);
+    }
+
+    public receiveAnswer(msg: WsAnswerMsgFromServer): Promise<void> {
+        const remoteSDP = JSON.parse(msg.data.answering_user_descriptor);
+        return this.pc
+            .setRemoteDescription(new RTCSessionDescription(remoteSDP))
+            .catch((err) => console.log('[receiveAnswer] setRemoteDescription err:', err));
+    }
+
+    private playTrack(event: RTCTrackEvent): void {
+        console.log('[playTrack] event', event);
+        this.audioElement = new Audio();
+        this.audioElement.srcObject = event.streams[0];
+        this.audioElement.play();
+    }
+
+    private async streamMediaToPeer(): Promise<void> {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => {
+            console.log('[streamMediaToPeer] track:', track);
+            this.pc.addTrack(track, stream);
+        });
     }
 
     private createDataChannel(): void {
@@ -58,17 +141,16 @@ export class VoicechatUser {
 
     private setupDataChannel(channel: RTCDataChannel, peerName: string): void {
         channel.onopen = () => {
-            console.log(`[VoiceChatService] DataChannel OPEN with ${peerName}`);
+            console.log(`[setupDataChannel] DataChannel OPEN with ${peerName}`);
         };
         channel.onclose = () => {
-            console.log(`[VoiceChatService] DataChannel CLOSED with ${peerName}`);
+            console.log(`[setupDataChannel] DataChannel CLOSED with ${peerName}`);
         };
         channel.onmessage = (e) => {
-            console.log(`[VoiceChatService] DataChannel message from ${peerName}:`, e.data);
-            // Extend here: forward to a Subject / callback for UI consumption.
+            console.log(`[setupDataChannel] DataChannel message from ${peerName}:`, e.data);
         };
         channel.onerror = (e) => {
-            console.error(`[VoiceChatService] DataChannel error with ${peerName}:`, e);
+            console.error(`[setupDataChannel] DataChannel error with ${peerName}:`, e);
         };
     }
 }
