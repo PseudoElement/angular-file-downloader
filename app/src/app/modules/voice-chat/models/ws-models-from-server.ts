@@ -1,18 +1,40 @@
+import { RoomFromServer } from './http-models-from-server';
+
 /* ---------------------------------------------GLOBAL--------------------------------------------------- */
 
-export interface UserFromServer {
-    name: string;
-    is_host: boolean;
-    id: string;
+export interface WsRoomCreatedMsgFromServer {
+    action: 'ROOM_CREATED';
+    data: {
+        room: RoomFromServer;
+    };
 }
 
-export interface RoomFromServer {
-    users: UserFromServer[];
-    name: string;
-    id: string;
-    max_peers: number;
-    host_name: string;
+export interface WsRoomRemovedMsgFromServer {
+    action: 'ROOM_REMOVED';
+    data: {
+        room: RoomFromServer;
+    };
 }
+
+export interface WsUserJoinedMsgFromServer {
+    action: 'USER_JOINED';
+    data: {
+        connected_user_name: string;
+        connected_user_id: string;
+    };
+}
+
+export interface WsUserLeftMsgFromServer {
+    action: 'USER_LEFT';
+    data: {
+        disconnected_user_name: string;
+        disconnected_user_id: string;
+        new_host_name: string;
+        new_host_id: string;
+    };
+}
+
+// @TODO добавить ивент на подключение/отключение пользователя(обновлять счетчик изеров)
 
 /* ------------------------------------------------Inner room messages------------------------------------------ */
 
@@ -56,6 +78,12 @@ export interface WsAnswerMsgFromServer {
         answering_user_descriptor: string;
     };
 }
+
+export type WsGlobalMsgFromServer =
+    | WsRoomCreatedMsgFromServer
+    | WsRoomRemovedMsgFromServer
+    | WsUserJoinedMsgFromServer
+    | WsUserLeftMsgFromServer;
 
 export type WsMsgFromServer =
     | WsUserConnectedMsgFromServer

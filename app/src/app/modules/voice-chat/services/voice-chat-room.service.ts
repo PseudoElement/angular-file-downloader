@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { SignalingClient } from '../entities/signaling-client';
 import { VoicechatUser } from '../entities/voicechat-user';
-import { HttpClient } from '@angular/common/http';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
-import { CreateRoomRespBody } from '../models/http-models-from-server';
+import { CreateRoomRespBody, UserFromServer } from '../models/http-models-from-server';
 import { ENVIRONMENT } from 'src/environments/environment';
 import { CreateRoomReqBody } from '../models/http-models-to-server';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -18,6 +17,8 @@ import {
 } from '../models/ws-models-from-server';
 import { WsConnectMsgToServer, WsDisconnectMsgToServer } from '../models/ws-models-to-server';
 import { RTC_CONFIG } from '../constants/ice-servers';
+import { HttpApiService } from 'src/app/core/api/http-api.service';
+import { VoiceChatApiService } from './voice-chat-api.service';
 
 /**
  * 1. CONNECT:
@@ -54,15 +55,17 @@ import { RTC_CONFIG } from '../constants/ice-servers';
  *   и отправляем ему answering_user_id, answering_user_descriptor, target_user_id
  */
 
-@Injectable()
-export class VoiceChatService {
-    private userName: string = '';
+@Injectable({ providedIn: 'root' })
+export class VoiceChatRoomService {
+    private _roomId: string = '';
 
-    private userId: string = '';
-
-    private roomId: string = '';
+    public get roomId(): string {
+        return this._roomId;
+    }
 
     private readonly _users$ = new BehaviorSubject<VoicechatUser[]>([]);
+
+    public readonly users$ = this._users$.asObservable();
 
     public get users(): VoicechatUser[] {
         return this._users$.value;
@@ -70,6 +73,22 @@ export class VoiceChatService {
 
     private setUsers(users: VoicechatUser[]): void {
         this._users$.next(users);
+    }
+
+    private readonly _me$ = new BehaviorSubject<UserFromServer | null>(null);
+
+    public readonly me$ = this._me$.asObservable();
+
+    public get me(): UserFromServer | null {
+        return this._me$.value;
+    }
+
+    private setMe(me: UserFromServer | null): void {
+        this._me$.next(me);
+    }
+
+    public get connected(): boolean {
+        return !!this.me?.id;
     }
 
     // ── Private state ───────────────────────────────────────────────
@@ -80,29 +99,31 @@ export class VoiceChatService {
     });
 
     constructor(
-        private readonly httpClient: HttpClient,
+        private readonly voicechatApi: VoiceChatApiService,
         private readonly sintolModalSrv: SintolLibDynamicComponentService
     ) {}
 
     public disconnect(): void {
+        if (!this.me) {
+            throw new Error('[VoiceChatRoomService_disconnect] me is undefined');
+        }
         const disconnectMsg: WsDisconnectMsgToServer = {
             action: 'DISCONNECT',
             data: {
-                disconnected_user_name: this.userName,
-                disconnected_user_id: this.userId
+                disconnected_user_name: this.me.name,
+                disconnected_user_id: this.me.id
             }
         };
         this.signalingClient.sendMsg(JSON.stringify(disconnectMsg));
         this.signalingClient.disconnect();
         this.users.forEach((user) => user.disconnect());
         this.setUsers([]);
-        this.roomId = '';
-        this.userId = '';
-        this.userName = '';
+        this.setMe(null);
+        this._roomId = '';
     }
 
     public async createVoiceRoom(): Promise<void> {
-        this.userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
+        const userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
             title: 'Modal',
             text: 'Input your name.'
         });
@@ -112,37 +133,41 @@ export class VoiceChatService {
         });
 
         const createRoomReqBody: CreateRoomReqBody = {
-            host_name: this.userName,
-            max_ueers: 10,
+            host_name: userName,
+            max_users: 10,
             room_name: roomName
         };
 
-        const resp = await firstValueFrom(
-            this.httpClient.post<CreateRoomRespBody>(`${ENVIRONMENT.apiBaseUrl}/voicechat/create`, createRoomReqBody)
-        );
-        this.roomId = resp.data.room_id;
+        const resp = await this.voicechatApi.createRoom(createRoomReqBody);
+        this._roomId = resp.created_room.room_id;
+        this.setMe({ id: '', is_host: true, name: userName });
+        console.log('this.me ==>', this.me);
 
-        const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${this.userName}`;
+        const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
         this.signalingClient.connect(socketUrl);
     }
 
     public async connectToVoiceRoom(roomId: string): Promise<void> {
-        this.userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
+        const userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
             title: 'Modal',
             text: 'Input your name.'
         });
-        this.roomId = roomId;
+        this.setMe({ id: '', is_host: false, name: userName });
+        this._roomId = roomId;
 
-        const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${this.userName}`;
+        const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
         this.signalingClient.connect(socketUrl);
     }
 
     private onSocketConnected(): void {
+        if (!this.me) {
+            throw new Error('[VoiceChatRoomService_onSocketConnected] me is undefined');
+        }
         const msg: WsConnectMsgToServer = {
             action: 'CONNECT',
             data: {
                 room_id: this.roomId,
-                connected_user_name: this.userName
+                connected_user_name: this.me.name
             }
         };
         this.signalingClient.sendMsg(JSON.stringify(msg));
@@ -180,27 +205,30 @@ export class VoiceChatService {
     }
 
     private async handleYouConnected(msg: WsYouConnectedMsgFromServer): Promise<void> {
+        if (!this.me) {
+            throw new Error('[VoiceChatRoomService_handleYouConnected] me is undefined');
+        }
         const apiUsers = msg.data.room.users;
         const users = apiUsers
-            .filter((user) => user.name !== this.userName)
+            .filter((user) => user.name !== this.me!.name)
             .map(
                 (user) =>
                     new VoicechatUser({
                         userId: user.id,
                         userName: user.name,
                         isHost: user.is_host,
-                        pc: new RTCPeerConnection(RTC_CONFIG),
-                        audioElement: null,
-                        dataChannel: null
+                        pc: new RTCPeerConnection(RTC_CONFIG)
                     })
             );
         this.setUsers(users);
 
-        const me = apiUsers.find((user) => user.name === this.userName);
+        const me = apiUsers.find((user) => user.name === this.me!.name);
+        console.log('handleYouConnected me ==>', me);
+        if (!me) return;
+        this.setMe(me);
         console.log('[VoiceChatService_handleYouConnected] me', me);
-        if (!me || !users.length) return;
+        if (!users.length) return;
 
-        this.userId = me.id;
         for (const user of users) {
             await user.sendOffer(this.signalingClient, me.id, {
                 offerToReceiveAudio: true,
@@ -215,9 +243,7 @@ export class VoiceChatService {
             userId: connectedUser.connected_user_id,
             userName: connectedUser.connected_user_name,
             isHost: false,
-            pc: new RTCPeerConnection(RTC_CONFIG),
-            audioElement: null,
-            dataChannel: null
+            pc: new RTCPeerConnection(RTC_CONFIG)
         });
         this.setUsers([...this.users, user]);
     }

@@ -1,0 +1,8 @@
+@import 'src/scss/mixins.scss';
+
+:host {
+    .page-wrapper {
+        @include flex-column(start, normal);
+        gap: 20px;
+    }
+}

@@ -21,8 +21,8 @@ export class VoicechatUser {
         this.pc = p.pc;
         this.userId = p.userId;
         this.userName = p.userName;
-        this.dataChannel = p.dataChannel;
-        this.audioElement = p.audioElement;
+        this.dataChannel = null;
+        this.audioElement = null;
     }
 
     public disconnect(): void {
@@ -127,11 +127,15 @@ export class VoicechatUser {
     }
 
     private async streamMediaToPeer(): Promise<void> {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach((track) => {
-            console.log('[streamMediaToPeer] track:', track);
-            this.pc.addTrack(track, stream);
-        });
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach((track) => {
+                console.log('[streamMediaToPeer] track:', track);
+                this.pc.addTrack(track, stream);
+            });
+        } catch (err) {
+            console.log('[streamMediaToPeer] err:', err);
+        }
     }
 
     private createDataChannel(): void {

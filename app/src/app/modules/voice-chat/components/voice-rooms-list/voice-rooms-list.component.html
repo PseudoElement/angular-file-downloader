@@ -1,0 +1,115 @@
+<div class="rooms-list-container">
+    <div class="rooms-header">
+        <svg class="header-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path
+                d="M11.383 3.07904C11.009 2.92504 10.579 3.01004 10.293 3.29604L6.586 7.00004H4C3.45 7.00004 3 7.45004 3 8.00004V16C3 16.55 3.45 17 4 17H6.586L10.293 20.707C10.579 20.993 11.009 21.078 11.383 20.924C11.757 20.77 12 20.404 12 20V4.00004C12 3.59604 11.757 3.23004 11.383 3.07904Z"
+            />
+            <path d="M14 9.00004C14 9.00004 16 10 16 12C16 14 14 15 14 15" />
+            <path
+                d="M17 7.00004C17 7.00004 20 9.00004 20 12C20 15 17 17 17 17"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+            />
+        </svg>
+        <span class="header-title">Voice Rooms</span>
+        <span class="rooms-count">{{ rooms.length }}</span>
+    </div>
+
+    <div class="rooms-empty" *ngIf="rooms.length === 0">
+        <svg class="empty-icon" viewBox="0 0 24 24" width="48" height="48" fill="currentColor" opacity="0.3">
+            <path
+                d="M11.383 3.07904C11.009 2.92504 10.579 3.01004 10.293 3.29604L6.586 7.00004H4C3.45 7.00004 3 7.45004 3 8.00004V16C3 16.55 3.45 17 4 17H6.586L10.293 20.707C10.579 20.993 11.009 21.078 11.383 20.924C11.757 20.77 12 20.404 12 20V4.00004C12 3.59604 11.757 3.23004 11.383 3.07904Z"
+            />
+            <line x1="18" y1="10" x2="22" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="22" y1="10" x2="18" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+        <p class="empty-text">No voice rooms available</p>
+        <p class="empty-subtext">Create a room to get started</p>
+    </div>
+
+    <div class="rooms-scroll-area">
+        <div class="room-card" *ngFor="let room of rooms; trackBy: trackByRoomId" (click)="connectToRoom(room.id)">
+            <div class="room-card-left">
+                <div class="room-icon-wrapper">
+                    <svg class="room-icon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path
+                            d="M11.383 3.07904C11.009 2.92504 10.579 3.01004 10.293 3.29604L6.586 7.00004H4C3.45 7.00004 3 7.45004 3 8.00004V16C3 16.55 3.45 17 4 17H6.586L10.293 20.707C10.579 20.993 11.009 21.078 11.383 20.924C11.757 20.77 12 20.404 12 20V4.00004C12 3.59604 11.757 3.23004 11.383 3.07904Z"
+                        />
+                        <path d="M14 9.00004C14 9.00004 16 10 16 12C16 14 14 15 14 15" />
+                        <path
+                            d="M17 7.00004C17 7.00004 20 9.00004 20 12C20 15 17 17 17 17"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                        />
+                    </svg>
+                </div>
+
+                <div class="room-info">
+                    <span class="room-name">{{ room.name }}</span>
+
+                    <div class="room-meta">
+                        <div class="room-host">
+                            <svg class="meta-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+                                <path d="M8 1a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM2 13c0-2.21 2.686-4 6-4s6 1.79 6 4v1H2v-1z" />
+                            </svg>
+                            <span class="host-name">{{ room.host_name }}</span>
+                        </div>
+
+                        <span class="meta-separator">•</span>
+
+                        <div
+                            class="room-id-badge"
+                            (click)="copyRoomId(room.id, $event)"
+                            [title]="copiedRoomId === room.id ? 'Copied!' : 'Click to copy Room ID'"
+                        >
+                            <svg
+                                *ngIf="copiedRoomId !== room.id"
+                                class="copy-icon"
+                                viewBox="0 0 16 16"
+                                width="11"
+                                height="11"
+                                fill="currentColor"
+                            >
+                                <path
+                                    d="M4 4V1.5A1.5 1.5 0 0 1 5.5 0h9A1.5 1.5 0 0 1 16 1.5v9a1.5 1.5 0 0 1-1.5 1.5H12v2.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 0 14.5v-9A1.5 1.5 0 0 1 1.5 4H4zm1.5-2.5v2H1.5a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V12h-2.5A1.5 1.5 0 0 1 7 10.5v-9h7.5a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5H12V12h2.5a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-9z"
+                                />
+                            </svg>
+                            <svg
+                                *ngIf="copiedRoomId === room.id"
+                                class="check-icon"
+                                viewBox="0 0 16 16"
+                                width="11"
+                                height="11"
+                                fill="currentColor"
+                            >
+                                <path
+                                    d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"
+                                />
+                            </svg>
+                            <span class="room-id-text">{{ copiedRoomId === room.id ? 'Copied!' : room.id }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="room-card-right">
+                <div
+                    class="user-count-badge"
+                    [class.room-full]="room.users.length >= room.max_users"
+                    [class.room-active]="room.users.length > 0 && room.users.length < room.max_users"
+                >
+                    <svg class="users-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                        <path
+                            d="M5.5 7a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm5 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM0 13c0-2 2.24-3.5 5.5-3.5S11 11 11 13v1H0v-1zm5.5-2.5c2.56 0 4.43 1.09 4.93 2.5H1.07c.5-1.41 2.37-2.5 4.43-2.5zM16 13v1h-4v-1c0-1.1-.56-2.08-1.44-2.8C11.34 9.72 12.14 9.5 13 9.5c2.46 0 3 1.5 3 3.5z"
+                        />
+                    </svg>
+                    <span class="user-count-text">{{ room.users.length }}/{{ room.max_users }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,12 +1,5 @@
 import { SignalingClient } from '../entities/signaling-client';
 
-export interface WebRtcUser {
-    pc: RTCPeerConnection;
-    username: string;
-    ip: string;
-    isHost: boolean;
-}
-
 export type SocketEventHandler = (msg: { data: string }) => void;
 
 export interface SignalingClientParams {

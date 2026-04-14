@@ -43,15 +43,6 @@ export class VoiceChatComponent {
         });
     }
 
-    /**
-     * 1. Создатель вызывает createOffer и выставляет свой дескриптор в setLocalDescription себе
-     * 2. Отправляет свой дескриптор на бэк
-     * 3. Коннектящийся юзер загружает с бэка по id дексриптор создателя, устанавливает его setRemoteDescription и вызывает createAnswer()
-     * 4. Коннектящийся выставляет setLocalDescription себе из createAnswer
-     * 5. Затем отправляет свой дескриптор на бэк
-     * 6. Затем создатель выставляет себе дескриптор другого пользователя, полученный с бэка и ставит его в setRemoteDescription
-     */
-
     public async createRoom(): Promise<void> {
         this.pc = new RTCPeerConnection(this.rtcConfig);
 
@@ -118,12 +109,12 @@ export class VoiceChatComponent {
         this.rtcChannel.send(JSON.stringify(msg));
     }
 
-    // public disconnect(): void {
-    //     this.rtcChannel?.close();
-    //     this.pc?.close();
-    //     this.rtcChannel = null;
-    //     this.pc = null;
-    // }
+    public disconnect(): void {
+        this.rtcChannel?.close();
+        this.pc?.close();
+        this.rtcChannel = null;
+        this.pc = null;
+    }
 
     public async connectToRoom(): Promise<void> {
         this.pc = new RTCPeerConnection(this.rtcConfig);

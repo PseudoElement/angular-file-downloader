@@ -1,0 +1,8 @@
+<div class="page-wrapper">
+    <div class="actions-panel">
+        <app-button (onClick)="createRoom()" [text]="'Create voice room'"></app-button>
+    </div>
+    <div class="rooms-list">
+        <app-voice-rooms-list [rooms]="rooms$ | async"></app-voice-rooms-list>
+    </div>
+</div>
