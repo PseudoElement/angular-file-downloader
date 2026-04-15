@@ -21,6 +21,7 @@ export interface WsUserJoinedMsgFromServer {
     data: {
         connected_user_name: string;
         connected_user_id: string;
+        room_id: string;
     };
 }
 
@@ -29,6 +30,7 @@ export interface WsUserLeftMsgFromServer {
     data: {
         disconnected_user_name: string;
         disconnected_user_id: string;
+        room_id: string;
         new_host_name: string;
         new_host_id: string;
     };
@@ -43,6 +45,7 @@ export interface WsUserConnectedMsgFromServer {
     data: {
         connected_user_name: string;
         connected_user_id: string;
+        room_id: string;
     };
 }
 
@@ -58,13 +61,14 @@ export interface WsUserDisconnectedMsgFromServer {
     data: {
         disconnected_user_name: string;
         disconnected_user_id: string;
+        room_id: string;
         new_host_name: string;
         new_host_id: string;
     };
 }
 
 export interface WsOfferMsgFromServer {
-    action: 'OFFER_CREATED';
+    action: 'INCOMING_OFFER';
     data: {
         offering_user_id: string;
         offering_user_descriptor: string;
@@ -72,7 +76,7 @@ export interface WsOfferMsgFromServer {
 }
 
 export interface WsAnswerMsgFromServer {
-    action: 'ANSWER_CREATED';
+    action: 'INCOMING_ANSWER';
     data: {
         answering_user_id: string;
         answering_user_descriptor: string;

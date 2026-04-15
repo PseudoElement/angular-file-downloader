@@ -12,6 +12,6 @@ import { VoiceChatRoomsService } from './services/voice-chat-rooms.service';
 @NgModule({
     declarations: [VoiceChatComponent, VoiceRoomPageComponent, VoiceRoomsListComponent, VoicechatMainPageComponent],
     imports: [CommonModule, VoiceChatRoutingModule, SharedModule],
-    providers: [VoiceChatRoomsService]
+    providers: [VoiceChatRoomsService, VoiceChatRoomService]
 })
 export class VoiceChatModule {}

@@ -1,6 +1,8 @@
 import { VoicechatUserParams } from '../models/voicechat-user';
 import { WsAnswerMsgFromServer, WsOfferMsgFromServer } from '../models/ws-models-from-server';
 import { WsAnswerMsgToServer, WsOfferMsgToServer } from '../models/ws-models-to-server';
+import { randomHexColor } from '../utils/converters';
+import { MediaStreamManager } from './media-stream-manager';
 import { SignalingClient } from './signaling-client';
 
 export class VoicechatUser {
@@ -16,13 +18,28 @@ export class VoicechatUser {
 
     public audioElement: HTMLAudioElement | null;
 
+    // private mediaStream: MediaStream | null;
+
+    public readonly iconHexColor: string;
+
+    private _muted: boolean;
+
+    /**
+     * true - if remote user was muted by you using toggleUserVoice(false)
+     */
+    public get muted(): boolean {
+        return this._muted;
+    }
+
     constructor(p: VoicechatUserParams) {
         this.isHost = p.isHost;
         this.pc = p.pc;
         this.userId = p.userId;
         this.userName = p.userName;
+        this.iconHexColor = randomHexColor();
         this.dataChannel = null;
         this.audioElement = null;
+        this._muted = false;
     }
 
     public disconnect(): void {
@@ -32,9 +49,15 @@ export class VoicechatUser {
         this.pc.close();
     }
 
-    public async sendOffer(signalingClient: SignalingClient, senderUserId: string, options: RTCOfferOptions): Promise<void> {
-        await this.streamMediaToPeer();
+    public async sendOffer(
+        signalingClient: SignalingClient,
+        mediaStreamManager: MediaStreamManager,
+        senderUserId: string,
+        options: RTCOfferOptions
+    ): Promise<void> {
+        mediaStreamManager.broadcastMediaToPeer(this.pc);
 
+        this._muted = false;
         this.pc.addEventListener('track', this.playTrack);
         // When all ICE candidates are gathered, send the complete offer.
         this.pc.addEventListener('icecandidate', (e) => {
@@ -62,9 +85,15 @@ export class VoicechatUser {
         await this.pc.setLocalDescription(offer);
     }
 
-    public async sendAnswer(signalingClient: SignalingClient, msg: WsOfferMsgFromServer): Promise<void> {
-        await this.streamMediaToPeer();
+    public async sendAnswer(
+        signalingClient: SignalingClient,
+        mediaStreamManager: MediaStreamManager,
+        answeringUserId: string,
+        msg: WsOfferMsgFromServer
+    ): Promise<void> {
+        mediaStreamManager.broadcastMediaToPeer(this.pc);
 
+        this._muted = false;
         this.pc.addEventListener('track', this.playTrack);
         // When all ICE candidates are gathered, send the complete answer.
         this.pc.addEventListener('icecandidate', (e) => {
@@ -78,8 +107,8 @@ export class VoicechatUser {
                 action: 'ANSWER',
                 data: {
                     answering_user_descriptor: JSON.stringify(localDesc),
-                    answering_user_id: this.userId,
-                    target_user_id: msg.data.offering_user_id
+                    answering_user_id: answeringUserId,
+                    target_user_id: this.userId
                 }
             };
             signalingClient.sendMsg(JSON.stringify(answerMsg));
@@ -126,16 +155,30 @@ export class VoicechatUser {
         this.audioElement.play();
     }
 
-    private async streamMediaToPeer(): Promise<void> {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach((track) => {
-                console.log('[streamMediaToPeer] track:', track);
-                this.pc.addTrack(track, stream);
-            });
-        } catch (err) {
-            console.log('[streamMediaToPeer] err:', err);
+    // private async streamMediaToPeer(): Promise<void> {
+    //     try {
+    //         await this.mediaStreamManager.startMediaStream();
+    //         this.mediaStreamManager.broadcastMediaToPeer(this.pc);
+    //     } catch (err) {
+    //         console.log('[streamMediaToPeer] err:', err);
+    //     }
+    // }
+
+    // public toggleYourVoice(enabled: boolean): void {
+    //     this.mediaStreamManager.toggleYourVoice(enabled);
+    // }
+
+    // public toggleYourVideo(enabled: boolean): void {
+    //     this.mediaStreamManager.toggleYourVideo(enabled);
+    // }
+
+    public toggleUserVoice(enabled: boolean): void {
+        if (enabled) {
+            this.pc.addEventListener('track', this.playTrack);
+        } else {
+            this.pc.removeEventListener('track', this.playTrack);
         }
+        this._muted = !enabled;
     }
 
     private createDataChannel(): void {

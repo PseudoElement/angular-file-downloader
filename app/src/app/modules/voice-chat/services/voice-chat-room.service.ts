@@ -3,10 +3,10 @@ import { SignalingClient } from '../entities/signaling-client';
 import { VoicechatUser } from '../entities/voicechat-user';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
-import { CreateRoomRespBody, UserFromServer } from '../models/http-models-from-server';
+import { UserFromServer } from '../models/http-models-from-server';
 import { ENVIRONMENT } from 'src/environments/environment';
 import { CreateRoomReqBody } from '../models/http-models-to-server';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
     WsAnswerMsgFromServer,
     WsMsgFromServer,
@@ -15,10 +15,10 @@ import {
     WsUserDisconnectedMsgFromServer,
     WsYouConnectedMsgFromServer
 } from '../models/ws-models-from-server';
-import { WsConnectMsgToServer, WsDisconnectMsgToServer } from '../models/ws-models-to-server';
+import { WsConnectMsgToServer, WsDisconnectMsgToServer, WsOfferMsgToServer } from '../models/ws-models-to-server';
 import { RTC_CONFIG } from '../constants/ice-servers';
-import { HttpApiService } from 'src/app/core/api/http-api.service';
 import { VoiceChatApiService } from './voice-chat-api.service';
+import { MediaStreamManager } from '../entities/media-stream-manager';
 
 /**
  * 1. CONNECT:
@@ -42,20 +42,20 @@ import { VoiceChatApiService } from './voice-chat-api.service';
  *   создаем new RTCPeerConnection(), делаем createOffer, создаем RTCChannel, выставляем setLocalDescription,
  *   отправляем для каждого user_id ивент OFFER с offering_user_id, offering_user_descriptor, target_user_id
  * - на сервере по target_user_id ищем в OnOfferCommand получателя оффера и
- *   отправляем ему ивент OFFER_CREATED с offering_user_id, offering_user_descriptor
+ *   отправляем ему ивент INCOMING_OFFER с offering_user_id, offering_user_descriptor
  *
- *   на клиенте OFFER_CREATED:
+ *   на клиенте INCOMING_OFFER:
  *   на клиенте-получателе создаем new RTCPeerConnection(), выставляем setRemoteDescription, делаем подписки,
  *   вызываем createAnswer(), выставляем setLocalDescription,
  *   и отправляем ивент ANSWER с answering_user_id, answering_user_descriptor, target_user_id
  *
- * 4. ANSWER_CREATED:
+ * 4. INCOMING_ANSWER:
  * - на клиенте-получателе находим нужный peer по answering_user_id, выставляем setRemoteDescription
  * - на сервере находим нужного user по target_user_id
  *   и отправляем ему answering_user_id, answering_user_descriptor, target_user_id
  */
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class VoiceChatRoomService {
     private _roomId: string = '';
 
@@ -98,25 +98,25 @@ export class VoiceChatRoomService {
         onMessage: (msg) => this.onSocketMessage(msg)
     });
 
+    public readonly mediaStreamManager: MediaStreamManager = new MediaStreamManager();
+
     constructor(
         private readonly voicechatApi: VoiceChatApiService,
         private readonly sintolModalSrv: SintolLibDynamicComponentService
     ) {}
 
     public disconnect(): void {
-        if (!this.me) {
-            throw new Error('[VoiceChatRoomService_disconnect] me is undefined');
-        }
         const disconnectMsg: WsDisconnectMsgToServer = {
             action: 'DISCONNECT',
             data: {
-                disconnected_user_name: this.me.name,
-                disconnected_user_id: this.me.id
+                disconnected_user_name: this.me!.name,
+                disconnected_user_id: this.me!.id
             }
         };
         this.signalingClient.sendMsg(JSON.stringify(disconnectMsg));
         this.signalingClient.disconnect();
         this.users.forEach((user) => user.disconnect());
+        this.mediaStreamManager.stopMediaStream();
         this.setUsers([]);
         this.setMe(null);
         this._roomId = '';
@@ -141,7 +141,6 @@ export class VoiceChatRoomService {
         const resp = await this.voicechatApi.createRoom(createRoomReqBody);
         this._roomId = resp.created_room.room_id;
         this.setMe({ id: '', is_host: true, name: userName });
-        console.log('this.me ==>', this.me);
 
         const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
         this.signalingClient.connect(socketUrl);
@@ -193,10 +192,10 @@ export class VoiceChatRoomService {
             case 'USER_DISCONNECTED':
                 this.handleUserDisconnected(parsed);
                 break;
-            case 'OFFER_CREATED':
+            case 'INCOMING_OFFER':
                 this.handleOffer(parsed);
                 break;
-            case 'ANSWER_CREATED':
+            case 'INCOMING_ANSWER':
                 this.handleAnswer(parsed);
                 break;
             default:
@@ -223,14 +222,15 @@ export class VoiceChatRoomService {
         this.setUsers(users);
 
         const me = apiUsers.find((user) => user.name === this.me!.name);
-        console.log('handleYouConnected me ==>', me);
         if (!me) return;
         this.setMe(me);
+        await this.mediaStreamManager.startMediaStream();
+
         console.log('[VoiceChatService_handleYouConnected] me', me);
         if (!users.length) return;
 
         for (const user of users) {
-            await user.sendOffer(this.signalingClient, me.id, {
+            await user.sendOffer(this.signalingClient, this.mediaStreamManager, me.id, {
                 offerToReceiveAudio: true,
                 offerToReceiveVideo: false
             });
@@ -276,9 +276,9 @@ export class VoiceChatRoomService {
         const offeringUserFromApi = msg.data;
         const offeringUser = this.users.find((u) => u.userId === offeringUserFromApi.offering_user_id);
         console.log('[handleOffer] offeringUser:', offeringUser);
-        if (!offeringUser) return;
+        if (!offeringUser || !this.me) return;
 
-        await offeringUser.sendAnswer(this.signalingClient, msg);
+        await offeringUser.sendAnswer(this.signalingClient, this.mediaStreamManager, this.me.id, msg);
     }
 
     /**
