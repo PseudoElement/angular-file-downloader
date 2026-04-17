@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, filter, firstValueFrom, forkJoin, map, Observable, of, startWith, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, firstValueFrom, forkJoin, map, Observable, of, startWith, switchMap } from 'rxjs';
 import { VoiceChatRoomService } from '../../services/voice-chat-room.service';
 import { VoicechatRooom } from '../../models/client-room';
 import { serverRoomToUiRoom } from '../../utils/converters';
@@ -22,20 +22,15 @@ const defaultRoomInfo: VoicechatRooom = {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VoiceRoomPageComponent implements OnInit, OnDestroy {
-    private readonly _updateState$ = new BehaviorSubject(true);
+    private readonly updateUI$ = this.voicechatRoomSrv.updateUI$;
 
-    private updateState(): void {
-        this._updateState$.next(true);
-    }
-
-    public readonly roomInfo$: Observable<VoicechatRooom> = this._updateState$.pipe(
+    public readonly roomInfo$: Observable<VoicechatRooom> = this.updateUI$.pipe(
         switchMap(() => this.voiceChatRoomsSrv.rooms$),
         switchMap((rooms) => forkJoin([of(rooms), firstValueFrom(this.activatedRoute.paramMap)])),
         map(([rooms, paramMap]) => rooms.find((room) => room.id === paramMap.get('id'))),
         filter((roomInfo) => !!roomInfo),
         switchMap((roomInfo) =>
             combineLatest([this.voicechatRoomSrv.users$, this.voicechatRoomSrv.me$]).pipe(
-                tap((users_me) => console.log('ROOM_INFO$', { users_me, roomInfo })),
                 filter(([_, me]) => !!me),
                 map(([users, me]) => {
                     const uiRoom = serverRoomToUiRoom(roomInfo, me!, users);
@@ -70,9 +65,10 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
         private readonly router: Router
     ) {}
 
-    ngOnInit() {
-        // const resolved = this.activatedRoute.snapshot.data as { roomInfo: RoomFromServer };
-        // this._initialRoomInfo$.next(resolved.roomInfo);
+    ngOnInit(): void {
+        if (!this.voicechatRoomSrv.me) {
+            this.router.navigate(['/voicechat']);
+        }
     }
 
     ngOnDestroy(): void {
@@ -106,6 +102,5 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
         if (!user) return;
 
         user.toggleUserVoice(user.muted);
-        this.updateState();
     }
 }

@@ -19,6 +19,7 @@ import { WsConnectMsgToServer, WsDisconnectMsgToServer, WsOfferMsgToServer } fro
 import { RTC_CONFIG } from '../constants/ice-servers';
 import { VoiceChatApiService } from './voice-chat-api.service';
 import { MediaStreamManager } from '../entities/media-stream-manager';
+import { AlertsService } from 'src/app/shared/services/alerts.service';
 
 /**
  * 1. CONNECT:
@@ -57,6 +58,14 @@ import { MediaStreamManager } from '../entities/media-stream-manager';
 
 @Injectable()
 export class VoiceChatRoomService {
+    private readonly _updateUI$ = new BehaviorSubject(true);
+
+    public readonly updateUI$ = this._updateUI$.asObservable();
+
+    private triggerUpdateUI(): void {
+        this._updateUI$.next(true);
+    }
+
     private _roomId: string = '';
 
     public get roomId(): string {
@@ -102,7 +111,8 @@ export class VoiceChatRoomService {
 
     constructor(
         private readonly voicechatApi: VoiceChatApiService,
-        private readonly sintolModalSrv: SintolLibDynamicComponentService
+        private readonly sintolModalSrv: SintolLibDynamicComponentService,
+        private readonly alertsService: AlertsService
     ) {}
 
     public disconnect(): void {
@@ -134,7 +144,7 @@ export class VoiceChatRoomService {
 
         const createRoomReqBody: CreateRoomReqBody = {
             host_name: userName,
-            max_users: 10,
+            max_users: 20,
             room_name: roomName
         };
 
@@ -146,16 +156,32 @@ export class VoiceChatRoomService {
         this.signalingClient.connect(socketUrl);
     }
 
-    public async connectToVoiceRoom(roomId: string): Promise<void> {
-        const userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
-            title: 'Modal',
-            text: 'Input your name.'
-        });
-        this.setMe({ id: '', is_host: false, name: userName });
-        this._roomId = roomId;
+    /**
+     * @returns success
+     */
+    public async connectToVoiceRoom(roomId: string): Promise<boolean> {
+        try {
+            const userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
+                title: 'Modal',
+                text: 'Input your name.'
+            });
+            const roomInfo = await this.voicechatApi.fetchRoomById(roomId);
+            const nameTaken = (roomInfo.room?.users || []).find((user) => user.name.toLowerCase() === userName.toLowerCase());
+            if (nameTaken) {
+                this.alertsService.showAlert({ text: `Username "${userName}" already taken. Choose another one.`, type: 'warn' });
+                return false;
+            }
 
-        const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
-        this.signalingClient.connect(socketUrl);
+            this.setMe({ id: '', is_host: false, name: userName });
+            this._roomId = roomId;
+
+            const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
+            this.signalingClient.connect(socketUrl);
+            return true;
+        } catch (err) {
+            this.alertsService.showAlert({ text: `Error happened trying to connect. ${err}`, type: 'error' });
+            return false;
+        }
     }
 
     private onSocketConnected(): void {
@@ -212,12 +238,15 @@ export class VoiceChatRoomService {
             .filter((user) => user.name !== this.me!.name)
             .map(
                 (user) =>
-                    new VoicechatUser({
-                        userId: user.id,
-                        userName: user.name,
-                        isHost: user.is_host,
-                        pc: new RTCPeerConnection(RTC_CONFIG)
-                    })
+                    new VoicechatUser(
+                        {
+                            userId: user.id,
+                            userName: user.name,
+                            isHost: user.is_host,
+                            pc: new RTCPeerConnection(RTC_CONFIG)
+                        },
+                        this.triggerUpdateUI.bind(this)
+                    )
             );
         this.setUsers(users);
 
@@ -239,12 +268,15 @@ export class VoiceChatRoomService {
 
     private handleUserConnected(msg: WsUserConnectedMsgFromServer): void {
         const connectedUser = msg.data;
-        const user = new VoicechatUser({
-            userId: connectedUser.connected_user_id,
-            userName: connectedUser.connected_user_name,
-            isHost: false,
-            pc: new RTCPeerConnection(RTC_CONFIG)
-        });
+        const user = new VoicechatUser(
+            {
+                userId: connectedUser.connected_user_id,
+                userName: connectedUser.connected_user_name,
+                isHost: false,
+                pc: new RTCPeerConnection(RTC_CONFIG)
+            },
+            this.triggerUpdateUI.bind(this)
+        );
         this.setUsers([...this.users, user]);
     }
 

@@ -37,7 +37,6 @@ export class MediaStreamManager {
     public toggleYourVoice(enabled: boolean): void {
         if (!this.mediaStream) return;
         this.mediaStream.getAudioTracks().forEach((track) => {
-            console.log('[toggleYourVoice] toggleVoice:', track);
             track.enabled = enabled;
         });
         this._audioEnabled = enabled;
@@ -46,7 +45,6 @@ export class MediaStreamManager {
     public toggleYourVideo(enabled: boolean): void {
         if (!this.mediaStream) return;
         this.mediaStream.getVideoTracks().forEach((track) => {
-            console.log('[toggleYourVideo] toggleVoice:', track);
             track.enabled = enabled;
         });
         this._videoEnabled = enabled;

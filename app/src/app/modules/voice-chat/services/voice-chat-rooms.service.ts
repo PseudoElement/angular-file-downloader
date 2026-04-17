@@ -94,6 +94,7 @@ export class VoiceChatRoomsService implements OnDestroy {
                             room.users = room.users.filter((user) => user.id !== msg.data.disconnected_user_id);
                             room.users.forEach((user) => {
                                 if (user.id === msg.data.new_host_id) {
+                                    room.host_name = user.name;
                                     user.is_host = true;
                                 }
                             });

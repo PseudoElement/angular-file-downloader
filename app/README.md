@@ -2,12 +2,14 @@ TODO:
 
 -++ connection to the same room after page reload
 -++ offer sent, but answer not taken
+-++ fix ID and users count in voiceroom
+-++ handle eror on disconnect [VoiceChatRoomService_disconnect] me is undefined
+-++ counter of users in room is not changed of USER_JOINED/USER_LEFT events
+-++ add loader on user square which connected, but answer not created yet
+-++ host not changed after old host disconnected
+-++ add LIMIT 20 users per room
 
-- add modal for max users
-- handle eror on disconnect [VoiceChatRoomService_disconnect] me is undefined
-- fix ID and users count in voiceroom
-- counter of users in room is not changed of USER_JOINED/USER_LEFT events
-- host not changed after old host disconnected
+- add indetiicator of speaking user
 
 ON SERVER:
 

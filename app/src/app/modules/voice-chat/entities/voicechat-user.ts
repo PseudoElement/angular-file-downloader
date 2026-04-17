@@ -31,7 +31,16 @@ export class VoicechatUser {
         return this._muted;
     }
 
-    constructor(p: VoicechatUserParams) {
+    private _loading: boolean;
+
+    public get loading(): boolean {
+        return this._loading;
+    }
+
+    constructor(
+        p: VoicechatUserParams,
+        private readonly triggerUpdateUI: () => void
+    ) {
         this.isHost = p.isHost;
         this.pc = p.pc;
         this.userId = p.userId;
@@ -40,11 +49,13 @@ export class VoicechatUser {
         this.dataChannel = null;
         this.audioElement = null;
         this._muted = false;
+        this._loading = true;
     }
 
     public disconnect(): void {
         this.dataChannel?.close();
         this.audioElement?.pause();
+        console.log('disconnect CALLED!');
         this.audioElement = null;
         this.pc.close();
     }
@@ -58,7 +69,7 @@ export class VoicechatUser {
         mediaStreamManager.broadcastMediaToPeer(this.pc);
 
         this._muted = false;
-        this.pc.addEventListener('track', this.playTrack);
+        this.pc.addEventListener('track', this.playTrack.bind(this));
         // When all ICE candidates are gathered, send the complete offer.
         this.pc.addEventListener('icecandidate', (e) => {
             if (e.candidate) return; // still gathering
@@ -77,6 +88,17 @@ export class VoicechatUser {
             };
             signalingClient.sendMsg(JSON.stringify(offerMsg));
         });
+        this.pc.addEventListener('iceconnectionstatechange', () => {
+            console.log('[sendAnswer] ICE connection state:', this.pc.iceConnectionState);
+            if (this.pc.iceConnectionState === 'connected') {
+                this._loading = false;
+                this.triggerUpdateUI();
+            }
+            if (this.pc.iceConnectionState === 'checking') {
+                this._loading = true;
+                this.triggerUpdateUI();
+            }
+        });
 
         this.createDataChannel();
         this.setupDataChannel(this.dataChannel!, this.userName);
@@ -94,7 +116,7 @@ export class VoicechatUser {
         mediaStreamManager.broadcastMediaToPeer(this.pc);
 
         this._muted = false;
-        this.pc.addEventListener('track', this.playTrack);
+        this.pc.addEventListener('track', this.playTrack.bind(this));
         // When all ICE candidates are gathered, send the complete answer.
         this.pc.addEventListener('icecandidate', (e) => {
             if (e.candidate) return;
@@ -118,6 +140,14 @@ export class VoicechatUser {
         });
         this.pc.addEventListener('iceconnectionstatechange', () => {
             console.log('[sendAnswer] ICE connection state:', this.pc.iceConnectionState);
+            if (this.pc.iceConnectionState === 'connected') {
+                this._loading = false;
+                this.triggerUpdateUI();
+            }
+            if (this.pc.iceConnectionState === 'checking') {
+                this._loading = true;
+                this.triggerUpdateUI();
+            }
         });
         this.pc.addEventListener('datachannel', (event) => {
             console.log('[sendAnswer] datachannel event received!');
@@ -149,36 +179,15 @@ export class VoicechatUser {
     }
 
     private playTrack(event: RTCTrackEvent): void {
-        console.log('[playTrack] event', event);
         this.audioElement = new Audio();
         this.audioElement.srcObject = event.streams[0];
         this.audioElement.play();
     }
 
-    // private async streamMediaToPeer(): Promise<void> {
-    //     try {
-    //         await this.mediaStreamManager.startMediaStream();
-    //         this.mediaStreamManager.broadcastMediaToPeer(this.pc);
-    //     } catch (err) {
-    //         console.log('[streamMediaToPeer] err:', err);
-    //     }
-    // }
-
-    // public toggleYourVoice(enabled: boolean): void {
-    //     this.mediaStreamManager.toggleYourVoice(enabled);
-    // }
-
-    // public toggleYourVideo(enabled: boolean): void {
-    //     this.mediaStreamManager.toggleYourVideo(enabled);
-    // }
-
     public toggleUserVoice(enabled: boolean): void {
-        if (enabled) {
-            this.pc.addEventListener('track', this.playTrack);
-        } else {
-            this.pc.removeEventListener('track', this.playTrack);
-        }
         this._muted = !enabled;
+        if (!this.audioElement) return;
+        this.audioElement.volume = enabled ? 1 : 0;
     }
 
     private createDataChannel(): void {
@@ -188,16 +197,16 @@ export class VoicechatUser {
 
     private setupDataChannel(channel: RTCDataChannel, peerName: string): void {
         channel.onopen = () => {
-            console.log(`[setupDataChannel] DataChannel OPEN with ${peerName}`);
+            // console.log(`[setupDataChannel] DataChannel OPEN with ${peerName}`);
         };
         channel.onclose = () => {
-            console.log(`[setupDataChannel] DataChannel CLOSED with ${peerName}`);
+            // console.log(`[setupDataChannel] DataChannel CLOSED with ${peerName}`);
         };
         channel.onmessage = (e) => {
-            console.log(`[setupDataChannel] DataChannel message from ${peerName}:`, e.data);
+            // console.log(`[setupDataChannel] DataChannel message from ${peerName}:`, e.data);
         };
         channel.onerror = (e) => {
-            console.error(`[setupDataChannel] DataChannel error with ${peerName}:`, e);
+            // console.error(`[setupDataChannel] DataChannel error with ${peerName}:`, e);
         };
     }
 }

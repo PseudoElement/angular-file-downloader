@@ -43,6 +43,12 @@
 
     <ng-template #userSquare let-user="user">
         <div class="user">
+            <div *ngIf="user.loading" class="loading">
+                <span>&bull;</span>
+                <span>&bull;</span>
+                <span>&bull;</span>
+            </div>
+
             <div class="photo" [style.background-color]="user.iconHexColor">
                 <span class="material-symbols-outlined icon"> person </span>
             </div>

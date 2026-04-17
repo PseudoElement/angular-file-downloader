@@ -11,7 +11,9 @@ import { Router } from '@angular/router';
 })
 export class VoiceRoomsListComponent {
     @Input() set rooms(value: RoomFromServer[] | null) {
+        console.log('rooms ==>', value);
         this._rooms = value ?? [];
+        this.cdr.detectChanges();
     }
     get rooms(): RoomFromServer[] {
         return this._rooms;
@@ -51,8 +53,10 @@ export class VoiceRoomsListComponent {
     }
 
     public async connectToRoom(roomId: string): Promise<void> {
-        await this.roomSrv.connectToVoiceRoom(roomId);
-        this.router.navigateByUrl('/voicechat/room/' + roomId);
-        console.log('[connectToRoom] connected to room:', this.roomSrv.roomId);
+        const success = await this.roomSrv.connectToVoiceRoom(roomId);
+        if (success) {
+            this.router.navigateByUrl('/voicechat/room/' + roomId);
+            console.log('[connectToRoom] connected to room:', this.roomSrv.roomId);
+        }
     }
 }
