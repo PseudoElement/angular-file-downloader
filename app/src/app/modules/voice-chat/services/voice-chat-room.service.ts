@@ -9,13 +9,14 @@ import { CreateRoomReqBody } from '../models/http-models-to-server';
 import { BehaviorSubject } from 'rxjs';
 import {
     WsAnswerMsgFromServer,
+    WsMicToggledMsgFromServer,
     WsMsgFromServer,
     WsOfferMsgFromServer,
     WsUserConnectedMsgFromServer,
     WsUserDisconnectedMsgFromServer,
     WsYouConnectedMsgFromServer
 } from '../models/ws-models-from-server';
-import { WsConnectMsgToServer, WsDisconnectMsgToServer, WsOfferMsgToServer } from '../models/ws-models-to-server';
+import { WsConnectMsgToServer, WsDisconnectMsgToServer, WsMicToggledMsgToServer, WsOfferMsgToServer } from '../models/ws-models-to-server';
 import { RTC_CONFIG } from '../constants/ice-servers';
 import { VoiceChatApiService } from './voice-chat-api.service';
 import { MediaStreamManager } from '../entities/media-stream-manager';
@@ -96,6 +97,18 @@ export class VoiceChatRoomService {
         this._me$.next(me);
     }
 
+    public toggleMyMic(enabled: boolean): void {
+        if (!this.me) return;
+        this.mediaStreamManager.toggleYourVoice(enabled);
+        this.setMe({ ...this.me, muted: !enabled });
+
+        const msg: WsMicToggledMsgToServer = {
+            action: 'USER_TOGGLED_MIC',
+            data: { mic_enabled: enabled, toggled_user_id: this.me.id }
+        };
+        this.signalingClient.sendMsg(JSON.stringify(msg));
+    }
+
     public get connected(): boolean {
         return !!this.me?.id;
     }
@@ -150,7 +163,7 @@ export class VoiceChatRoomService {
 
         const resp = await this.voicechatApi.createRoom(createRoomReqBody);
         this._roomId = resp.created_room.room_id;
-        this.setMe({ id: '', is_host: true, name: userName });
+        this.setMe({ id: '', is_host: true, name: userName, muted: true });
 
         const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
         this.signalingClient.connect(socketUrl);
@@ -172,7 +185,7 @@ export class VoiceChatRoomService {
                 return false;
             }
 
-            this.setMe({ id: '', is_host: false, name: userName });
+            this.setMe({ id: '', is_host: false, name: userName, muted: true });
             this._roomId = roomId;
 
             const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
@@ -223,6 +236,9 @@ export class VoiceChatRoomService {
                 break;
             case 'INCOMING_ANSWER':
                 this.handleAnswer(parsed);
+                break;
+            case 'USER_TOGGLED_MIC':
+                this.handleUserToggledMic(parsed);
                 break;
             default:
                 console.log('[VoiceChatService_onSocketMessage] Unknown WS action:', (parsed as any).action);
@@ -323,5 +339,15 @@ export class VoiceChatRoomService {
         if (!answeringUser) return;
 
         await answeringUser.receiveAnswer(msg);
+    }
+
+    private async handleUserToggledMic(msg: WsMicToggledMsgFromServer): Promise<void> {
+        const toggledUserData = msg.data;
+        if (toggledUserData.toggled_user_id === this.me?.id) return;
+
+        const foundUser = this.users.find((u) => u.userId);
+        if (!foundUser) return;
+
+        foundUser.toggleUserMicRemotely(toggledUserData.mic_enabled);
     }
 }

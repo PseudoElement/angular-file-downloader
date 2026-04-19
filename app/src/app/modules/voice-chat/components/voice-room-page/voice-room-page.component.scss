@@ -72,8 +72,20 @@
                         }
                     }
 
-                    .red {
+                    .red-bg {
                         background-color: #db073c;
+                    }
+
+                    .remote-mic {
+                        padding: 10px;
+                        border-radius: 50%;
+
+                        &-muted {
+                            color: #db073c;
+                        }
+                        &-enabled {
+                            color: #10c954;
+                        }
                     }
                 }
 

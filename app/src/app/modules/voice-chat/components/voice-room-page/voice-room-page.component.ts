@@ -12,7 +12,7 @@ const defaultRoomInfo: VoicechatRooom = {
     max_users: 1,
     name: '',
     users: [],
-    me: { id: '228', is_host: false, name: 'sintol' }
+    me: { id: '228', is_host: false, name: 'sintol', muted: true }
 };
 
 @Component({
@@ -41,14 +41,6 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
         ),
         startWith(defaultRoomInfo)
     );
-
-    private readonly _audioEnabled$ = new BehaviorSubject(true);
-
-    public readonly audioEnabled$ = this._audioEnabled$.asObservable();
-
-    private setAudioEnabled(enabled: boolean): void {
-        this._audioEnabled$.next(enabled);
-    }
 
     private readonly _videoEnabled$ = new BehaviorSubject(true);
 
@@ -83,10 +75,10 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
     }
 
     public toggleMyVoice(): void {
+        if (!this.voicechatRoomSrv.me) return;
         console.log('[VoiceRoomPageComponent_toggleVoice] called');
-        const enabled = this._audioEnabled$.value;
-        this.voicechatRoomSrv.mediaStreamManager.toggleYourVoice(!enabled);
-        this.setAudioEnabled(!enabled);
+        const newEnabled = this.voicechatRoomSrv.me.muted;
+        this.voicechatRoomSrv.toggleMyMic(newEnabled);
     }
 
     public toggleMyVideo(): void {
@@ -101,6 +93,6 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
         const user = this.voicechatRoomSrv.users.find((user) => user.userId === userId);
         if (!user) return;
 
-        user.toggleUserVoice(user.muted);
+        user.toggleUserMicLocally(user.mutedLocally);
     }
 }

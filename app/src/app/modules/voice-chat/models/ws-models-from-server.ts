@@ -36,8 +36,6 @@ export interface WsUserLeftMsgFromServer {
     };
 }
 
-// @TODO добавить ивент на подключение/отключение пользователя(обновлять счетчик изеров)
-
 /* ------------------------------------------------Inner room messages------------------------------------------ */
 
 export interface WsUserConnectedMsgFromServer {
@@ -83,6 +81,14 @@ export interface WsAnswerMsgFromServer {
     };
 }
 
+export interface WsMicToggledMsgFromServer {
+    action: 'USER_TOGGLED_MIC';
+    data: {
+        toggled_user_id: string;
+        mic_enabled: boolean;
+    };
+}
+
 export type WsGlobalMsgFromServer =
     | WsRoomCreatedMsgFromServer
     | WsRoomRemovedMsgFromServer
@@ -94,6 +100,7 @@ export type WsMsgFromServer =
     | WsYouConnectedMsgFromServer
     | WsUserDisconnectedMsgFromServer
     | WsOfferMsgFromServer
-    | WsAnswerMsgFromServer;
+    | WsAnswerMsgFromServer
+    | WsMicToggledMsgFromServer;
 
 /* --------------------------------------------------------------------------------------------------------------- */

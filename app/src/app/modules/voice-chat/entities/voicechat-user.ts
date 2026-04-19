@@ -18,17 +18,24 @@ export class VoicechatUser {
 
     public audioElement: HTMLAudioElement | null;
 
-    // private mediaStream: MediaStream | null;
-
     public readonly iconHexColor: string;
 
-    private _muted: boolean;
+    private _mutedLocally: boolean;
 
     /**
      * true - if remote user was muted by you using toggleUserVoice(false)
      */
-    public get muted(): boolean {
-        return this._muted;
+    public get mutedLocally(): boolean {
+        return this._mutedLocally;
+    }
+
+    private _mutedRemotely: boolean;
+
+    /**
+     * true - if remote user muted himself (got message USER_TOGGLED_MIC from room's socket)
+     */
+    public get mutedRemotely(): boolean {
+        return this._mutedRemotely;
     }
 
     private _loading: boolean;
@@ -48,7 +55,8 @@ export class VoicechatUser {
         this.iconHexColor = randomHexColor();
         this.dataChannel = null;
         this.audioElement = null;
-        this._muted = false;
+        this._mutedLocally = false;
+        this._mutedRemotely = false;
         this._loading = true;
     }
 
@@ -68,7 +76,7 @@ export class VoicechatUser {
     ): Promise<void> {
         mediaStreamManager.broadcastMediaToPeer(this.pc);
 
-        this._muted = false;
+        this._mutedLocally = false;
         this.pc.addEventListener('track', this.playTrack.bind(this));
         // When all ICE candidates are gathered, send the complete offer.
         this.pc.addEventListener('icecandidate', (e) => {
@@ -115,7 +123,7 @@ export class VoicechatUser {
     ): Promise<void> {
         mediaStreamManager.broadcastMediaToPeer(this.pc);
 
-        this._muted = false;
+        this._mutedLocally = false;
         this.pc.addEventListener('track', this.playTrack.bind(this));
         // When all ICE candidates are gathered, send the complete answer.
         this.pc.addEventListener('icecandidate', (e) => {
@@ -184,10 +192,15 @@ export class VoicechatUser {
         this.audioElement.play();
     }
 
-    public toggleUserVoice(enabled: boolean): void {
-        this._muted = !enabled;
+    public toggleUserMicLocally(enabled: boolean): void {
+        this._mutedLocally = !enabled;
         if (!this.audioElement) return;
         this.audioElement.volume = enabled ? 1 : 0;
+    }
+
+    public toggleUserMicRemotely(enabled: boolean): void {
+        this._mutedRemotely = !enabled;
+        this.triggerUpdateUI();
     }
 
     private createDataChannel(): void {

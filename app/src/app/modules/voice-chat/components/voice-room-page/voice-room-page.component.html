@@ -1,7 +1,6 @@
 <div
     *ngLet="{
         roomInfo: roomInfo$ | async,
-        audioEnabled: audioEnabled$ | async,
         videoEnabled: videoEnabled$ | async
     } as state"
     class="voice-room-wrapper"
@@ -31,12 +30,12 @@
             </div>
             <div class="action-bar">
                 <span class="material-symbols-outlined action-icon" (click)="toggleMyVoice()">
-                    {{ state.audioEnabled ? 'mic' : 'mic_off' }}
+                    {{ state.roomInfo.me.muted ? 'mic' : 'mic_off' }}
                 </span>
                 <span class="material-symbols-outlined action-icon" (click)="toggleMyVideo()">
                     {{ state.videoEnabled ? 'video_camera_front' : 'video_camera_front_off' }}
                 </span>
-                <span class="material-symbols-outlined action-icon red" (click)="disconnect()"> call_end </span>
+                <span class="material-symbols-outlined action-icon red-bg" (click)="disconnect()"> call_end </span>
             </div>
         </div>
     </ng-template>
@@ -57,7 +56,13 @@
             </div>
             <div class="action-bar">
                 <span class="material-symbols-outlined action-icon" (click)="toggleUserVoice(user.userId)">
-                    {{ user.muted ? 'volume_off' : 'volume_up' }}
+                    {{ user.mutedLocally ? 'volume_off' : 'volume_up' }}
+                </span>
+                <span
+                    class="material-symbols-outlined remote-mic"
+                    [ngClass]="user.mutedRemotely ? 'remote-mic-muted' : 'remote-mic-enabled'"
+                >
+                    {{ user.mutedRemotely ? 'mic_off' : 'mic' }}
                 </span>
             </div>
         </div>

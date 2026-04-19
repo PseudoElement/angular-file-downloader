@@ -4,6 +4,7 @@ export interface UserFromServer {
     name: string;
     is_host: boolean;
     id: string;
+    muted: boolean;
 }
 
 export interface RoomFromServer {

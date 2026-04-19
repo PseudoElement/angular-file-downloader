@@ -13,4 +13,5 @@ TODO:
 
 ON SERVER:
 
+- add Microphone sign (red/green) of user muted/unmuted and event USER_TOGGLED_MICRO
 - fix USER_DISCONNECTED sent 2 times on user disconnection

@@ -32,4 +32,17 @@ export interface WsAnswerMsgToServer {
     };
 }
 
-export type WsMsgToServer = WsConnectMsgToServer | WsOfferMsgToServer | WsAnswerMsgToServer | WsDisconnectMsgToServer;
+export interface WsMicToggledMsgToServer {
+    action: 'USER_TOGGLED_MIC';
+    data: {
+        toggled_user_id: string;
+        mic_enabled: boolean;
+    };
+}
+
+export type WsMsgToServer =
+    | WsConnectMsgToServer
+    | WsOfferMsgToServer
+    | WsAnswerMsgToServer
+    | WsDisconnectMsgToServer
+    | WsMicToggledMsgToServer;
