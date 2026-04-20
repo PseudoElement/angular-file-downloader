@@ -12,7 +12,7 @@ const defaultRoomInfo: VoicechatRooom = {
     max_users: 1,
     name: '',
     users: [],
-    me: { id: '228', is_host: false, name: 'sintol', muted: true }
+    me: { id: '228', is_host: false, name: 'sintol', muted: false }
 };
 
 @Component({

@@ -30,7 +30,7 @@
     </div>
 
     <div class="rooms-scroll-area">
-        <div class="room-card" *ngFor="let room of rooms; trackBy: trackByRoomId" (click)="connectToRoom(room.id)">
+        <div class="room-card" *ngFor="let room of rooms; trackBy: trackByRoomId">
             <div class="room-card-left">
                 <div class="room-icon-wrapper">
                     <svg class="room-icon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -109,6 +109,8 @@
                     </svg>
                     <span class="user-count-text">{{ room.users.length }}/{{ room.max_users }}</span>
                 </div>
+
+                <app-button text="Join" type="flat" (onClick)="connectToRoom(room.id)"></app-button>
             </div>
         </div>
     </div>

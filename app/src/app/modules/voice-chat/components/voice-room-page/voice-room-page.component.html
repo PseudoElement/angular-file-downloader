@@ -30,7 +30,7 @@
             </div>
             <div class="action-bar">
                 <span class="material-symbols-outlined action-icon" (click)="toggleMyVoice()">
-                    {{ state.roomInfo.me.muted ? 'mic' : 'mic_off' }}
+                    {{ state.roomInfo.me.muted ? 'mic_off' : 'mic' }}
                 </span>
                 <span class="material-symbols-outlined action-icon" (click)="toggleMyVideo()">
                     {{ state.videoEnabled ? 'video_camera_front' : 'video_camera_front_off' }}

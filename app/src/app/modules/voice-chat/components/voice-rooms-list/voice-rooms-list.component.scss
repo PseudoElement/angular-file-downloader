@@ -266,6 +266,7 @@ $discord-badge-bg: #aba09f;
 .room-card-right {
     @include flex-row(flex-end, center);
     flex-shrink: 0;
+    gap: 20px;
 }
 
 .user-count-badge {

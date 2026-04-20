@@ -14,7 +14,18 @@ export class MediaStreamManager {
     private mediaStream: MediaStream | null = null;
 
     public async startMediaStream(): Promise<void> {
-        this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const initialStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const preferredMic = devices.find((d) => d.kind === 'audioinput' && d.label.toLowerCase().includes('airpods'));
+
+        if (preferredMic) {
+            initialStream.getTracks().forEach((t) => t.stop());
+            this.mediaStream = await navigator.mediaDevices.getUserMedia({
+                audio: { deviceId: { exact: preferredMic.deviceId } }
+            });
+        } else {
+            this.mediaStream = initialStream;
+        }
     }
 
     public stopMediaStream(): void {

@@ -8,6 +8,7 @@ import { GameObjectSpritesheetConfigs, ImagesForGameObject } from '../models/spr
 import { BaseGameObjectParams } from '../abstract/base-game-object';
 import { DinoGameState, FarmReward } from '../models/common';
 import { DinoGameSettings } from '../services/dino-game-settings.service';
+import { AudioLoaderService } from 'src/app/core/audio/audio-loader.service';
 
 export class Coin extends CanvasGameObject implements MobileObject<CoinAction>, AnimatedObject<CoinAnimation>, Farmable {
     public type = GAME_OBJECTS.COIN;
@@ -46,7 +47,8 @@ export class Coin extends CanvasGameObject implements MobileObject<CoinAction>, 
         params: BaseGameObjectParams,
         containerInfo: GameContainerInfo,
         private readonly _gameState$: BehaviorSubject<DinoGameState>,
-        private readonly settings: DinoGameSettings
+        private readonly settings: DinoGameSettings,
+        private readonly audioLoaderSrv: AudioLoaderService
     ) {
         const rootNode = document.getElementById(containerInfo.id)!;
         super(params, containerInfo, rootNode);
@@ -104,7 +106,7 @@ export class Coin extends CanvasGameObject implements MobileObject<CoinAction>, 
 
     public beGrabbed(): FarmReward {
         if (!this.settings.isMuted) {
-            const audio = new Audio('../../../../../../assets/audio/coin-earn.mp3');
+            const audio = this.audioLoaderSrv.audioElements.COIN_EARN;
             audio.currentTime = 0.15;
             audio.play();
         }

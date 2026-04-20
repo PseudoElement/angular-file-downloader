@@ -12,6 +12,7 @@ import { DIFFICULTY_CONFIG } from '../constants/main-config';
 import { Bird } from '../game-objects/bird';
 import { Coin } from '../game-objects/coin';
 import { DinoGameSettings, DinoGameSettingsService } from './dino-game-settings.service';
+import { AudioLoaderService } from 'src/app/core/audio/audio-loader.service';
 
 @Injectable()
 export class DinoGameService {
@@ -21,7 +22,8 @@ export class DinoGameService {
         private readonly dinoGameObservers: DinoGameObservers,
         private readonly gameContainerSrv: DinoGameContainerService,
         private readonly gameStateSrv: DinoGameStateService,
-        private readonly gameSetingsSrv: DinoGameSettingsService
+        private readonly gameSetingsSrv: DinoGameSettingsService,
+        private readonly audioLoaderSrv: AudioLoaderService
     ) {}
 
     public startGame(): void {
@@ -179,7 +181,8 @@ export class DinoGameService {
             { height: '75px', width: '75px', left: `${containerWidth}px`, top: `${top}px` },
             { id: DYNO_CONTAINER_ID, coords$: this.gameContainerSrv.gameContainerCoords$ },
             this.gameStateSubj$,
-            this.gameSetingsSrv.settings
+            this.gameSetingsSrv.settings,
+            this.audioLoaderSrv
         );
         this.gameStateSrv.addGameObject(coin);
     }

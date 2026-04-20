@@ -21,6 +21,7 @@ import { RTC_CONFIG } from '../constants/ice-servers';
 import { VoiceChatApiService } from './voice-chat-api.service';
 import { MediaStreamManager } from '../entities/media-stream-manager';
 import { AlertsService } from 'src/app/shared/services/alerts.service';
+import { AudioLoaderService } from 'src/app/core/audio/audio-loader.service';
 
 /**
  * 1. CONNECT:
@@ -125,7 +126,8 @@ export class VoiceChatRoomService {
     constructor(
         private readonly voicechatApi: VoiceChatApiService,
         private readonly sintolModalSrv: SintolLibDynamicComponentService,
-        private readonly alertsService: AlertsService
+        private readonly alertsService: AlertsService,
+        private readonly audioLoaderSrv: AudioLoaderService
     ) {}
 
     public disconnect(): void {
@@ -163,7 +165,7 @@ export class VoiceChatRoomService {
 
         const resp = await this.voicechatApi.createRoom(createRoomReqBody);
         this._roomId = resp.created_room.room_id;
-        this.setMe({ id: '', is_host: true, name: userName, muted: true });
+        this.setMe({ id: '', is_host: true, name: userName, muted: false });
 
         const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
         this.signalingClient.connect(socketUrl);
@@ -185,7 +187,7 @@ export class VoiceChatRoomService {
                 return false;
             }
 
-            this.setMe({ id: '', is_host: false, name: userName, muted: true });
+            this.setMe({ id: '', is_host: false, name: userName, muted: false });
             this._roomId = roomId;
 
             const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
@@ -269,6 +271,7 @@ export class VoiceChatRoomService {
         const me = apiUsers.find((user) => user.name === this.me!.name);
         if (!me) return;
         this.setMe(me);
+        this.audioLoaderSrv.audioElements.DISCORD_JOIN.play();
         await this.mediaStreamManager.startMediaStream();
 
         console.log('[VoiceChatService_handleYouConnected] me', me);
@@ -293,6 +296,7 @@ export class VoiceChatRoomService {
             },
             this.triggerUpdateUI.bind(this)
         );
+        this.audioLoaderSrv.audioElements.DISCORD_JOIN.play();
         this.setUsers([...this.users, user]);
     }
 
@@ -305,6 +309,7 @@ export class VoiceChatRoomService {
         user.dataChannel?.close();
         user.pc.close();
         if (user.audioElement) user.audioElement.srcObject = null;
+        this.audioLoaderSrv.audioElements.DISCORD_LEAVE.play();
 
         const filteredUsers = this.users.filter((u) => u.userId !== disconnectedData.disconnected_user_id);
         filteredUsers.forEach((u) => {

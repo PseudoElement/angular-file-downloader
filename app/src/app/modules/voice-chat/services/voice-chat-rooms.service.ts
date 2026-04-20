@@ -80,7 +80,8 @@ export class VoiceChatRoomsService implements OnDestroy {
                             const newUser: UserFromServer = {
                                 id: msg.data.connected_user_id,
                                 name: msg.data.connected_user_name,
-                                is_host: false
+                                is_host: false,
+                                muted: false
                             };
                             room.users.push(newUser);
                         }
