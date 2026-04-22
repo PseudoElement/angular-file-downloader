@@ -74,7 +74,7 @@ export class VoicechatUser {
         senderUserId: string,
         options: RTCOfferOptions
     ): Promise<void> {
-        mediaStreamManager.broadcastMediaToPeer(this.pc);
+        mediaStreamManager.broadcastAudioToPeer(this.pc);
 
         this._mutedLocally = false;
         this.pc.addEventListener('track', this.playTrack.bind(this));
@@ -121,7 +121,7 @@ export class VoicechatUser {
         answeringUserId: string,
         msg: WsOfferMsgFromServer
     ): Promise<void> {
-        mediaStreamManager.broadcastMediaToPeer(this.pc);
+        mediaStreamManager.broadcastAudioToPeer(this.pc);
 
         this._mutedLocally = false;
         this.pc.addEventListener('track', this.playTrack.bind(this));

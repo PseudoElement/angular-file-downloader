@@ -14,18 +14,19 @@ export class MediaStreamManager {
     private mediaStream: MediaStream | null = null;
 
     public async startMediaStream(): Promise<void> {
-        const initialStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const preferredMic = devices.find((d) => d.kind === 'audioinput' && d.label.toLowerCase().includes('airpods'));
+        console.log('[startMediaStream] devices:', devices);
+        const airpods = devices.find((d) => d.kind === 'audioinput' && d.label.toLowerCase().includes('airpods'));
+        const hasWebCamera = !!devices.find((d) => d.kind === 'videoinput');
 
-        if (preferredMic) {
-            initialStream.getTracks().forEach((t) => t.stop());
-            this.mediaStream = await navigator.mediaDevices.getUserMedia({
-                audio: { deviceId: { exact: preferredMic.deviceId } }
-            });
-        } else {
-            this.mediaStream = initialStream;
-        }
+        this.mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                noiseSuppression: true,
+                echoCancellation: true,
+                ...(airpods && { deviceId: { exact: airpods.deviceId } })
+            },
+            video: hasWebCamera
+        });
     }
 
     public stopMediaStream(): void {
@@ -35,13 +36,21 @@ export class MediaStreamManager {
         });
     }
 
-    public broadcastMediaToPeer(pc: RTCPeerConnection): void {
+    public broadcastAudioToPeer(pc: RTCPeerConnection): void {
         if (!this.mediaStream) return;
-        this.mediaStream.getTracks().forEach((track) => {
-            console.log('[broadcastMediaToPeer] track:', track);
+        this.mediaStream.getAudioTracks().forEach((track) => {
+            console.log('[broadcastAudioToPeer] track:', track);
             pc.addTrack(track, this.mediaStream!);
         });
         this._audioEnabled = true;
+    }
+
+    public broadcastVideoToPeer(pc: RTCPeerConnection): void {
+        if (!this.mediaStream) return;
+        this.mediaStream.getVideoTracks().forEach((track) => {
+            console.log('[broadcastVideoToPeer] track:', track);
+            pc.addTrack(track, this.mediaStream!);
+        });
         this._videoEnabled = true;
     }
 
