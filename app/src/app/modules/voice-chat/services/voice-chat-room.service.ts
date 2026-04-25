@@ -131,6 +131,8 @@ export class VoiceChatRoomService {
 
     public readonly mediaStreamManager: MediaStreamManager = new MediaStreamManager();
 
+    private speechEvents: hark.Harker | null = null;
+
     constructor(
         private readonly voicechatApi: VoiceChatApiService,
         private readonly sintolModalSrv: SintolLibDynamicComponentService,
@@ -153,6 +155,7 @@ export class VoiceChatRoomService {
         this.setUsers([]);
         this.setMe(null);
         this._roomId = '';
+        this.speechEvents?.stop();
     }
 
     public async createVoiceRoom(): Promise<void> {
@@ -305,8 +308,8 @@ export class VoiceChatRoomService {
     private onMediaStreamStart(mediaStream: MediaStream): void {
         if (!this.me) return;
         const me = this.me;
-        const speechEvents = hark(mediaStream, { interval: 300 });
-        speechEvents.on('speaking', () => {
+        this.speechEvents = hark(mediaStream, { interval: 300, threshold: -70 });
+        this.speechEvents.on('speaking', () => {
             if (me.speaking) return;
             if (this.users.length < 1) return;
             const msg: WsUserVoiceChangedMsgToServer = {
@@ -316,7 +319,7 @@ export class VoiceChatRoomService {
             this.signalingClient.sendMsg(JSON.stringify(msg));
             this.setMe({ ...me, speaking: true });
         });
-        speechEvents.on('stopped_speaking', () => {
+        this.speechEvents.on('stopped_speaking', () => {
             if (this.users.length < 1) return;
             const msg: WsUserVoiceChangedMsgToServer = {
                 action: 'USER_VOICE_CHANGED',
