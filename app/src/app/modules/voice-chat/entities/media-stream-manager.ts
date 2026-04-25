@@ -13,7 +13,7 @@ export class MediaStreamManager {
 
     private mediaStream: MediaStream | null = null;
 
-    public async startMediaStream(): Promise<void> {
+    public async startMediaStream(onMediaStreamStart?: (mediaStream: MediaStream) => void): Promise<void> {
         const devices = await navigator.mediaDevices.enumerateDevices();
         console.log('[startMediaStream] devices:', devices);
         const airpods = devices.find((d) => d.kind === 'audioinput' && d.label.toLowerCase().includes('airpods'));
@@ -27,6 +27,7 @@ export class MediaStreamManager {
             },
             video: hasWebCamera
         });
+        onMediaStreamStart?.(this.mediaStream);
     }
 
     public stopMediaStream(): void {

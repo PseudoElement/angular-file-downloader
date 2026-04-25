@@ -89,6 +89,14 @@ export interface WsMicToggledMsgFromServer {
     };
 }
 
+export interface WsUserVoiceChangedMsgFromServer {
+    action: 'USER_VOICE_CHANGED';
+    data: {
+        user_id: string;
+        speaking: boolean;
+    };
+}
+
 export type WsGlobalMsgFromServer =
     | WsRoomCreatedMsgFromServer
     | WsRoomRemovedMsgFromServer
@@ -101,6 +109,7 @@ export type WsMsgFromServer =
     | WsUserDisconnectedMsgFromServer
     | WsOfferMsgFromServer
     | WsAnswerMsgFromServer
-    | WsMicToggledMsgFromServer;
+    | WsMicToggledMsgFromServer
+    | WsUserVoiceChangedMsgFromServer;
 
 /* --------------------------------------------------------------------------------------------------------------- */

@@ -6,11 +6,14 @@
     top: 72px;
     left: 301px;
     min-height: calc(100vh - 95px);
+    box-sizing: border-box;
     width: 100%;
     max-width: calc(100vw - 400px);
 
     @include tablet {
         top: 47px;
         left: 10px;
+        max-width: 100%;
+        width: 100%;
     }
 }

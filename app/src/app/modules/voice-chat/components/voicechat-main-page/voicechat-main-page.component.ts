@@ -21,6 +21,5 @@ export class VoicechatMainPageComponent {
     protected async createRoom(): Promise<void> {
         await this.roomSrv.createVoiceRoom();
         this.router.navigateByUrl('/voicechat/room/' + this.roomSrv.roomId);
-        console.log('[createRoom] room created:', this.roomSrv.roomId);
     }
 }

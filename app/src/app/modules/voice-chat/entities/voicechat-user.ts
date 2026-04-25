@@ -44,6 +44,12 @@ export class VoicechatUser {
         return this._loading;
     }
 
+    private _speaking: boolean;
+
+    public get speaking(): boolean {
+        return this._speaking;
+    }
+
     constructor(
         p: VoicechatUserParams,
         private readonly triggerUpdateUI: () => void
@@ -58,6 +64,7 @@ export class VoicechatUser {
         this._mutedLocally = false;
         this._mutedRemotely = false;
         this._loading = true;
+        this._speaking = false;
     }
 
     public disconnect(): void {
@@ -200,6 +207,12 @@ export class VoicechatUser {
 
     public toggleUserMicRemotely(enabled: boolean): void {
         this._mutedRemotely = !enabled;
+        this.triggerUpdateUI();
+    }
+
+    public toggleSpeakingStatus(speaking: boolean): void {
+        console.log('[toggleSpeakingStatus] speaking:', speaking);
+        this._speaking = speaking;
         this.triggerUpdateUI();
     }
 

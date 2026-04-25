@@ -41,7 +41,7 @@
     </ng-template>
 
     <ng-template #userSquare let-user="user">
-        <div class="user">
+        <div class="user" [class.user-speaking]="user.speaking">
             <div *ngIf="user.loading" class="loading">
                 <span>&bull;</span>
                 <span>&bull;</span>

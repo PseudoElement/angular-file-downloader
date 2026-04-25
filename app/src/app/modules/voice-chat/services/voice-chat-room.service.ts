@@ -3,7 +3,7 @@ import { SignalingClient } from '../entities/signaling-client';
 import { VoicechatUser } from '../entities/voicechat-user';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
-import { UserFromServer } from '../models/http-models-from-server';
+import { Me, UserFromServer } from '../models/http-models-from-server';
 import { ENVIRONMENT } from 'src/environments/environment';
 import { CreateRoomReqBody } from '../models/http-models-to-server';
 import { BehaviorSubject } from 'rxjs';
@@ -14,14 +14,22 @@ import {
     WsOfferMsgFromServer,
     WsUserConnectedMsgFromServer,
     WsUserDisconnectedMsgFromServer,
+    WsUserVoiceChangedMsgFromServer,
     WsYouConnectedMsgFromServer
 } from '../models/ws-models-from-server';
-import { WsConnectMsgToServer, WsDisconnectMsgToServer, WsMicToggledMsgToServer, WsOfferMsgToServer } from '../models/ws-models-to-server';
+import {
+    WsConnectMsgToServer,
+    WsDisconnectMsgToServer,
+    WsMicToggledMsgToServer,
+    WsOfferMsgToServer,
+    WsUserVoiceChangedMsgToServer
+} from '../models/ws-models-to-server';
 import { RTC_CONFIG } from '../constants/ice-servers';
 import { VoiceChatApiService } from './voice-chat-api.service';
 import { MediaStreamManager } from '../entities/media-stream-manager';
 import { AlertsService } from 'src/app/shared/services/alerts.service';
 import { AudioLoaderService } from 'src/app/core/audio/audio-loader.service';
+import * as hark from 'hark';
 
 /**
  * 1. CONNECT:
@@ -86,15 +94,15 @@ export class VoiceChatRoomService {
         this._users$.next(users);
     }
 
-    private readonly _me$ = new BehaviorSubject<UserFromServer | null>(null);
+    private readonly _me$ = new BehaviorSubject<Me | null>(null);
 
     public readonly me$ = this._me$.asObservable();
 
-    public get me(): UserFromServer | null {
+    public get me(): Me | null {
         return this._me$.value;
     }
 
-    private setMe(me: UserFromServer | null): void {
+    private setMe(me: Me | null): void {
         this._me$.next(me);
     }
 
@@ -157,6 +165,11 @@ export class VoiceChatRoomService {
             text: 'Input room name.'
         });
 
+        if (!roomName.trim()) {
+            this.alertsService.showAlert({ text: `Empty room name is not allowed.`, type: 'warn' });
+            return;
+        }
+
         const createRoomReqBody: CreateRoomReqBody = {
             host_name: userName,
             max_users: 20,
@@ -165,10 +178,11 @@ export class VoiceChatRoomService {
 
         const resp = await this.voicechatApi.createRoom(createRoomReqBody);
         this._roomId = resp.created_room.room_id;
-        this.setMe({ id: '', is_host: true, name: userName, muted: false });
+        this.setMe({ id: '', is_host: true, name: userName, muted: false, speaking: false });
 
         const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
         this.signalingClient.connect(socketUrl);
+        console.log('[createRoom] room created:', this.roomId);
     }
 
     /**
@@ -187,7 +201,7 @@ export class VoiceChatRoomService {
                 return false;
             }
 
-            this.setMe({ id: '', is_host: false, name: userName, muted: false });
+            this.setMe({ id: '', is_host: false, name: userName, muted: false, speaking: false });
             this._roomId = roomId;
 
             const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
@@ -242,6 +256,9 @@ export class VoiceChatRoomService {
             case 'USER_TOGGLED_MIC':
                 this.handleUserToggledMic(parsed);
                 break;
+            case 'USER_VOICE_CHANGED':
+                this.handleUserVoiceChanged(parsed);
+                break;
             default:
                 console.log('[VoiceChatService_onSocketMessage] Unknown WS action:', (parsed as any).action);
         }
@@ -270,9 +287,9 @@ export class VoiceChatRoomService {
 
         const me = apiUsers.find((user) => user.name === this.me!.name);
         if (!me) return;
-        this.setMe(me);
+        this.setMe({ ...me, speaking: false });
         this.audioLoaderSrv.audioElements.DISCORD_JOIN.play();
-        await this.mediaStreamManager.startMediaStream();
+        await this.mediaStreamManager.startMediaStream((stream) => this.onMediaStreamStart(stream));
 
         console.log('[VoiceChatService_handleYouConnected] me', me);
         if (!users.length) return;
@@ -283,6 +300,31 @@ export class VoiceChatRoomService {
                 offerToReceiveVideo: false
             });
         }
+    }
+
+    private onMediaStreamStart(mediaStream: MediaStream): void {
+        if (!this.me) return;
+        const me = this.me;
+        const speechEvents = hark(mediaStream, { interval: 300 });
+        speechEvents.on('speaking', () => {
+            if (me.speaking) return;
+            if (this.users.length < 1) return;
+            const msg: WsUserVoiceChangedMsgToServer = {
+                action: 'USER_VOICE_CHANGED',
+                data: { speaking: true, user_id: this.me!.id }
+            };
+            this.signalingClient.sendMsg(JSON.stringify(msg));
+            this.setMe({ ...me, speaking: true });
+        });
+        speechEvents.on('stopped_speaking', () => {
+            if (this.users.length < 1) return;
+            const msg: WsUserVoiceChangedMsgToServer = {
+                action: 'USER_VOICE_CHANGED',
+                data: { speaking: false, user_id: this.me!.id }
+            };
+            this.signalingClient.sendMsg(JSON.stringify(msg));
+            this.setMe({ ...me, speaking: false });
+        });
     }
 
     private handleUserConnected(msg: WsUserConnectedMsgFromServer): void {
@@ -350,9 +392,22 @@ export class VoiceChatRoomService {
         const toggledUserData = msg.data;
         if (toggledUserData.toggled_user_id === this.me?.id) return;
 
-        const foundUser = this.users.find((u) => u.userId);
+        const foundUser = this.users.find((u) => toggledUserData.toggled_user_id === u.userId);
         if (!foundUser) return;
 
         foundUser.toggleUserMicRemotely(toggledUserData.mic_enabled);
+    }
+
+    /**
+     * invoked when other user speaks to microphone
+     */
+    private async handleUserVoiceChanged(msg: WsUserVoiceChangedMsgFromServer): Promise<void> {
+        const voiceChangedData = msg.data;
+        if (voiceChangedData.user_id === this.me?.id) return;
+
+        const foundUser = this.users.find((u) => voiceChangedData.user_id === u.userId);
+        if (!foundUser) return;
+
+        foundUser.toggleSpeakingStatus(voiceChangedData.speaking);
     }
 }

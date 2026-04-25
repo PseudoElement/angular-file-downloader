@@ -40,9 +40,18 @@ export interface WsMicToggledMsgToServer {
     };
 }
 
+export interface WsUserVoiceChangedMsgToServer {
+    action: 'USER_VOICE_CHANGED';
+    data: {
+        user_id: string;
+        speaking: boolean;
+    };
+}
+
 export type WsMsgToServer =
     | WsConnectMsgToServer
     | WsOfferMsgToServer
     | WsAnswerMsgToServer
     | WsDisconnectMsgToServer
-    | WsMicToggledMsgToServer;
+    | WsMicToggledMsgToServer
+    | WsUserVoiceChangedMsgToServer;

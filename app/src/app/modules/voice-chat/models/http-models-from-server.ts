@@ -7,6 +7,10 @@ export interface UserFromServer {
     muted: boolean;
 }
 
+export interface Me extends UserFromServer {
+    speaking: boolean;
+}
+
 export interface RoomFromServer {
     users: UserFromServer[];
     name: string;
