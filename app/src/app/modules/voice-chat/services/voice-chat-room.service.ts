@@ -308,7 +308,7 @@ export class VoiceChatRoomService {
     private onMediaStreamStart(mediaStream: MediaStream): void {
         if (!this.me) return;
         const me = this.me;
-        this.speechEvents = hark(mediaStream, { interval: 300, threshold: -70 });
+        this.speechEvents = hark(mediaStream, { interval: 300, threshold: -20 });
         this.speechEvents.on('speaking', () => {
             if (me.speaking) return;
             if (this.users.length < 1) return;
