@@ -111,6 +111,14 @@ export class VoicechatUser {
                 this.triggerUpdateUI();
             }
         });
+        this.pc.addEventListener('negotiationneeded', () => {
+            if (this.pc.connectionState === 'failed' || this.pc.iceConnectionState === 'failed') {
+                console.log('[sendOffer] negotiationneeded failed. Restarting...');
+                this.pc.restartIce();
+                this._loading = true;
+                this.triggerUpdateUI();
+            }
+        });
         this.pc.addEventListener('iceconnectionstatechange', () => {
             if (this.pc.iceConnectionState === 'connected') {
                 this._loading = false;
@@ -166,6 +174,14 @@ export class VoicechatUser {
         this.pc.addEventListener('connectionstatechange', () => {
             if (this.pc.connectionState === 'failed') {
                 console.log('[sendAnswer] connectionState failed. Restarting...');
+                this.pc.restartIce();
+                this._loading = true;
+                this.triggerUpdateUI();
+            }
+        });
+        this.pc.addEventListener('negotiationneeded', () => {
+            if (this.pc.connectionState === 'failed' || this.pc.iceConnectionState === 'failed') {
+                console.log('[sendAnswer] negotiationneeded failed. Restarting...');
                 this.pc.restartIce();
                 this._loading = true;
                 this.triggerUpdateUI();

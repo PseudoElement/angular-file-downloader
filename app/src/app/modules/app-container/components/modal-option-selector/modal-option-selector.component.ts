@@ -13,6 +13,12 @@ export class OptionSelectorModalComponent extends AbstractModalComp<void> {
 
     public returnedValue: EventEmitter<void> = new EventEmitter();
 
+    public forceClose(event: MouseEvent): void {
+        const target = event.target as HTMLElement;
+        const selectorClicked = target.closest('app-main-option-selector');
+        if (!selectorClicked) this.close();
+    }
+
     public handleClose(): void {
         console.log('handleClose_handleClose');
         this.close();

@@ -1,4 +1,6 @@
-export const ENVIRONMENT = {
+import { EnvConfig } from './model';
+
+export const ENVIRONMENT: EnvConfig = {
     apiBaseUrl: 'http://localhost:8081/api/v1',
     apiSocketUrl: 'ws://localhost:8081/api/v1',
     appDomain: 'localhost:4200',
