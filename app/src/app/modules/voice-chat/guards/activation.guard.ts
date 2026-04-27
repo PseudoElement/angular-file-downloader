@@ -22,7 +22,7 @@ export const activationGuard: CanActivateFn = async (route: ActivatedRouteSnapsh
     }
 
     const success = await roomSrv.connectToVoiceRoom(roomId);
-    return success;
+    return success ? true : router.parseUrl('/voicechat');
 };
 
 export const userDataChecker = async (

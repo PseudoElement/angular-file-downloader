@@ -231,6 +231,11 @@ export class VoiceChatRoomService {
             }
 
             const roomInfo = await this.voicechatApi.fetchRoomById(roomId);
+            if (!roomInfo.room) {
+                this.alertsService.showAlert({ text: `Room with id ${roomId} not found.`, type: 'warn' });
+                return false;
+            }
+
             const nameTaken = (roomInfo.room?.users || []).find((user) => user.name.toLowerCase() === userName.toLowerCase());
             if (nameTaken) {
                 this.alertsService.showAlert({ text: `Username "${userName}" already taken. Choose another one.`, type: 'warn' });
