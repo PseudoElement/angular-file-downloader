@@ -97,6 +97,15 @@ export interface WsUserVoiceChangedMsgFromServer {
     };
 }
 
+export interface WsIceCandidateMsgFromServer {
+    action: 'ICE_CANDIDATE_FROM_SERVER';
+    data: {
+        candidate: RTCIceCandidateInit;
+        sender_user_id: string;
+        target_user_id: string;
+    };
+}
+
 export type WsGlobalMsgFromServer =
     | WsRoomCreatedMsgFromServer
     | WsRoomRemovedMsgFromServer
@@ -110,6 +119,7 @@ export type WsMsgFromServer =
     | WsOfferMsgFromServer
     | WsAnswerMsgFromServer
     | WsMicToggledMsgFromServer
-    | WsUserVoiceChangedMsgFromServer;
+    | WsUserVoiceChangedMsgFromServer
+    | WsIceCandidateMsgFromServer;
 
 /* --------------------------------------------------------------------------------------------------------------- */

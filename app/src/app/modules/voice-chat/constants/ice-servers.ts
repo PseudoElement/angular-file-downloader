@@ -1,5 +1,6 @@
 import { ENVIRONMENT } from 'src/environments/environment';
 
 export const RTC_CONFIG: RTCConfiguration = {
-    iceServers: ENVIRONMENT.iceServers
+    iceServers: ENVIRONMENT.iceServers,
+    iceCandidatePoolSize: 10
 };

@@ -9,6 +9,7 @@ import { CreateRoomReqBody } from '../models/http-models-to-server';
 import { BehaviorSubject } from 'rxjs';
 import {
     WsAnswerMsgFromServer,
+    WsIceCandidateMsgFromServer,
     WsMicToggledMsgFromServer,
     WsMsgFromServer,
     WsOfferMsgFromServer,
@@ -300,6 +301,9 @@ export class VoiceChatRoomService {
             case 'USER_VOICE_CHANGED':
                 this.handleUserVoiceChanged(parsed);
                 break;
+            case 'ICE_CANDIDATE_FROM_SERVER':
+                this.handleIceCandidate(parsed);
+                break;
             default:
                 console.log('[VoiceChatService_onSocketMessage] Unknown WS action:', (parsed as any).action);
         }
@@ -450,5 +454,11 @@ export class VoiceChatRoomService {
         if (!foundUser) return;
 
         foundUser.toggleSpeakingStatus(voiceChangedData.speaking);
+    }
+
+    private async handleIceCandidate(msg: WsIceCandidateMsgFromServer): Promise<void> {
+        const user = this.users.find((u) => u.userId === msg.data.sender_user_id);
+        if (!user) return;
+        await user.addIceCandidate(msg);
     }
 }

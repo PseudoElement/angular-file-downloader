@@ -48,10 +48,20 @@ export interface WsUserVoiceChangedMsgToServer {
     };
 }
 
+export interface WsIceCandidateMsgToServer {
+    action: 'ICE_CANDIDATE_TO_SERVER';
+    data: {
+        candidate: RTCIceCandidateInit;
+        sender_user_id: string;
+        target_user_id: string;
+    };
+}
+
 export type WsMsgToServer =
     | WsConnectMsgToServer
     | WsOfferMsgToServer
     | WsAnswerMsgToServer
     | WsDisconnectMsgToServer
     | WsMicToggledMsgToServer
-    | WsUserVoiceChangedMsgToServer;
+    | WsUserVoiceChangedMsgToServer
+    | WsIceCandidateMsgToServer;

@@ -23,8 +23,6 @@ export class MediaStreamManager {
 
         this.mediaStream = await navigator.mediaDevices.getUserMedia({
             audio: {
-                noiseSuppression: true,
-                echoCancellation: true,
                 ...(airpods && { deviceId: { exact: airpods.deviceId } })
             },
             video: hasWebCamera && allowedCamera

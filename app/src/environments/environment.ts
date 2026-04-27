@@ -5,8 +5,9 @@ export const ENVIRONMENT: EnvConfig = {
     apiSocketUrl: 'ws://localhost:8081/api/v1',
     appDomain: 'localhost:4200',
     iceServers: [
-        { urls: 'turn:127.0.0.1:3478', credential: 'bimba', username: 'bimba' },
-        { urls: 'turn:192.168.1.102:3478', credential: 'bimba', username: 'bimba' },
-        { urls: 'turn:172.16.9.1:3478', credential: 'bimba', username: 'bimba' }
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun.l.google.com:5349' },
+        { urls: 'stun:stun1.l.google.com:3478' }
     ]
 };

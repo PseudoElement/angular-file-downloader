@@ -1,6 +1,6 @@
 import { VoicechatUserParams } from '../models/voicechat-user';
-import { WsAnswerMsgFromServer, WsOfferMsgFromServer } from '../models/ws-models-from-server';
-import { WsAnswerMsgToServer, WsOfferMsgToServer } from '../models/ws-models-to-server';
+import { WsAnswerMsgFromServer, WsIceCandidateMsgFromServer, WsOfferMsgFromServer } from '../models/ws-models-from-server';
+import { WsAnswerMsgToServer, WsIceCandidateMsgToServer, WsOfferMsgToServer } from '../models/ws-models-to-server';
 import { randomHexColor } from '../utils/converters';
 import { MediaStreamManager } from './media-stream-manager';
 import { SignalingClient } from './signaling-client';
@@ -87,21 +87,16 @@ export class VoicechatUser {
         this.pc.addEventListener('track', this.playTrack.bind(this));
         // When all ICE candidates are gathered, send the complete offer.
         this.pc.addEventListener('icecandidate', (e) => {
-            if (e.candidate) return; // still gathering
-
-            const localDesc = this.pc.localDescription?.toJSON();
-            if (!localDesc) return;
-
-            console.log(`[sendOffer] Sending OFFER to ${this.userName}`);
-            const offerMsg: WsOfferMsgToServer = {
-                action: 'OFFER',
+            if (!e.candidate) return; // gathering complete, nothing to send
+            const candidateMsg: WsIceCandidateMsgToServer = {
+                action: 'ICE_CANDIDATE_TO_SERVER',
                 data: {
-                    offering_user_descriptor: JSON.stringify(localDesc),
-                    offering_user_id: senderUserId,
+                    candidate: e.candidate.toJSON(),
+                    sender_user_id: senderUserId,
                     target_user_id: this.userId
                 }
             };
-            signalingClient.sendMsg(JSON.stringify(offerMsg));
+            signalingClient.sendMsg(JSON.stringify(candidateMsg));
         });
         this.pc.addEventListener('connectionstatechange', () => {
             if (this.pc.connectionState === 'failed') {
@@ -141,6 +136,18 @@ export class VoicechatUser {
 
         const offer = await this.pc.createOffer(options);
         await this.pc.setLocalDescription(offer);
+
+        console.log(`[sendOffer] Sending OFFER to ${this.userName}`);
+        const localDesc = this.pc.localDescription!.toJSON();
+        const offerMsg: WsOfferMsgToServer = {
+            action: 'OFFER',
+            data: {
+                offering_user_descriptor: JSON.stringify(localDesc),
+                offering_user_id: senderUserId,
+                target_user_id: this.userId
+            }
+        };
+        signalingClient.sendMsg(JSON.stringify(offerMsg));
     }
 
     public async sendAnswer(
@@ -153,23 +160,17 @@ export class VoicechatUser {
 
         this._mutedLocally = false;
         this.pc.addEventListener('track', this.playTrack.bind(this));
-        // When all ICE candidates are gathered, send the complete answer.
         this.pc.addEventListener('icecandidate', (e) => {
-            if (e.candidate) return;
-
-            const localDesc = this.pc.localDescription?.toJSON();
-            if (!localDesc) return;
-
-            console.log(`[sendAnswer] Sending ANSWER to ${this.userName}`);
-            const answerMsg: WsAnswerMsgToServer = {
-                action: 'ANSWER',
+            if (!e.candidate) return; // gathering complete, nothing to send
+            const candidateMsg: WsIceCandidateMsgToServer = {
+                action: 'ICE_CANDIDATE_TO_SERVER',
                 data: {
-                    answering_user_descriptor: JSON.stringify(localDesc),
-                    answering_user_id: answeringUserId,
+                    candidate: e.candidate.toJSON(),
+                    sender_user_id: answeringUserId,
                     target_user_id: this.userId
                 }
             };
-            signalingClient.sendMsg(JSON.stringify(answerMsg));
+            signalingClient.sendMsg(JSON.stringify(candidateMsg));
         });
         this.pc.addEventListener('connectionstatechange', () => {
             if (this.pc.connectionState === 'failed') {
@@ -223,6 +224,24 @@ export class VoicechatUser {
             .catch((err) => console.log('[sendAnswer] setRemoteDescription err:', err));
         const answer = await this.pc.createAnswer();
         await this.pc.setLocalDescription(answer);
+
+        const localDesc = this.pc.localDescription?.toJSON();
+        if (!localDesc) return;
+
+        console.log(`[sendAnswer] Sending ANSWER to ${this.userName}`);
+        const answerMsg: WsAnswerMsgToServer = {
+            action: 'ANSWER',
+            data: {
+                answering_user_descriptor: JSON.stringify(localDesc),
+                answering_user_id: answeringUserId,
+                target_user_id: this.userId
+            }
+        };
+        signalingClient.sendMsg(JSON.stringify(answerMsg));
+    }
+
+    public async addIceCandidate(msg: WsIceCandidateMsgFromServer): Promise<void> {
+        await this.pc.addIceCandidate(new RTCIceCandidate(msg.data.candidate));
     }
 
     public receiveAnswer(msg: WsAnswerMsgFromServer): Promise<void> {
