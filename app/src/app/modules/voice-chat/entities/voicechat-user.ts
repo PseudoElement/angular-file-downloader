@@ -103,13 +103,26 @@ export class VoicechatUser {
             };
             signalingClient.sendMsg(JSON.stringify(offerMsg));
         });
+        this.pc.addEventListener('connectionstatechange', () => {
+            if (this.pc.connectionState === 'failed') {
+                console.log(`[sendOffer] connectionstatechange failed. Restarting...`);
+                this.pc.restartIce();
+                this._loading = true;
+                this.triggerUpdateUI();
+            }
+        });
         this.pc.addEventListener('iceconnectionstatechange', () => {
-            console.log('[sendAnswer] ICE connection state:', this.pc.iceConnectionState);
             if (this.pc.iceConnectionState === 'connected') {
                 this._loading = false;
                 this.triggerUpdateUI();
             }
             if (this.pc.iceConnectionState === 'checking') {
+                this._loading = true;
+                this.triggerUpdateUI();
+            }
+            if (this.pc.iceConnectionState === 'failed') {
+                console.log(`[sendOffer] iceconnectionstatechange failed. Restarting...`);
+                this.pc.restartIce();
                 this._loading = true;
                 this.triggerUpdateUI();
             }
@@ -151,15 +164,25 @@ export class VoicechatUser {
             signalingClient.sendMsg(JSON.stringify(answerMsg));
         });
         this.pc.addEventListener('connectionstatechange', () => {
-            console.log('[sendAnswer] Connection state:', this.pc.connectionState);
+            if (this.pc.connectionState === 'failed') {
+                console.log('[sendAnswer] connectionState failed. Restarting...');
+                this.pc.restartIce();
+                this._loading = true;
+                this.triggerUpdateUI();
+            }
         });
         this.pc.addEventListener('iceconnectionstatechange', () => {
-            console.log('[sendAnswer] ICE connection state:', this.pc.iceConnectionState);
             if (this.pc.iceConnectionState === 'connected') {
                 this._loading = false;
                 this.triggerUpdateUI();
             }
             if (this.pc.iceConnectionState === 'checking') {
+                this._loading = true;
+                this.triggerUpdateUI();
+            }
+            if (this.pc.iceConnectionState === 'failed') {
+                console.log('[sendAnswer] iceConnectionState failed. Restarting...');
+                this.pc.restartIce();
                 this._loading = true;
                 this.triggerUpdateUI();
             }

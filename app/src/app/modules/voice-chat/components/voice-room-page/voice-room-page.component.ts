@@ -34,7 +34,6 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
                 filter(([_, me]) => !!me),
                 map(([users, me]) => {
                     const uiRoom = serverRoomToUiRoom(roomInfo, me!, users);
-                    console.log('uiRoom$', uiRoom);
                     return uiRoom;
                 })
             )
@@ -76,23 +75,19 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
 
     public toggleMyVoice(): void {
         if (!this.voicechatRoomSrv.me) return;
-        console.log('[VoiceRoomPageComponent_toggleVoice] called');
         const newEnabled = this.voicechatRoomSrv.me.muted;
         this.voicechatRoomSrv.toggleMyMic(newEnabled);
     }
 
     public toggleMyVideo(): void {
-        console.log('[VoiceRoomPageComponent_toggleVideo] called');
         const enabled = this._videoEnabled$.value;
         this.voicechatRoomSrv.mediaStreamManager.toggleYourVideo(!enabled);
         this.setVideoEnabled(!enabled);
     }
 
     public toggleUserVoice(userId: string): void {
-        console.log('[toggleUserVoice] called');
         const user = this.voicechatRoomSrv.users.find((user) => user.userId === userId);
         if (!user) return;
-
         user.toggleUserMicLocally(user.mutedLocally);
     }
 }

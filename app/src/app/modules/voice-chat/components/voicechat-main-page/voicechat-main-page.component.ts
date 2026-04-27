@@ -19,7 +19,9 @@ export class VoicechatMainPageComponent {
     ) {}
 
     protected async createRoom(): Promise<void> {
-        await this.roomSrv.createVoiceRoom();
-        this.router.navigateByUrl('/voicechat/room/' + this.roomSrv.roomId);
+        const success = await this.roomSrv.createVoiceRoom();
+        if (success) {
+            this.router.navigateByUrl('/voicechat/room/' + this.roomSrv.roomId);
+        }
     }
 }

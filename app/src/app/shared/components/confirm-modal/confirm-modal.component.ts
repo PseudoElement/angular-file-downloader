@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { AbstractModalComp } from 'dynamic-rendering/lib/types/dynamic-comp-srv-types';
+import { AbstractModalComp } from 'dynamic-rendering';
 import { FormControl } from '@angular/forms';
 import { animate, style, transition, trigger } from '@angular/animations';
 
@@ -21,7 +21,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
         ])
     ]
 })
-export class ConfirmModalComponent implements AbstractModalComp<string> {
+export class ConfirmModalComponent extends AbstractModalComp<string> {
     @Input({ required: true }) title: string = '';
 
     @Input({ required: true }) text: string = '';
@@ -31,8 +31,6 @@ export class ConfirmModalComponent implements AbstractModalComp<string> {
     @Input() height: number = 300;
 
     @Output() returnedValue: EventEmitter<string> = new EventEmitter();
-
-    public close: () => void = () => {};
 
     public readonly valueCtrl = new FormControl<string>('');
 

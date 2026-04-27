@@ -3,7 +3,7 @@ import { SignalingClient } from '../entities/signaling-client';
 import { VoicechatUser } from '../entities/voicechat-user';
 import { SintolLibDynamicComponentService } from 'dynamic-rendering';
 import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/confirm-modal.component';
-import { Me, UserFromServer } from '../models/http-models-from-server';
+import { Me } from '../models/http-models-from-server';
 import { ENVIRONMENT } from 'src/environments/environment';
 import { CreateRoomReqBody } from '../models/http-models-to-server';
 import { BehaviorSubject } from 'rxjs';
@@ -66,7 +66,7 @@ import * as hark from 'hark';
  *   и отправляем ему answering_user_id, answering_user_descriptor, target_user_id
  */
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class VoiceChatRoomService {
     private readonly _updateUI$ = new BehaviorSubject(true);
 
@@ -158,34 +158,53 @@ export class VoiceChatRoomService {
         this.speechEvents?.stop();
     }
 
-    public async createVoiceRoom(): Promise<void> {
-        const userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
-            title: 'Modal',
-            text: 'Input your name.'
-        });
-        const roomName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
-            title: 'Modal',
-            text: 'Input room name.'
-        });
+    public async createVoiceRoom(): Promise<boolean> {
+        try {
+            const allowedMicrophone = await navigator.mediaDevices
+                .getUserMedia({ audio: true })
+                .then(() => true)
+                .catch(() => false);
+            if (!allowedMicrophone) {
+                this.alertsService.showAlert({ text: 'Allow microphone to create room.', type: 'warn' });
+                return false;
+            }
 
-        if (!roomName.trim()) {
-            this.alertsService.showAlert({ text: `Empty room name is not allowed.`, type: 'warn' });
-            return;
+            const userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
+                title: 'Modal',
+                text: 'Input your name.'
+            });
+            if (!userName || !userName.trim()) {
+                this.alertsService.showAlert({ text: `Empty user name is not allowed.`, type: 'warn' });
+                return false;
+            }
+
+            const roomName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
+                title: 'Modal',
+                text: 'Input room name.'
+            });
+            if (!roomName || !roomName.trim()) {
+                this.alertsService.showAlert({ text: `Empty room name is not allowed.`, type: 'warn' });
+                return false;
+            }
+
+            const createRoomReqBody: CreateRoomReqBody = {
+                host_name: userName,
+                max_users: 20,
+                room_name: roomName
+            };
+
+            const resp = await this.voicechatApi.createRoom(createRoomReqBody);
+            this._roomId = resp.created_room.room_id;
+            this.setMe({ id: '', is_host: true, name: userName, muted: false, speaking: false });
+
+            const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
+            this.signalingClient.connect(socketUrl);
+            console.log('[createVoiceRoom] room created:', this.roomId);
+            return true;
+        } catch (err) {
+            console.error('[createVoiceRoom] err:', err);
+            return false;
         }
-
-        const createRoomReqBody: CreateRoomReqBody = {
-            host_name: userName,
-            max_users: 20,
-            room_name: roomName
-        };
-
-        const resp = await this.voicechatApi.createRoom(createRoomReqBody);
-        this._roomId = resp.created_room.room_id;
-        this.setMe({ id: '', is_host: true, name: userName, muted: false, speaking: false });
-
-        const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
-        this.signalingClient.connect(socketUrl);
-        console.log('[createRoom] room created:', this.roomId);
     }
 
     /**
@@ -193,10 +212,24 @@ export class VoiceChatRoomService {
      */
     public async connectToVoiceRoom(roomId: string): Promise<boolean> {
         try {
+            const allowedMicrophone = await navigator.mediaDevices
+                .getUserMedia({ audio: true })
+                .then(() => true)
+                .catch(() => false);
+            if (!allowedMicrophone) {
+                this.alertsService.showAlert({ text: 'Allow microphone to connect to room.', type: 'warn' });
+                return false;
+            }
+
             const userName = await this.sintolModalSrv.openConfirmModal<ConfirmModalComponent, string>(ConfirmModalComponent, {
                 title: 'Modal',
                 text: 'Input your name.'
             });
+            if (!userName || !userName.trim()) {
+                this.alertsService.showAlert({ text: `Empty user name is not allowed.`, type: 'warn' });
+                return false;
+            }
+
             const roomInfo = await this.voicechatApi.fetchRoomById(roomId);
             const nameTaken = (roomInfo.room?.users || []).find((user) => user.name.toLowerCase() === userName.toLowerCase());
             if (nameTaken) {

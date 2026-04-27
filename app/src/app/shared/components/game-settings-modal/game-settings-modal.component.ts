@@ -1,7 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { AbstractModalComp } from 'dynamic-rendering/lib/types/dynamic-comp-srv-types';
+import { AbstractModalComp } from 'dynamic-rendering';
 import { CommonGameSettings } from 'src/app/modules/mini-games/models/common-settings-types';
 import { PlayerKeyboardAction } from 'src/app/modules/mini-games/modules/dino-game/models/game-objects-types';
 import { KeysBindings } from 'src/app/modules/mini-games/modules/dino-game/models/key-bindings-types';
@@ -36,14 +36,12 @@ export interface SettingsReturnedValue {
         ])
     ]
 })
-export class GameSettingsModalComponent implements AbstractModalComp<SettingsReturnedValue>, OnInit {
+export class GameSettingsModalComponent extends AbstractModalComp<SettingsReturnedValue> implements OnInit {
     @Input({ required: true }) initialKeyBindings: KeysBindings = {} as KeysBindings;
 
     @Input({ required: true }) settings: CommonGameSettings = { isMuted: false };
 
     @Output() returnedValue: EventEmitter<SettingsReturnedValue> = new EventEmitter<SettingsReturnedValue>();
-
-    public close = () => {};
 
     public newKeyBindings!: KeysBindings;
 

@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { AbstractModalComp } from 'dynamic-rendering/lib/types/dynamic-comp-srv-types';
+import { AbstractModalComp } from 'dynamic-rendering';
 
 @Component({
     selector: 'app-modal',
@@ -34,6 +34,8 @@ export class ModalComponent implements AbstractModalComp<boolean> {
     @Output() returnedValue: EventEmitter<boolean> = new EventEmitter();
 
     ngOnInit(): void {}
+
+    public value = false;
 
     public close: () => void = () => {};
 

@@ -56,7 +56,6 @@ export class VoiceRoomsListComponent {
         const success = await this.roomSrv.connectToVoiceRoom(roomId);
         if (success) {
             this.router.navigateByUrl('/voicechat/room/' + roomId);
-            console.log('[connectToRoom] connected to room:', this.roomSrv.roomId);
         }
     }
 }

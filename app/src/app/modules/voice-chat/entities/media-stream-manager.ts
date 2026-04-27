@@ -18,6 +18,8 @@ export class MediaStreamManager {
         console.log('[startMediaStream] devices:', devices);
         const airpods = devices.find((d) => d.kind === 'audioinput' && d.label.toLowerCase().includes('airpods'));
         const hasWebCamera = !!devices.find((d) => d.kind === 'videoinput');
+        //@ts-ignore
+        const allowedCamera = await navigator.permissions.query({ name: 'camera' }).then((d) => d.state === 'granted');
 
         this.mediaStream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -25,7 +27,7 @@ export class MediaStreamManager {
                 echoCancellation: true,
                 ...(airpods && { deviceId: { exact: airpods.deviceId } })
             },
-            video: hasWebCamera
+            video: hasWebCamera && allowedCamera
         });
         onMediaStreamStart?.(this.mediaStream);
     }
