@@ -22,7 +22,6 @@ import {
     WsConnectMsgToServer,
     WsDisconnectMsgToServer,
     WsMicToggledMsgToServer,
-    WsOfferMsgToServer,
     WsUserVoiceChangedMsgToServer
 } from '../models/ws-models-to-server';
 import { RTC_CONFIG } from '../constants/ice-servers';
@@ -349,31 +348,30 @@ export class VoiceChatRoomService {
 
     private onMediaStreamStart(mediaStream: MediaStream): void {
         if (!this.me) return;
-        const me = this.me;
         this.speechEvents = hark(mediaStream, { interval: 100, threshold: -40 });
         this.speechEvents.on('speaking', () => {
-            if (me.speaking) return;
-            if (this.users.length < 1) return;
+            if (!this.me || this.me.speaking || this.users.length < 1) return;
             const msg: WsUserVoiceChangedMsgToServer = {
                 action: 'USER_VOICE_CHANGED',
-                data: { speaking: true, user_id: this.me!.id }
+                data: { speaking: true, user_id: this.me.id }
             };
             this.signalingClient.sendMsg(JSON.stringify(msg));
-            this.setMe({ ...me, speaking: true });
+            this.setMe({ ...this.me, speaking: true });
         });
         this.speechEvents.on('stopped_speaking', () => {
-            if (this.users.length < 1) return;
+            if (!this.me || this.users.length < 1) return;
             const msg: WsUserVoiceChangedMsgToServer = {
                 action: 'USER_VOICE_CHANGED',
-                data: { speaking: false, user_id: this.me!.id }
+                data: { speaking: false, user_id: this.me.id }
             };
             this.signalingClient.sendMsg(JSON.stringify(msg));
-            this.setMe({ ...me, speaking: false });
+            this.setMe({ ...this.me, speaking: false });
         });
     }
 
     private handleUserConnected(msg: WsUserConnectedMsgFromServer): void {
         const connectedUser = msg.data;
+        if (connectedUser.connected_user_id.toLowerCase() === this.me?.id.toLowerCase()) return;
         const user = new VoicechatUser(
             {
                 userId: connectedUser.connected_user_id,
@@ -435,7 +433,7 @@ export class VoiceChatRoomService {
 
     private async handleUserToggledMic(msg: WsMicToggledMsgFromServer): Promise<void> {
         const toggledUserData = msg.data;
-        if (toggledUserData.toggled_user_id === this.me?.id) return;
+        if (toggledUserData.toggled_user_id.toLowerCase() === this.me?.id.toLowerCase()) return;
 
         const foundUser = this.users.find((u) => toggledUserData.toggled_user_id === u.userId);
         if (!foundUser) return;
@@ -448,7 +446,7 @@ export class VoiceChatRoomService {
      */
     private async handleUserVoiceChanged(msg: WsUserVoiceChangedMsgFromServer): Promise<void> {
         const voiceChangedData = msg.data;
-        if (voiceChangedData.user_id === this.me?.id) return;
+        if (voiceChangedData.user_id.toLowerCase() === this.me?.id.toLowerCase()) return;
 
         const foundUser = this.users.find((u) => voiceChangedData.user_id === u.userId);
         if (!foundUser) return;
