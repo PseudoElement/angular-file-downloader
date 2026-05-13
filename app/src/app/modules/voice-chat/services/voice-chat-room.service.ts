@@ -197,8 +197,8 @@ export class VoiceChatRoomService {
                 title: 'Modal',
                 text: 'Input your name.'
             });
-            if (!userName || !userName.trim()) {
-                this.alertsService.showAlert({ text: `Empty user name is not allowed.`, type: 'warn' });
+            if (!userName || !userName.trim() || /[\&\%\+]/.test(userName)) {
+                this.alertsService.showAlert({ text: `Invalid user name.`, type: 'warn' });
                 return false;
             }
 
@@ -207,7 +207,7 @@ export class VoiceChatRoomService {
                 text: 'Input room name.'
             });
             if (!roomName || !roomName.trim()) {
-                this.alertsService.showAlert({ text: `Empty room name is not allowed.`, type: 'warn' });
+                this.alertsService.showAlert({ text: `Invalid room name.`, type: 'warn' });
                 return false;
             }
 
@@ -249,8 +249,8 @@ export class VoiceChatRoomService {
                 title: 'Modal',
                 text: 'Input your name.'
             });
-            if (!userName || !userName.trim()) {
-                this.alertsService.showAlert({ text: `Empty user name is not allowed.`, type: 'warn' });
+            if (!userName || !userName.trim() || /[\&\%\+]/.test(userName)) {
+                this.alertsService.showAlert({ text: `Invalid user name.`, type: 'warn' });
                 return false;
             }
 

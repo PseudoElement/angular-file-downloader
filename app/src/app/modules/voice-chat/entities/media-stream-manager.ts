@@ -33,8 +33,12 @@ export class MediaStreamManager {
         this._hasWebCamera = !!devices.find((d) => d.kind === 'videoinput');
         this._hasMicrophone = !!devices.find((d) => d.kind === 'audioinput');
 
-        //@ts-ignore
-        const allowedCamera = await navigator.permissions.query({ name: 'camera' }).then((d) => d.state === 'granted');
+        let allowedCamera = true;
+        try {
+            // @ts-ignore
+            const permission = await navigator.permissions.query({ name: 'camera' });
+            allowedCamera = permission.state !== 'denied';
+        } catch {}
 
         this.mediaStream = await navigator.mediaDevices.getUserMedia({
             audio: {

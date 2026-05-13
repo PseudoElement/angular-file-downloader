@@ -281,16 +281,23 @@ export class VoicechatUser {
             this.audioElement.srcObject = event.streams[0];
             this.audioElement.play();
         } else {
-            const el = document.getElementById(`video-tag-${this.userId}`) as HTMLVideoElement | null;
-            console.log('VIDEO_TAG_FOUND ==>', el);
-            if (!el) {
-                console.log('[playTrack] video tag not found by id!');
-                return;
-            }
-            this.videoElement = el;
-            this.videoElement.srcObject = event.streams[0];
-            this.videoElement.muted = true;
+            this.tryAttachVideoStream(event.streams[0]);
         }
+    }
+
+    private tryAttachVideoStream(stream: MediaStream | null, attempt = 0): void {
+        if (!stream) return;
+        const el = document.getElementById(`video-tag-${this.userId}`) as HTMLVideoElement | null;
+        if (!el) {
+            if (attempt < 30) {
+                console.log('[tryAttachVideoStream] attempt:', attempt);
+                setTimeout(() => this.tryAttachVideoStream(stream, attempt + 1), 50);
+            }
+            return;
+        }
+        this.videoElement = el;
+        this.videoElement.srcObject = stream;
+        this.videoElement.muted = true;
     }
 
     public toggleUserMicLocally(enabled: boolean): void {
