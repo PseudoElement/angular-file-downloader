@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, filter, firstValueFrom, forkJoin, map, Observable, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, filter, firstValueFrom, forkJoin, map, Observable, of, startWith, switchMap } from 'rxjs';
 import { VoiceChatRoomService } from '../../services/voice-chat-room.service';
 import { VoicechatRooom } from '../../models/client-room';
 import { serverRoomToUiRoom } from '../../utils/converters';
@@ -12,7 +12,7 @@ const defaultRoomInfo: VoicechatRooom = {
     max_users: 1,
     name: '',
     users: [],
-    me: { id: '228', is_host: false, name: 'sintol', muted: false }
+    me: { id: '228', is_host: false, name: 'sintol', muted: false, camera_enabled: false }
 };
 
 @Component({
@@ -40,14 +40,6 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
         ),
         startWith(defaultRoomInfo)
     );
-
-    private readonly _videoEnabled$ = new BehaviorSubject(true);
-
-    public readonly videoEnabled$ = this._videoEnabled$.asObservable();
-
-    private setVideoEnabled(enabled: boolean): void {
-        this._videoEnabled$.next(enabled);
-    }
 
     constructor(
         private readonly activatedRoute: ActivatedRoute,
@@ -80,9 +72,9 @@ export class VoiceRoomPageComponent implements OnInit, OnDestroy {
     }
 
     public toggleMyVideo(): void {
-        const enabled = this._videoEnabled$.value;
-        this.voicechatRoomSrv.mediaStreamManager.toggleYourVideo(!enabled);
-        this.setVideoEnabled(!enabled);
+        if (!this.voicechatRoomSrv.me) return;
+        const newEnabled = !this.voicechatRoomSrv.me.camera_enabled;
+        this.voicechatRoomSrv.toggleMyCamera(newEnabled);
     }
 
     public toggleUserVoice(userId: string): void {

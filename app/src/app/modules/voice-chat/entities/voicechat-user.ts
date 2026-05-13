@@ -18,6 +18,8 @@ export class VoicechatUser {
 
     public audioElement: HTMLAudioElement | null;
 
+    public videoElement: HTMLVideoElement | null;
+
     public readonly iconHexColor: string;
 
     private _mutedLocally: boolean;
@@ -36,6 +38,22 @@ export class VoicechatUser {
      */
     public get mutedRemotely(): boolean {
         return this._mutedRemotely;
+    }
+
+    private _enabledCameraRemotely: boolean;
+
+    /**
+     * true - if remote user enabled camera himself (got message USER_TOGGLED_CAMERA from room's socket)
+     */
+    public get enabledCameraRemotely(): boolean {
+        return this._enabledCameraRemotely;
+    }
+
+    /**
+     * this.videoElement is set as HTMLVideoElement only when in playTrack() method sent `video` track from peer
+     */
+    public get alreadyHasVideoTrack(): boolean {
+        return !!this.videoElement;
     }
 
     private _loading: boolean;
@@ -61,8 +79,10 @@ export class VoicechatUser {
         this.iconHexColor = randomHexColor();
         this.dataChannel = null;
         this.audioElement = null;
+        this.videoElement = null;
         this._mutedLocally = false;
         this._mutedRemotely = false;
+        this._enabledCameraRemotely = p.cameraEnabled;
         this._loading = true;
         this._speaking = false;
     }
@@ -82,6 +102,7 @@ export class VoicechatUser {
         options: RTCOfferOptions
     ): Promise<void> {
         mediaStreamManager.broadcastAudioToPeer(this.pc);
+        mediaStreamManager.broadcastVideoToPeer(this.pc);
 
         this._mutedLocally = false;
         this.pc.addEventListener('track', this.playTrack.bind(this));
@@ -157,6 +178,7 @@ export class VoicechatUser {
         msg: WsOfferMsgFromServer
     ): Promise<void> {
         mediaStreamManager.broadcastAudioToPeer(this.pc);
+        mediaStreamManager.broadcastVideoToPeer(this.pc);
 
         this._mutedLocally = false;
         this.pc.addEventListener('track', this.playTrack.bind(this));
@@ -222,6 +244,7 @@ export class VoicechatUser {
         await this.pc
             .setRemoteDescription(new RTCSessionDescription(remoteSDP))
             .catch((err) => console.log('[sendAnswer] setRemoteDescription err:', err));
+
         const answer = await this.pc.createAnswer();
         await this.pc.setLocalDescription(answer);
 
@@ -252,9 +275,22 @@ export class VoicechatUser {
     }
 
     private playTrack(event: RTCTrackEvent): void {
-        this.audioElement = new Audio();
-        this.audioElement.srcObject = event.streams[0];
-        this.audioElement.play();
+        console.log('[PLAY_TRACK]', event);
+        if (event.track.kind === 'audio') {
+            this.audioElement = new Audio();
+            this.audioElement.srcObject = event.streams[0];
+            this.audioElement.play();
+        } else {
+            const el = document.getElementById(`video-tag-${this.userId}`) as HTMLVideoElement | null;
+            console.log('VIDEO_TAG_FOUND ==>', el);
+            if (!el) {
+                console.log('[playTrack] video tag not found by id!');
+                return;
+            }
+            this.videoElement = el;
+            this.videoElement.srcObject = event.streams[0];
+            this.videoElement.muted = true;
+        }
     }
 
     public toggleUserMicLocally(enabled: boolean): void {
@@ -268,8 +304,12 @@ export class VoicechatUser {
         this.triggerUpdateUI();
     }
 
+    public toggleUserCameraRemotely(enabled: boolean): void {
+        this._enabledCameraRemotely = enabled;
+        this.triggerUpdateUI();
+    }
+
     public toggleSpeakingStatus(speaking: boolean): void {
-        console.log('[toggleSpeakingStatus] speaking:', speaking);
         this._speaking = speaking;
         this.triggerUpdateUI();
     }

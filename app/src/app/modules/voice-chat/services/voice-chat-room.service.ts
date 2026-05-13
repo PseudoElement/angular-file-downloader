@@ -9,6 +9,7 @@ import { CreateRoomReqBody } from '../models/http-models-to-server';
 import { BehaviorSubject } from 'rxjs';
 import {
     WsAnswerMsgFromServer,
+    WsCameraToggledMsgFromServer,
     WsIceCandidateMsgFromServer,
     WsMicToggledMsgFromServer,
     WsMsgFromServer,
@@ -19,6 +20,7 @@ import {
     WsYouConnectedMsgFromServer
 } from '../models/ws-models-from-server';
 import {
+    WsCameraToggledMsgToServer,
     WsConnectMsgToServer,
     WsDisconnectMsgToServer,
     WsMicToggledMsgToServer,
@@ -110,10 +112,32 @@ export class VoiceChatRoomService {
         if (!this.me) return;
         this.mediaStreamManager.toggleYourVoice(enabled);
         this.setMe({ ...this.me, muted: !enabled });
+        this.triggerUpdateUI();
 
         const msg: WsMicToggledMsgToServer = {
             action: 'USER_TOGGLED_MIC',
             data: { mic_enabled: enabled, toggled_user_id: this.me.id }
+        };
+        this.signalingClient.sendMsg(JSON.stringify(msg));
+    }
+
+    public toggleMyCamera(enabled: boolean): void {
+        if (!this.me) return;
+        if (!this.mediaStreamManager.hasWebCamera) {
+            this.alertsService.showAlert({
+                type: 'warn',
+                text: `Can't find your video. Allow your web-camera in site-settings and reload page.`
+            });
+            return;
+        }
+
+        this.setMe({ ...this.me, camera_enabled: enabled });
+        this.triggerUpdateUI();
+        this.mediaStreamManager.toggleYourVideo(enabled);
+
+        const msg: WsCameraToggledMsgToServer = {
+            action: 'USER_TOGGLED_CAMERA',
+            data: { camera_enabled: enabled, toggled_user_id: this.me.id }
         };
         this.signalingClient.sendMsg(JSON.stringify(msg));
     }
@@ -195,7 +219,7 @@ export class VoiceChatRoomService {
 
             const resp = await this.voicechatApi.createRoom(createRoomReqBody);
             this._roomId = resp.created_room.room_id;
-            this.setMe({ id: '', is_host: true, name: userName, muted: false, speaking: false });
+            this.setMe({ id: '', is_host: true, name: userName, muted: false, camera_enabled: false, speaking: false });
 
             const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
             this.signalingClient.connect(socketUrl);
@@ -242,7 +266,7 @@ export class VoiceChatRoomService {
                 return false;
             }
 
-            this.setMe({ id: '', is_host: false, name: userName, muted: false, speaking: false });
+            this.setMe({ id: '', is_host: false, name: userName, muted: false, camera_enabled: false, speaking: false });
             this._roomId = roomId;
 
             const socketUrl = `${ENVIRONMENT.apiSocketUrl}/voicechat/ws/connect?room_id=${this.roomId}&user_name=${userName}`;
@@ -262,7 +286,8 @@ export class VoiceChatRoomService {
             action: 'CONNECT',
             data: {
                 room_id: this.roomId,
-                connected_user_name: this.me.name
+                connected_user_name: this.me.name,
+                camera_enabled: this.mediaStreamManager.videoEnabled
             }
         };
         this.signalingClient.sendMsg(JSON.stringify(msg));
@@ -303,6 +328,9 @@ export class VoiceChatRoomService {
             case 'ICE_CANDIDATE_FROM_SERVER':
                 this.handleIceCandidate(parsed);
                 break;
+            case 'USER_TOGGLED_CAMERA':
+                this.handleUserToggledCamera(parsed);
+                break;
             default:
                 console.log('[VoiceChatService_onSocketMessage] Unknown WS action:', (parsed as any).action);
         }
@@ -322,6 +350,7 @@ export class VoiceChatRoomService {
                             userId: user.id,
                             userName: user.name,
                             isHost: user.is_host,
+                            cameraEnabled: user.camera_enabled,
                             pc: new RTCPeerConnection(RTC_CONFIG)
                         },
                         this.triggerUpdateUI.bind(this)
@@ -341,7 +370,7 @@ export class VoiceChatRoomService {
         for (const user of users) {
             await user.sendOffer(this.signalingClient, this.mediaStreamManager, me.id, {
                 offerToReceiveAudio: true,
-                offerToReceiveVideo: false
+                offerToReceiveVideo: true
             });
         }
     }
@@ -377,6 +406,7 @@ export class VoiceChatRoomService {
                 userId: connectedUser.connected_user_id,
                 userName: connectedUser.connected_user_name,
                 isHost: false,
+                cameraEnabled: connectedUser.camera_enabled,
                 pc: new RTCPeerConnection(RTC_CONFIG)
             },
             this.triggerUpdateUI.bind(this)
@@ -458,5 +488,15 @@ export class VoiceChatRoomService {
         const user = this.users.find((u) => u.userId === msg.data.sender_user_id);
         if (!user) return;
         await user.addIceCandidate(msg);
+    }
+
+    private async handleUserToggledCamera(msg: WsCameraToggledMsgFromServer): Promise<void> {
+        const toggledUserData = msg.data;
+        if (toggledUserData.toggled_user_id.toLowerCase() === this.me?.id.toLowerCase()) return;
+
+        const user = this.users.find((u) => u.userId === msg.data.toggled_user_id);
+        if (!user) return;
+
+        user.toggleUserCameraRemotely(toggledUserData.camera_enabled);
     }
 }

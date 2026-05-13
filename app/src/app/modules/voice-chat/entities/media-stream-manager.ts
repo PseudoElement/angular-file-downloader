@@ -11,13 +11,28 @@ export class MediaStreamManager {
         return this._audioEnabled;
     }
 
+    private _hasWebCamera: boolean = false;
+
+    public get hasWebCamera(): boolean {
+        return this._hasWebCamera;
+    }
+
+    private _hasMicrophone: boolean = false;
+
+    public get hasMicrophone(): boolean {
+        return this._hasMicrophone;
+    }
+
     private mediaStream: MediaStream | null = null;
 
     public async startMediaStream(onMediaStreamStart?: (mediaStream: MediaStream) => void): Promise<void> {
         const devices = await navigator.mediaDevices.enumerateDevices();
         console.log('[startMediaStream] devices:', devices);
         const airpods = devices.find((d) => d.kind === 'audioinput' && d.label.toLowerCase().includes('airpods'));
-        const hasWebCamera = !!devices.find((d) => d.kind === 'videoinput');
+
+        this._hasWebCamera = !!devices.find((d) => d.kind === 'videoinput');
+        this._hasMicrophone = !!devices.find((d) => d.kind === 'audioinput');
+
         //@ts-ignore
         const allowedCamera = await navigator.permissions.query({ name: 'camera' }).then((d) => d.state === 'granted');
 
@@ -25,7 +40,7 @@ export class MediaStreamManager {
             audio: {
                 ...(airpods && { deviceId: { exact: airpods.deviceId } })
             },
-            video: hasWebCamera && allowedCamera
+            video: this._hasWebCamera && allowedCamera
         });
         onMediaStreamStart?.(this.mediaStream);
     }
@@ -69,5 +84,14 @@ export class MediaStreamManager {
             track.enabled = enabled;
         });
         this._videoEnabled = enabled;
+        if (enabled) {
+            const myVideoEl = document.getElementById('video-tag-my') as HTMLVideoElement | null;
+            if (!myVideoEl) {
+                console.log('[toggleYourVideo] video-tag-my element not found by id!');
+                return;
+            }
+            myVideoEl.srcObject = this.mediaStream;
+            myVideoEl.muted = true;
+        }
     }
 }

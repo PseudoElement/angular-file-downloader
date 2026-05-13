@@ -1,10 +1,4 @@
-<div
-    *ngLet="{
-        roomInfo: roomInfo$ | async,
-        videoEnabled: videoEnabled$ | async
-    } as state"
-    class="voice-room-wrapper"
->
+<div *ngLet="{ roomInfo: roomInfo$ | async } as state" class="voice-room-wrapper">
     <h3>Room {{ state.roomInfo.name }}</h3>
 
     <div class="info">
@@ -22,19 +16,26 @@
 
     <ng-template #mySquare let-userName="userName">
         <div class="user">
-            <div class="photo" [style.background-color]="'#e62753'">
-                <span class="material-symbols-outlined icon"> person </span>
+            <div class="video-wrapper" [style.display]="state.roomInfo.me.camera_enabled ? 'block' : 'none'">
+                <video id="video-tag-my" autoplay muted></video>
             </div>
-            <div class="name">
-                <span> {{ userName }} </span>
-            </div>
+
+            <ng-container *ngIf="!state.roomInfo.me.camera_enabled">
+                <div class="photo" [style.background-color]="'#e62753'">
+                    <span class="material-symbols-outlined icon"> person </span>
+                </div>
+                <div class="name">
+                    <span> {{ userName }} </span>
+                </div>
+            </ng-container>
+
             <div class="action-bar">
                 <span class="material-symbols-outlined action-icon" (click)="toggleMyVoice()">
                     {{ state.roomInfo.me.muted ? 'mic_off' : 'mic' }}
                 </span>
-                <!--<span class="material-symbols-outlined action-icon" (click)="toggleMyVideo()">
-                    {{ state.videoEnabled ? 'video_camera_front' : 'video_camera_front_off' }}
-                </span>-->
+                <span class="material-symbols-outlined action-icon" (click)="toggleMyVideo()">
+                    {{ state.roomInfo.me.camera_enabled ? 'video_camera_front' : 'video_camera_front_off' }}
+                </span>
                 <span class="material-symbols-outlined action-icon red-bg" (click)="disconnect()"> call_end </span>
             </div>
         </div>
@@ -48,12 +49,19 @@
                 <span>&bull;</span>
             </div>
 
-            <div class="photo" [style.background-color]="user.iconHexColor">
-                <span class="material-symbols-outlined icon"> person </span>
+            <div class="video-wrapper" [style.display]="user.enabledCameraRemotely ? 'block' : 'none'">
+                <video [id]="'video-tag-' + user.userId" autoplay muted></video>
             </div>
-            <div class="name">
-                <span> {{ user.userName }} </span>
-            </div>
+
+            <ng-container *ngIf="!user.enabledCameraRemotely">
+                <div class="photo" [style.background-color]="user.iconHexColor">
+                    <span class="material-symbols-outlined icon"> person </span>
+                </div>
+                <div class="name">
+                    <span> {{ user.userName }} </span>
+                </div>
+            </ng-container>
+
             <div class="action-bar">
                 <span class="material-symbols-outlined action-icon" (click)="toggleUserVoice(user.userId)">
                     {{ user.mutedLocally ? 'volume_off' : 'volume_up' }}

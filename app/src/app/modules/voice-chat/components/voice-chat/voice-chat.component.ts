@@ -84,7 +84,7 @@ export class VoiceChatComponent {
             console.log('channel.onerror:', e);
         };
 
-        const offer = await this.pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: false });
+        const offer = await this.pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
         console.log('Called createOffer...');
         await this.pc.setLocalDescription(offer);
     }

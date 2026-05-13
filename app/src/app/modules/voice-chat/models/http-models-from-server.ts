@@ -5,6 +5,7 @@ export interface UserFromServer {
     is_host: boolean;
     id: string;
     muted: boolean;
+    camera_enabled: boolean;
 }
 
 export interface Me extends UserFromServer {

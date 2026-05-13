@@ -1,9 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ENVIRONMENT } from 'src/environments/environment';
-import { HttpClient } from '@angular/common/http';
 import { GetRoomsListRespBody, RoomFromServer, UserFromServer } from '../models/http-models-from-server';
-import { Event, NavigationEnd, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { WsGlobalMsgFromServer } from '../models/ws-models-from-server';
 import { HttpApiService } from 'src/app/core/api/http-api.service';
 
@@ -81,7 +80,8 @@ export class VoiceChatRoomsService implements OnDestroy {
                                 id: msg.data.connected_user_id,
                                 name: msg.data.connected_user_name,
                                 is_host: false,
-                                muted: false
+                                muted: false,
+                                camera_enabled: false
                             };
                             room.users.push(newUser);
                         }

@@ -43,6 +43,7 @@ export interface WsUserConnectedMsgFromServer {
     data: {
         connected_user_name: string;
         connected_user_id: string;
+        camera_enabled: boolean;
         room_id: string;
     };
 }
@@ -106,6 +107,16 @@ export interface WsIceCandidateMsgFromServer {
     };
 }
 
+export interface WsCameraToggledMsgFromServer {
+    action: 'USER_TOGGLED_CAMERA';
+    data: {
+        toggled_user_id: string;
+        camera_enabled: boolean;
+    };
+}
+
+/* --------------------------------------------------------------------------------------------------------------- */
+
 export type WsGlobalMsgFromServer =
     | WsRoomCreatedMsgFromServer
     | WsRoomRemovedMsgFromServer
@@ -120,6 +131,5 @@ export type WsMsgFromServer =
     | WsAnswerMsgFromServer
     | WsMicToggledMsgFromServer
     | WsUserVoiceChangedMsgFromServer
-    | WsIceCandidateMsgFromServer;
-
-/* --------------------------------------------------------------------------------------------------------------- */
+    | WsIceCandidateMsgFromServer
+    | WsCameraToggledMsgFromServer;
