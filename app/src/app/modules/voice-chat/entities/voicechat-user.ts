@@ -291,7 +291,7 @@ export class VoicechatUser {
         if (!el) {
             if (attempt < 30) {
                 console.log('[tryAttachVideoStream] attempt:', attempt);
-                setTimeout(() => this.tryAttachVideoStream(stream, attempt + 1), 50);
+                setTimeout(() => this.tryAttachVideoStream(stream, attempt + 1), 100);
             }
             return;
         }

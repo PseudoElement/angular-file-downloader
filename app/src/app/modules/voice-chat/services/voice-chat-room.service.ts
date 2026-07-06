@@ -131,9 +131,13 @@ export class VoiceChatRoomService {
             return;
         }
 
+        const success = this.mediaStreamManager.toggleYourVideo(enabled);
+        if (!success) {
+            setTimeout(() => this.toggleMyCamera(enabled), 100);
+            return;
+        }
         this.setMe({ ...this.me, camera_enabled: enabled });
         this.triggerUpdateUI();
-        this.mediaStreamManager.toggleYourVideo(enabled);
 
         const msg: WsCameraToggledMsgToServer = {
             action: 'USER_TOGGLED_CAMERA',

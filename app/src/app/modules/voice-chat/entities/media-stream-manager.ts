@@ -54,6 +54,9 @@ export class MediaStreamManager {
         this.mediaStream.getTracks().forEach((track) => {
             track.stop();
         });
+        this._videoEnabled = false;
+        this._audioEnabled = false;
+        this.mediaStream = null;
     }
 
     public broadcastAudioToPeer(pc: RTCPeerConnection): void {
@@ -82,8 +85,9 @@ export class MediaStreamManager {
         this._audioEnabled = enabled;
     }
 
-    public toggleYourVideo(enabled: boolean): void {
-        if (!this.mediaStream) return;
+    public toggleYourVideo(enabled: boolean): boolean {
+        if (!this.mediaStream) return false;
+
         this.mediaStream.getVideoTracks().forEach((track) => {
             track.enabled = enabled;
         });
@@ -92,10 +96,12 @@ export class MediaStreamManager {
             const myVideoEl = document.getElementById('video-tag-my') as HTMLVideoElement | null;
             if (!myVideoEl) {
                 console.log('[toggleYourVideo] video-tag-my element not found by id!');
-                return;
+                setTimeout(() => this.toggleYourVideo(enabled), 100);
+                return true;
             }
             myVideoEl.srcObject = this.mediaStream;
             myVideoEl.muted = true;
         }
+        return true;
     }
 }
