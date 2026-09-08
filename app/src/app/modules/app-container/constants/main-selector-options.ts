@@ -52,12 +52,6 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                     },
                     {
                         isOpen: false,
-                        value: 'Snake(Linux)',
-                        navigationUrl: `/download-games/${GAMES_IDS.SNAKE_LINUX}`,
-                        children: []
-                    },
-                    {
-                        isOpen: false,
                         value: 'Galaga(MacOS)',
                         navigationUrl: `/download-games/${GAMES_IDS.SNAKE_MAC}`,
                         children: []
@@ -66,12 +60,6 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                         isOpen: false,
                         value: 'Galaga(Windows)',
                         navigationUrl: `/download-games/${GAMES_IDS.SNAKE_WINDOWS}`,
-                        children: []
-                    },
-                    {
-                        isOpen: false,
-                        value: 'Galaga(Linux)',
-                        navigationUrl: `/download-games/${GAMES_IDS.SNAKE_LINUX}`,
                         children: []
                     }
                 ],
