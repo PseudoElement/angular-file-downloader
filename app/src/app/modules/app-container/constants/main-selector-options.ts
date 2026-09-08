@@ -53,13 +53,13 @@ export const MAIN_SELECTOR_OPTIONS: MainSelectorOption[] = [
                     {
                         isOpen: false,
                         value: 'Galaga(MacOS)',
-                        navigationUrl: `/download-games/${GAMES_IDS.SNAKE_MAC}`,
+                        navigationUrl: `/download-games/${GAMES_IDS.GALAGA_MAC}`,
                         children: []
                     },
                     {
                         isOpen: false,
                         value: 'Galaga(Windows)',
-                        navigationUrl: `/download-games/${GAMES_IDS.SNAKE_WINDOWS}`,
+                        navigationUrl: `/download-games/${GAMES_IDS.GALAGA_WINDOWS}`,
                         children: []
                     }
                 ],
