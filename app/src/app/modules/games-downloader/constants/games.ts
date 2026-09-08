@@ -19,12 +19,31 @@ export const GAMES_IDS = {
     FLAPPY_BIRD: 'flappy-bird',
     SNAKE_MAC: 'snake-macos',
     SNAKE_WINDOWS: 'snake-windows',
-    SNAKE_LINUX: 'snake-linux'
+    SNAKE_LINUX: 'snake-linux',
+    GALAGA_MAC: 'galaga-macos',
+    GALAGA_WINDOWS: 'galaga-windows',
+    GALAGA_LINUX: 'galaga-linux'
 } as const;
 
 export type GameId = (typeof GAMES_IDS)[keyof typeof GAMES_IDS];
 
 export const GAMES: GameUiInfo[] = [
+    {
+        img: `${basePath}/galaga.webp`,
+        description: `Protect your ship against evil NPCs and bossses.`,
+        id: GAMES_IDS.GALAGA_MAC,
+        link: `games/${GAMES_IDS.GALAGA_MAC}`,
+        title: 'Galaga(MacOS)',
+        isDownloader: true
+    },
+    {
+        img: `${basePath}/galaga.webp`,
+        description: `Protect your ship against evil NPCs and bossses.`,
+        id: GAMES_IDS.GALAGA_WINDOWS,
+        link: `games/${GAMES_IDS.GALAGA_WINDOWS}`,
+        title: 'Galaga(Windows)',
+        isDownloader: true
+    },
     {
         img: `${basePath}/terminal-snake.png`,
         description: `Classic snake game. You need to earn points eatting red squares of food.`,
@@ -39,14 +58,6 @@ export const GAMES: GameUiInfo[] = [
         id: GAMES_IDS.SNAKE_WINDOWS,
         link: `games/${GAMES_IDS.SNAKE_WINDOWS}`,
         title: 'Snake game(Windows)',
-        isDownloader: true
-    },
-    {
-        img: `${basePath}/terminal-snake.png`,
-        description: `Classic snake game. You need to earn points eatting red squares of food.`,
-        id: GAMES_IDS.SNAKE_LINUX,
-        link: `games/${GAMES_IDS.SNAKE_LINUX}`,
-        title: 'Snake game(Linux)',
         isDownloader: true
     },
     {
@@ -67,7 +78,7 @@ export const GAMES: GameUiInfo[] = [
     },
     {
         img: `${basePath}/asteroids.jpg`,
-        description: `This is a clone of the cult game "Asteroids" from Atari. 
+        description: `This is a clone of the cult game "Asteroids" from Atari.
 The main idea is to score as many points as possible, as in all games created for slot machines.`,
         id: GAMES_IDS.ASTEROIDS,
         link: `games/${GAMES_IDS.ASTEROIDS}`,

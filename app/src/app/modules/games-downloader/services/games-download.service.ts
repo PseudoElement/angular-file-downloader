@@ -18,10 +18,16 @@ export class GamesDownloadService {
         [GAMES_IDS.SPACE_MARINE_2]: false,
         [GAMES_IDS.SNAKE_LINUX]: false,
         [GAMES_IDS.SNAKE_MAC]: false,
-        [GAMES_IDS.SNAKE_WINDOWS]: false
+        [GAMES_IDS.SNAKE_WINDOWS]: false,
+        [GAMES_IDS.GALAGA_LINUX]: false,
+        [GAMES_IDS.GALAGA_MAC]: false,
+        [GAMES_IDS.GALAGA_WINDOWS]: false
     });
 
-    constructor(private readonly httpApi: HttpApiService, private readonly sintolModalSrv: SintolLibDynamicComponentService) {}
+    constructor(
+        private readonly httpApi: HttpApiService,
+        private readonly sintolModalSrv: SintolLibDynamicComponentService
+    ) {}
 
     public async downloadGame(game: GameUiInfo, cdr: ChangeDetectorRef): Promise<void> {
         const ok = await this.sintolModalSrv.openConfirmModal<ModalComponent, boolean>(ModalComponent, {
