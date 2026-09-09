@@ -23,6 +23,11 @@
         }
     }
 
+    .disabled {
+        opacity: 0.6;
+        user-select: none;
+    }
+
     .logo {
         border-radius: 50%;
         margin-right: 50px;

@@ -7,6 +7,8 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExternalAppInfoComponent {
+    @Input() disabled: boolean = false;
+
     @Input({ required: true }) title!: string;
 
     @Input({ required: true }) img!: string;
@@ -26,6 +28,7 @@ export class ExternalAppInfoComponent {
 
     public handleButtonClick(e: MouseEvent): void {
         e.stopPropagation();
+        if (this.disabled) return;
         this.onButtonClick.emit();
     }
 }

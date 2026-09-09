@@ -6,6 +6,7 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import { SeaBattleSocketService } from '../../services/sea-battle-socket.service';
 import { debounceTime } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AlertsService } from 'src/app/shared/services/alerts.service';
 
 @Component({
     selector: 'app-sea-battle-actions-panel',
@@ -19,7 +20,8 @@ export class SeaBattleActionsPanelComponent {
     constructor(
         private readonly seabattleSocketSrv: SeaBattleSocketService,
         private readonly sintolModalSrv: SintolLibDynamicComponentService,
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly alertsSrv: AlertsService
     ) {
         this.playerNameCtrl.valueChanges.pipe(debounceTime(500), takeUntilDestroyed()).subscribe((email) => {
             this.authService.setUserEmail(email || '');
@@ -31,8 +33,17 @@ export class SeaBattleActionsPanelComponent {
             title: 'Modal',
             text: 'Input room name.'
         });
+        if (!roomName) {
+            this.alertsSrv.showAlert({ text: 'Room name is required.', type: 'warn' });
+            return;
+        }
+        if (!this.playerNameCtrl.value) {
+            this.playerNameCtrl.markAsTouched();
+            this.alertsSrv.showAlert({ text: 'Input player name.', type: 'warn' });
+            return;
+        }
         this.seabattleSocketSrv.createAndConnectToNewRoom({
-            player_email: this.authService.user!.email!,
+            player_email: this.playerNameCtrl.value,
             room_name: roomName
         });
     }

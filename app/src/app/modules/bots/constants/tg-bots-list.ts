@@ -6,7 +6,14 @@ export const TG_BOTS: TelegramBotUiInfo[] = [
     {
         link: 'https://t.me/go_tg_musician_bot',
         description: 'This bot can find either similar songs by search query or find song by key words using Shazam and YouTube apis.',
-        title: 'Musician Bot',
-        img: `${basePath}/music-bot.jpg`
+        title: 'Musician Bot(disabled)',
+        img: `${basePath}/music-bot.jpg`,
+        disabled: true
+    },
+    {
+        link: 'https://t.me/RubicPartnershipBot',
+        description: 'Here you can ask something to support team and offer to cooperate with Rubic team.',
+        title: 'Rubic Partnership Bot',
+        img: `${basePath}/rubic-bot.jpeg`
     }
 ] as const;

@@ -3,4 +3,5 @@ export interface TelegramBotUiInfo {
     description: string;
     title: string;
     link: string;
+    disabled?: boolean;
 }
